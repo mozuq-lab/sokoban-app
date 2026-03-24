@@ -15,8 +15,9 @@ class Board {
   final Set<(int, int)> _walls;
   final Set<(int, int)> _goals;
 
-  /// 指定座標が壁かどうか。
-  bool isWall(int x, int y) => _walls.contains((x, y));
+  /// 指定座標が壁かどうか。盤面外も壁として扱う。
+  bool isWall(int x, int y) =>
+      x < 0 || y < 0 || x >= width || y >= height || _walls.contains((x, y));
 
   /// 指定座標がゴールかどうか。
   bool isGoal(int x, int y) => _goals.contains((x, y));
@@ -47,6 +48,13 @@ class Board {
           case '*':
             goals.add((x, y));
         }
+      }
+    }
+
+    // 各行の末尾より右の未定義セルを壁として扱う
+    for (var y = 0; y < height; y++) {
+      for (var x = lines[y].length; x < width; x++) {
+        walls.add((x, y));
       }
     }
 
