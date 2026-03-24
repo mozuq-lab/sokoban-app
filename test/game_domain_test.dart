@@ -231,6 +231,50 @@ void main() {
       );
     });
 
+    test('欠けた行がある盤面で盤面外に移動できない', () {
+      // 2行目が短い盤面（右端が欠けている）
+      final s = GameState.parse([
+        '####',
+        '#@',
+        '####',
+      ]);
+      // 右に移動 → (2,1) は行の外なので壁扱い
+      final next = s.move(Direction.right);
+      expect(next.playerX, 1);
+      expect(next.playerY, 1); // 動かない
+    });
+
+    test('盤面の上端・下端の外に移動できない', () {
+      final s = GameState.parse([
+        '# #',
+        '#@#',
+        '# #',
+      ]);
+      // 上に移動 → (1,0) は壁ではないが床
+      final up = s.move(Direction.up);
+      expect(up.playerY, 0);
+      // さらに上 → 盤面外
+      final outUp = up.move(Direction.up);
+      expect(outUp.playerY, 0); // 動かない
+      // 下端
+      final down = s.move(Direction.down);
+      final outDown = down.move(Direction.down);
+      expect(outDown.playerY, 2); // 動かない
+    });
+
+    test('欠けた行の外に箱を押せない', () {
+      // 2行目が短い盤面で箱が端にある
+      final s = GameState.parse([
+        '#####',
+        '#@\$',
+        '#####',
+      ]);
+      // 右に箱を押す → 押し先 (3,1) は行の外なので壁扱い
+      final next = s.move(Direction.right);
+      expect(next.playerX, 1);
+      expect(next.playerY, 1); // 動かない
+    });
+
     test('左右方向で箱を押せる', () {
       final s = GameState.parse([
         '#####',
