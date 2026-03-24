@@ -184,5 +184,65 @@ void main() {
       expect(next.playerX, 2);
       expect(next.playerY, 1);
     });
+
+    test('左右方向の移動が正しく動作する', () {
+      final s = GameState.parse([
+        '#####',
+        '# @ #',
+        '#####',
+      ]);
+      // 左に移動
+      final left = s.move(Direction.left);
+      expect(left.playerX, 1);
+      expect(left.playerY, 1);
+      // 右に移動
+      final right = s.move(Direction.right);
+      expect(right.playerX, 3);
+      expect(right.playerY, 1);
+    });
+
+    test('箱を押してゴールに乗せるとクリアになる', () {
+      // ゲームプレイ一連: 箱を押してゴールへ運びクリア
+      final s = GameState.parse([
+        '#####',
+        '#   #',
+        '#@\$.#',
+        '#   #',
+        '#####',
+      ]);
+      expect(s.isSolved, isFalse);
+      // 右に押す → 箱がゴール(3,2)に乗る
+      final solved = s.move(Direction.right);
+      expect(solved.playerX, 2);
+      expect(solved.playerY, 2);
+      expect(solved.boxes, contains((3, 2)));
+      expect(solved.isSolved, isTrue);
+    });
+
+    test('プレイヤーがいない盤面のパースでエラーになる', () {
+      expect(
+        () => GameState.parse([
+          '####',
+          '# \$#',
+          '# .#',
+          '####',
+        ]),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
+    test('左右方向で箱を押せる', () {
+      final s = GameState.parse([
+        '#####',
+        '# @\$ #',
+        '#####',
+      ]);
+      // 右に箱を押す
+      final pushed = s.move(Direction.right);
+      expect(pushed.playerX, 3);
+      expect(pushed.playerY, 1);
+      expect(pushed.boxes, contains((4, 1)));
+      expect(pushed.boxes, isNot(contains((3, 1))));
+    });
   });
 }

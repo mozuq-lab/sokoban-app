@@ -93,20 +93,30 @@ v1 の基準:
 - **Status:** `ready`
 - **Purpose:** レイアウト、アニメーション、フィードバック、操作感を改善する。
 
+### 12. GitHub Actions でテストを自動実行する
+- **Status:** `ready`
+- **Purpose:** PR や main への変更時に、テストの自動確認が走る状態を作る。
+- **Acceptance ideas:**
+  - GitHub Actions の workflow が追加されている
+  - PR 作成時に自動でテストが実行される
+  - `main` への push でもテストが実行される
+  - 失敗時に GitHub 上で分かる
+  - 現在の Flutter / Dart 構成に対して過剰でない最小限の workflow になっている
+
 ---
 
 ## Icebox
 
-### 12. レベルエディタ
+### 13. レベルエディタ
 - **Status:** `needs-clarification`
 - **Purpose:** アプリ内で Sokoban ステージを作成・編集できるようにする。
 
-### 13. クラウド同期
+### 14. クラウド同期
 - **Status:** `blocked`
 - **Purpose:** 端末間で進捗を同期する。
 - **Reason:** 最初の有用バージョンには不要。
 
-### 14. デイリーチャレンジ / キュレーションパック
+### 15. デイリーチャレンジ / キュレーションパック
 - **Status:** `blocked`
 - **Purpose:** コアゲームが固まったあとに再遊性を足す。
 
