@@ -51,11 +51,13 @@ v1 の基準:
 
 ### 4. 1 ステージ遊べる画面を作る
 - **Status:** `ready`
-- **Purpose:** 最小のエンドツーエンド体験を成立させる。
+- **Purpose:** Flutter の最小アプリシェルの上で、固定の 1 ステージを実際に遊べる最小のエンドツーエンド体験を成立させる。
 - **Acceptance ideas:**
-  - タッチ操作またはシンプルな画面内ボタンで移動できる
+  - Flutter の最小アプリシェル上で 1 ステージが表示される
+  - 画面内ボタン（上下左右）でプレイヤーを操作できる
   - 毎手ごとに盤面が正しく更新される
   - クリア状態がユーザーに見える
+  - Flutter Web でも基本動作を確認しやすい
 
 ### 5. パズルロジックのテストを追加する
 - **Status:** `ready`
@@ -93,13 +95,13 @@ v1 の基準:
 - **Status:** `ready`
 - **Purpose:** レイアウト、アニメーション、フィードバック、操作感を改善する。
 
-### 12. GitHub Actions でテストを自動実行する
+### 12. GitHub Actions で analyze / test を自動化する
 - **Status:** `ready`
-- **Purpose:** PR や main への変更時に、テストの自動確認が走る状態を作る。
+- **Purpose:** PR や main への変更時に、`dart analyze` と `dart test` の自動確認が走る状態を作る。
 - **Acceptance ideas:**
   - GitHub Actions の workflow が追加されている
-  - PR 作成時に自動でテストが実行される
-  - `main` への push でもテストが実行される
+  - PR 作成時に `dart analyze` と `dart test` が自動実行される
+  - `main` への push でも `dart analyze` と `dart test` が実行される
   - 失敗時に GitHub 上で分かる
   - 現在の Flutter / Dart 構成に対して過剰でない最小限の workflow になっている
 
