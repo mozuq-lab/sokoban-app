@@ -70,9 +70,9 @@ void main() {
 
   testWidgets('初期状態では Undo ボタンが無効', (tester) async {
     await tester.pumpWidget(buildApp());
-    final undoButton = tester.widget<IconButton>(find.byIcon(Icons.undo).first.evaluate().first.widget is IconButton
-        ? find.byIcon(Icons.undo)
-        : find.byIcon(Icons.undo));
+    final undoButton = tester.widget<IconButton>(
+      find.widgetWithIcon(IconButton, Icons.undo),
+    );
     expect(undoButton.onPressed, isNull);
   });
 
@@ -84,7 +84,9 @@ void main() {
     await tester.pump();
 
     // Undo ボタンが有効になっている
-    final undoAfterMove = tester.widget<IconButton>(find.byIcon(Icons.undo));
+    final undoAfterMove = tester.widget<IconButton>(
+      find.widgetWithIcon(IconButton, Icons.undo),
+    );
     expect(undoAfterMove.onPressed, isNotNull);
 
     // Undo
@@ -96,7 +98,9 @@ void main() {
     expect(find.byIcon(Icons.inventory_2), findsNWidgets(2));
 
     // Undo 後は再び無効
-    final undoAfterUndo = tester.widget<IconButton>(find.byIcon(Icons.undo));
+    final undoAfterUndo = tester.widget<IconButton>(
+      find.widgetWithIcon(IconButton, Icons.undo),
+    );
     expect(undoAfterUndo.onPressed, isNull);
   });
 
@@ -112,7 +116,9 @@ void main() {
     await tester.pump();
 
     // Undo ボタンが無効
-    final undoButton = tester.widget<IconButton>(find.byIcon(Icons.undo));
+    final undoButton = tester.widget<IconButton>(
+      find.widgetWithIcon(IconButton, Icons.undo),
+    );
     expect(undoButton.onPressed, isNull);
   });
 
