@@ -7,8 +7,8 @@ class Board {
     required this.height,
     required Set<(int, int)> walls,
     required Set<(int, int)> goals,
-  })  : _walls = walls,
-        _goals = goals;
+  })  : _walls = Set.of(walls),
+        _goals = Set.of(goals);
 
   final int width;
   final int height;
@@ -31,6 +31,10 @@ class Board {
   ///   `#` = 壁, `.` = ゴール, `+` = ゴール（プレイヤー位置として使われる）,
   ///   `*` = ゴール（箱位置として使われる）, その他 = 床。
   factory Board.parse(List<String> lines) {
+    if (lines.isEmpty) {
+      throw ArgumentError('盤面が空です');
+    }
+
     final walls = <(int, int)>{};
     final goals = <(int, int)>{};
     final height = lines.length;

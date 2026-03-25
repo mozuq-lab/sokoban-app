@@ -10,7 +10,7 @@ class GameState {
     required this.playerX,
     required this.playerY,
     required Set<(int, int)> boxes,
-  }) : _boxes = boxes;
+  }) : _boxes = Set.of(boxes);
 
   final Board board;
   final int playerX;
@@ -79,6 +79,9 @@ class GameState {
         switch (line[x]) {
           case '@':
           case '+':
+            if (px != null) {
+              throw ArgumentError('盤面にプレイヤーが複数あります');
+            }
             px = x;
             py = y;
           case '\$':
