@@ -23,6 +23,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late GameState _gameState;
+  final List<GameState> _history = [];
 
   @override
   void initState() {
@@ -33,12 +34,25 @@ class _HomeScreenState extends State<HomeScreen> {
   void _move(Direction dir) {
     final next = _gameState.move(dir);
     if (!identical(next, _gameState)) {
-      setState(() => _gameState = next);
+      setState(() {
+        _history.add(_gameState);
+        _gameState = next;
+      });
     }
   }
 
+  void _undo() {
+    if (_history.isEmpty) return;
+    setState(() {
+      _gameState = _history.removeLast();
+    });
+  }
+
   void _restart() {
-    setState(() => _gameState = GameState.parse(HomeScreen.initialLevel));
+    setState(() {
+      _history.clear();
+      _gameState = GameState.parse(HomeScreen.initialLevel);
+    });
   }
 
   @override
@@ -47,6 +61,11 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('Sokoban'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.undo),
+            tooltip: '元に戻す',
+            onPressed: _history.isNotEmpty ? _undo : null,
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'リスタート',
