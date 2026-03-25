@@ -1,4 +1,4 @@
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:sokoban_app/features/game/domain/direction.dart';
 import 'package:sokoban_app/features/game/domain/board.dart';
 import 'package:sokoban_app/features/game/domain/game_state.dart';

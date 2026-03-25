@@ -2,3 +2,10 @@
 .packages
 build/
 .claude-working-note.md
+
+# Flutter
+.flutter-plugins
+.flutter-plugins-dependencies
+*.iml
+.idea/
+.metadata
