@@ -56,6 +56,37 @@ void main() {
       expect(board.isGoal(1, 1), isTrue);
       expect(board.isGoal(2, 1), isFalse);
     });
+
+    test('空の行リストでパースするとエラーになる', () {
+      expect(
+        () => Board.parse([]),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
+    test('+ と * の位置がゴールとして認識される', () {
+      final board = Board.parse([
+        '####',
+        '#+*#',
+        '####',
+      ]);
+      expect(board.isGoal(1, 1), isTrue); // + はゴール
+      expect(board.isGoal(2, 1), isTrue); // * もゴール
+    });
+
+    test('コンストラクタに渡した Set を外部から変更しても影響しない', () {
+      final walls = <(int, int)>{(0, 0)};
+      final goals = <(int, int)>{(1, 1)};
+      final board = Board(width: 3, height: 3, walls: walls, goals: goals);
+
+      // 外部から壁とゴールを追加
+      walls.add((2, 2));
+      goals.add((0, 1));
+
+      // Board 内部には影響しない
+      expect(board.isWall(2, 2), isFalse);
+      expect(board.isGoal(0, 1), isFalse);
+    });
   });
 
   group('GameState', () {
@@ -287,6 +318,101 @@ void main() {
       expect(pushed.playerY, 1);
       expect(pushed.boxes, contains((4, 1)));
       expect(pushed.boxes, isNot(contains((3, 1))));
+    });
+
+    test('プレイヤーが複数ある盤面のパースでエラーになる', () {
+      expect(
+        () => GameState.parse([
+          '#####',
+          '#@ @#',
+          '#####',
+        ]),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
+    test('@ と + が両方ある盤面でもプレイヤー重複エラーになる', () {
+      expect(
+        () => GameState.parse([
+          '#####',
+          '#@.+#',
+          '#####',
+        ]),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
+    test('空の盤面のパースでエラーになる', () {
+      expect(
+        () => GameState.parse([]),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
+    test('* は箱とゴールの両方として認識される', () {
+      final s = GameState.parse([
+        '####',
+        '#* #',
+        '# @#',
+        '####',
+      ]);
+      expect(s.boxes, contains((1, 1)));
+      expect(s.board.isGoal(1, 1), isTrue);
+    });
+
+    test('コンストラクタに渡した箱 Set を外部から変更しても影響しない', () {
+      final board = Board.parse([
+        '###',
+        '# #',
+        '###',
+      ]);
+      final boxes = <(int, int)>{(1, 1)};
+      final gs = GameState(
+        board: board,
+        playerX: 1,
+        playerY: 1,
+        boxes: boxes,
+      );
+
+      // 外部から箱を追加
+      boxes.add((0, 0));
+
+      // GameState 内部には影響しない
+      expect(gs.boxes.length, 1);
+      expect(gs.boxes, isNot(contains((0, 0))));
+    });
+
+    test('move で箱を押さない場合も元の状態の boxes が変更されない', () {
+      final s = GameState.parse([
+        '#####',
+        '#   #',
+        '# \$ #',
+        '# @ #',
+        '#####',
+      ]);
+      final originalBoxes = s.boxes;
+
+      // 箱を押さない移動（左へ）
+      final moved = s.move(Direction.left);
+
+      // 元の状態の boxes は変わらない
+      expect(s.boxes, equals(originalBoxes));
+      // 新しい状態でも同じ箱位置
+      expect(moved.boxes, equals(originalBoxes));
+    });
+
+    test('boxes ゲッターの戻り値を変更しても内部状態に影響しない', () {
+      final s = GameState.parse([
+        '####',
+        '#\$@#',
+        '####',
+      ]);
+
+      // boxes ゲッターで取得した Set を変更しようとする
+      expect(
+        () => s.boxes.add((0, 0)),
+        throwsA(isA<UnsupportedError>()),
+      );
     });
   });
 }
