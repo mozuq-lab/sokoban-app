@@ -176,4 +176,75 @@ void main() {
 
     expect(find.text('クリア！'), findsOneWidget);
   });
+
+  // --- 手数カウンタのテスト ---
+
+  testWidgets('初期状態で手数が 0 と表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    expect(find.text('手数: 0'), findsOneWidget);
+  });
+
+  testWidgets('移動成功で手数が増える', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    await tester.tap(find.byIcon(Icons.arrow_downward));
+    await tester.pump();
+    expect(find.text('手数: 1'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.arrow_upward));
+    await tester.pump();
+    expect(find.text('手数: 2'), findsOneWidget);
+  });
+
+  testWidgets('壁にぶつかる移動では手数が増えない', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // 上に移動（壁で blocked）
+    await tester.tap(find.byIcon(Icons.arrow_upward));
+    await tester.pump();
+    expect(find.text('手数: 0'), findsOneWidget);
+  });
+
+  testWidgets('Undo で手数が 1 戻る', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    await tester.tap(find.byIcon(Icons.arrow_downward));
+    await tester.pump();
+    expect(find.text('手数: 1'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.undo));
+    await tester.pump();
+    expect(find.text('手数: 0'), findsOneWidget);
+  });
+
+  testWidgets('リスタートで手数が 0 に戻る', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    await tester.tap(find.byIcon(Icons.arrow_downward));
+    await tester.pump();
+    await tester.tap(find.byIcon(Icons.arrow_upward));
+    await tester.pump();
+    expect(find.text('手数: 2'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.refresh));
+    await tester.pump();
+    expect(find.text('手数: 0'), findsOneWidget);
+  });
+
+  testWidgets('クリア後も手数が表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // 解法: 下, 上, 右, 下 (4 手)
+    await tester.tap(find.byIcon(Icons.arrow_downward));
+    await tester.pump();
+    await tester.tap(find.byIcon(Icons.arrow_upward));
+    await tester.pump();
+    await tester.tap(find.byIcon(Icons.arrow_forward));
+    await tester.pump();
+    await tester.tap(find.byIcon(Icons.arrow_downward));
+    await tester.pump();
+
+    expect(find.text('クリア！'), findsOneWidget);
+    expect(find.text('手数: 4'), findsOneWidget);
+  });
 }
