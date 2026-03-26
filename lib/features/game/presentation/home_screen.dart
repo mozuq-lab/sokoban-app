@@ -84,8 +84,8 @@ class _HomeScreenState extends State<HomeScreen> {
               width: double.infinity,
               color: Colors.green.shade100,
               padding: const EdgeInsets.all(12),
-              child: const Text(
-                'クリア！',
+              child: Text(
+                'クリア！ $_moveCount手',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 20,

@@ -44,7 +44,7 @@ void main() {
 
   testWidgets('クリア前はクリアメッセージが表示されない', (tester) async {
     await tester.pumpWidget(buildApp());
-    expect(find.text('クリア！'), findsNothing);
+    expect(find.textContaining('クリア！'), findsNothing);
   });
 
   testWidgets('リスタートで初期状態に戻る', (tester) async {
@@ -135,13 +135,13 @@ void main() {
     await tester.tap(find.byIcon(Icons.arrow_downward));
     await tester.pump();
 
-    expect(find.text('クリア！'), findsOneWidget);
+    expect(find.text('クリア！ 4手'), findsOneWidget);
 
     // Undo
     await tester.tap(find.byIcon(Icons.undo));
     await tester.pump();
 
-    expect(find.text('クリア！'), findsNothing);
+    expect(find.textContaining('クリア！'), findsNothing);
   });
 
   testWidgets('全箱をゴールに載せるとクリアメッセージが表示される',
@@ -174,7 +174,7 @@ void main() {
     await tester.pump();
     // box(3,3)→(3,4) [goal!], player→(3,3). Solved!
 
-    expect(find.text('クリア！'), findsOneWidget);
+    expect(find.text('クリア！ 4手'), findsOneWidget);
   });
 
   // --- 手数カウンタのテスト ---
@@ -244,7 +244,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.arrow_downward));
     await tester.pump();
 
-    expect(find.text('クリア！'), findsOneWidget);
+    expect(find.text('クリア！ 4手'), findsOneWidget);
     expect(find.text('手数: 4'), findsOneWidget);
   });
 }
