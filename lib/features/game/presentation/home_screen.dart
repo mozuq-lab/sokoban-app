@@ -24,6 +24,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late GameState _gameState;
   final List<GameState> _history = [];
+  int _moveCount = 0;
 
   @override
   void initState() {
@@ -37,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         _history.add(_gameState);
         _gameState = next;
+        _moveCount++;
       });
     }
   }
@@ -45,12 +47,14 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_history.isEmpty) return;
     setState(() {
       _gameState = _history.removeLast();
+      _moveCount--;
     });
   }
 
   void _restart() {
     setState(() {
       _history.clear();
+      _moveCount = 0;
       _gameState = GameState.parse(HomeScreen.initialLevel);
     });
   }
@@ -90,6 +94,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Text(
+              '手数: $_moveCount',
+              style: const TextStyle(fontSize: 16),
+            ),
+          ),
           Expanded(
             child: Center(
               child: AspectRatio(
