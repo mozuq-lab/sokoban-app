@@ -27,12 +27,13 @@ v1 の基準:
 ## Now
 
 ### 1. Flutter アプリの土台を作る
-- **Status:** `ready`
+- **Status:** `done`
 - **Purpose:** 実行可能なアプリの基本構造、lint、最小のアプリシェルを整える。
 - **Acceptance ideas:**
   - iOS / Android で起動できる
   - プロジェクト構造が把握しやすい
   - プレースホルダーのホーム画面がある
+- **実装メモ:** PR #3 で最小アプリシェルを追加済み。
 
 ### 2. Sokoban のコアドメインモデルを実装する
 - **Status:** `done`
@@ -50,7 +51,7 @@ v1 の基準:
   - unit test で保護されている
 
 ### 4. 1 ステージ遊べる画面を作る
-- **Status:** `ready`
+- **Status:** `done`
 - **Purpose:** Flutter の最小アプリシェルの上で、固定の 1 ステージを実際に遊べる最小のエンドツーエンド体験を成立させる。
 - **Acceptance ideas:**
   - Flutter の最小アプリシェル上で 1 ステージが表示される
@@ -58,13 +59,15 @@ v1 の基準:
   - 毎手ごとに盤面が正しく更新される
   - クリア状態がユーザーに見える
   - Flutter Web でも基本動作を確認しやすい
+- **実装メモ:** PR #5 で固定ステージの遊べる画面を追加済み。
 
 ### 5. パズルロジックのテストを追加する
-- **Status:** `ready`
+- **Status:** `done`
 - **Purpose:** 移動、押し出し、衝突、クリア判定を守る。
 - **Acceptance ideas:**
   - 重要なロジック経路に unit test がある
   - 回帰バグをテストで再現できる
+- **実装メモ:** PR #1, #2, #4 でコアロジックと異常系のテストを追加済み。
 
 ---
 
@@ -80,22 +83,24 @@ v1 の基準:
 - **Purpose:** レベル選択やレベルパック進行を扱えるようにする。
 
 ### 8. Undo / Restart を追加する
-- **Status:** `ready`
+- **Status:** `done`
 - **Purpose:** `GameState` の履歴を画面側で薄く扱い、1 手ずつ戻す Undo とステージ初期化の Restart を追加して、倉庫番としての遊びやすさを上げる。
 - **Acceptance ideas:**
   - 固定 1 ステージのまま、移動成功時だけ履歴が積まれる
   - Undo ボタンから 1 手ずつ戻せる
   - Restart で初期状態と履歴がリセットされる
   - 既存のゲーム進行やクリア判定を壊さない
+- **実装メモ:** PR #6 で Undo / Restart を追加済み。
 
 ### 9. 手数カウンタ / 簡易統計
-- **Status:** `ready`
+- **Status:** `done`
 - **Purpose:** 移動成功回数を表示し、クリア時に簡単な結果を見せてプレイ感と達成感を上げる。
 - **Acceptance ideas:**
   - 移動成功回数が常時表示される
   - クリア時に「クリア！ 12手」のような簡易結果表示が出る
   - Restart で手数がリセットされる
   - 表示追加が既存の最小 UI と大きく衝突しない
+- **実装メモ:** PR #7 で手数カウンタ、PR #8 でクリア時の手数表示を追加済み。
 
 ### 10. プレイ状態の保存 / 復元
 - **Status:** `needs-clarification`
@@ -106,7 +111,7 @@ v1 の基準:
 - **Purpose:** レイアウト、アニメーション、フィードバック、操作感を改善する。
 
 ### 12. GitHub Actions で analyze / test を自動化する
-- **Status:** `ready`
+- **Status:** `done`
 - **Purpose:** PR と `main` への push で `flutter analyze` / `flutter test` を自動実行し、回帰を早めに検知できる状態を作る。
 - **Acceptance ideas:**
   - GitHub Actions の最小 workflow が追加されている
@@ -114,6 +119,7 @@ v1 の基準:
   - `main` への push でも `flutter analyze` と `flutter test` が実行される
   - 失敗時に GitHub 上で分かる
   - Flutter セットアップを含めても過剰でない最小限の構成になっている
+- **実装メモ:** PR #9 で CI workflow を追加済み。
 
 ---
 
