@@ -81,11 +81,21 @@ v1 の基準:
 
 ### 8. Undo / Restart を追加する
 - **Status:** `ready`
-- **Purpose:** パズルゲームとしての遊びやすさを上げる。
+- **Purpose:** `GameState` の履歴を画面側で薄く扱い、1 手ずつ戻す Undo とステージ初期化の Restart を追加して、倉庫番としての遊びやすさを上げる。
+- **Acceptance ideas:**
+  - 固定 1 ステージのまま、移動成功時だけ履歴が積まれる
+  - Undo ボタンから 1 手ずつ戻せる
+  - Restart で初期状態と履歴がリセットされる
+  - 既存のゲーム進行やクリア判定を壊さない
 
 ### 9. 手数カウンタ / 簡易統計
 - **Status:** `ready`
-- **Purpose:** 進捗やプレイ結果をシンプルに見せる。
+- **Purpose:** 移動成功回数を表示し、クリア時に簡単な結果を見せてプレイ感と達成感を上げる。
+- **Acceptance ideas:**
+  - 移動成功回数が常時表示される
+  - クリア時に「クリア！ 12手」のような簡易結果表示が出る
+  - Restart で手数がリセットされる
+  - 表示追加が既存の最小 UI と大きく衝突しない
 
 ### 10. プレイ状態の保存 / 復元
 - **Status:** `needs-clarification`
@@ -97,13 +107,13 @@ v1 の基準:
 
 ### 12. GitHub Actions で analyze / test を自動化する
 - **Status:** `ready`
-- **Purpose:** PR や main への変更時に、`dart analyze` と `dart test` の自動確認が走る状態を作る。
+- **Purpose:** PR と `main` への push で `flutter analyze` / `flutter test` を自動実行し、回帰を早めに検知できる状態を作る。
 - **Acceptance ideas:**
-  - GitHub Actions の workflow が追加されている
-  - PR 作成時に `dart analyze` と `dart test` が自動実行される
-  - `main` への push でも `dart analyze` と `dart test` が実行される
+  - GitHub Actions の最小 workflow が追加されている
+  - PR 作成時に `flutter analyze` と `flutter test` が自動実行される
+  - `main` への push でも `flutter analyze` と `flutter test` が実行される
   - 失敗時に GitHub 上で分かる
-  - 現在の Flutter / Dart 構成に対して過剰でない最小限の workflow になっている
+  - Flutter セットアップを含めても過剰でない最小限の構成になっている
 
 ---
 
