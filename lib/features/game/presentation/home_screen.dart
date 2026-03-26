@@ -12,7 +12,7 @@ class HomeScreen extends StatefulWidget {
     '######',
     '#    #',
     '# @  #',
-    '# $$ #',
+    '# \$\$ #',
     '# .. #',
     '######',
   ];
