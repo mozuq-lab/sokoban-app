@@ -199,10 +199,15 @@ void main() {
   testWidgets('壁にぶつかる移動では手数が増えない', (tester) async {
     await tester.pumpWidget(buildApp());
 
-    // 上に移動（壁で blocked）
-    await tester.tap(find.byIcon(Icons.arrow_upward));
+    // 左に移動（成功: (2,2) → (1,2)）
+    await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pump();
-    expect(find.text('手数: 0'), findsOneWidget);
+    expect(find.text('手数: 1'), findsOneWidget);
+
+    // さらに左に移動（壁 (0,2) で blocked）
+    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.pump();
+    expect(find.text('手数: 1'), findsOneWidget);
   });
 
   testWidgets('Undo で手数が 1 戻る', (tester) async {
