@@ -23,9 +23,9 @@ void main() {
     expect(find.byIcon(Icons.arrow_forward), findsOneWidget);
   });
 
-  testWidgets('リスタートボタンが表示される', (tester) async {
+  testWidgets('リスタートボタンが AppBar と画面下部に表示される', (tester) async {
     await tester.pumpWidget(buildApp());
-    expect(find.byIcon(Icons.refresh), findsOneWidget);
+    expect(find.byIcon(Icons.refresh), findsNWidgets(2));
   });
 
   testWidgets('方向ボタンを押すとプレイヤーが移動する', (tester) async {
@@ -55,7 +55,7 @@ void main() {
     await tester.pump();
 
     // リスタート
-    await tester.tap(find.byIcon(Icons.refresh));
+    await tester.tap(find.byIcon(Icons.refresh).first);
     await tester.pump();
 
     // プレイヤーと箱がまだ存在
@@ -63,9 +63,9 @@ void main() {
     expect(find.byIcon(Icons.inventory_2), findsNWidgets(2));
   });
 
-  testWidgets('Undo ボタンが表示される', (tester) async {
+  testWidgets('Undo ボタンが AppBar と画面下部に表示される', (tester) async {
     await tester.pumpWidget(buildApp());
-    expect(find.byIcon(Icons.undo), findsOneWidget);
+    expect(find.byIcon(Icons.undo), findsNWidgets(2));
   });
 
   testWidgets('初期状態では Undo ボタンが無効', (tester) async {
@@ -90,7 +90,7 @@ void main() {
     expect(undoAfterMove.onPressed, isNotNull);
 
     // Undo
-    await tester.tap(find.byIcon(Icons.undo));
+    await tester.tap(find.byIcon(Icons.undo).first);
     await tester.pump();
 
     // プレイヤーと箱がまだ存在
@@ -112,7 +112,7 @@ void main() {
     await tester.pump();
 
     // リスタート
-    await tester.tap(find.byIcon(Icons.refresh));
+    await tester.tap(find.byIcon(Icons.refresh).first);
     await tester.pump();
 
     // Undo ボタンが無効
@@ -138,7 +138,7 @@ void main() {
     expect(find.text('クリア！ 4手'), findsOneWidget);
 
     // Undo
-    await tester.tap(find.byIcon(Icons.undo));
+    await tester.tap(find.byIcon(Icons.undo).first);
     await tester.pump();
 
     expect(find.textContaining('クリア！'), findsNothing);
@@ -217,7 +217,7 @@ void main() {
     await tester.pump();
     expect(find.text('手数: 1'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.undo));
+    await tester.tap(find.byIcon(Icons.undo).first);
     await tester.pump();
     expect(find.text('手数: 0'), findsOneWidget);
   });
@@ -231,7 +231,7 @@ void main() {
     await tester.pump();
     expect(find.text('手数: 2'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.refresh));
+    await tester.tap(find.byIcon(Icons.refresh).first);
     await tester.pump();
     expect(find.text('手数: 0'), findsOneWidget);
   });
@@ -301,7 +301,7 @@ void main() {
     expect(undoButton.onPressed, isNotNull);
 
     // Undo を実行
-    await tester.tap(find.byIcon(Icons.undo));
+    await tester.tap(find.byIcon(Icons.undo).first);
     await tester.pump();
 
     // クリア表示が消える
@@ -345,7 +345,7 @@ void main() {
     expect(restartButton.onPressed, isNotNull);
 
     // Restart を実行
-    await tester.tap(find.byIcon(Icons.refresh));
+    await tester.tap(find.byIcon(Icons.refresh).first);
     await tester.pump();
 
     // クリア表示が消え、手数が 0 に戻る
@@ -357,5 +357,59 @@ void main() {
       find.widgetWithIcon(IconButton, Icons.arrow_upward),
     );
     expect(upButton.onPressed, isNotNull);
+  });
+
+  // --- 画面下部の補助ボタンのテスト ---
+
+  testWidgets('画面下部に「元に戻す」「リスタート」テキストが表示される',
+      (tester) async {
+    await tester.pumpWidget(buildApp());
+    expect(find.text('元に戻す'), findsOneWidget);
+    expect(find.text('リスタート'), findsOneWidget);
+  });
+
+  testWidgets('画面下部の Undo ボタンが初期状態で無効', (tester) async {
+    await tester.pumpWidget(buildApp());
+    final bottomUndo = tester.widget<TextButton>(
+      find.widgetWithText(TextButton, '元に戻す'),
+    );
+    expect(bottomUndo.onPressed, isNull);
+  });
+
+  testWidgets('画面下部の Undo ボタンが移動後に有効になる', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    await tester.tap(find.byIcon(Icons.arrow_downward));
+    await tester.pump();
+
+    final bottomUndo = tester.widget<TextButton>(
+      find.widgetWithText(TextButton, '元に戻す'),
+    );
+    expect(bottomUndo.onPressed, isNotNull);
+  });
+
+  testWidgets('画面下部の Undo ボタンで手数が戻る', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    await tester.tap(find.byIcon(Icons.arrow_downward));
+    await tester.pump();
+    expect(find.text('手数: 1'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(TextButton, '元に戻す'));
+    await tester.pump();
+    expect(find.text('手数: 0'), findsOneWidget);
+  });
+
+  testWidgets('画面下部の Restart ボタンで初期状態に戻る', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    await tester.tap(find.byIcon(Icons.arrow_downward));
+    await tester.pump();
+    expect(find.text('手数: 1'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(TextButton, 'リスタート'));
+    await tester.pump();
+    expect(find.text('手数: 0'), findsOneWidget);
+    expect(find.byIcon(Icons.person), findsOneWidget);
   });
 }
