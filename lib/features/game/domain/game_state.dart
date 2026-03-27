@@ -20,6 +20,10 @@ class GameState {
   /// 現在の箱位置一覧。
   Set<(int, int)> get boxes => Set.unmodifiable(_boxes);
 
+  /// ゴール上にない箱の数。
+  int get remainingBoxes =>
+      _boxes.where((b) => !board.isGoal(b.$1, b.$2)).length;
+
   /// すべての箱がゴール上にあれば true。
   bool get isSolved {
     if (_boxes.length != board.goals.length) return false;

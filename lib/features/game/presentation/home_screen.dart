@@ -103,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Text(
-                      '手数: $_moveCount',
+                      '手数: $_moveCount　残り箱: ${_gameState.remainingBoxes}',
                       style: const TextStyle(fontSize: 16),
                     ),
                   ),
