@@ -181,7 +181,7 @@ void main() {
 
   testWidgets('初期状態で手数が 0 と表示される', (tester) async {
     await tester.pumpWidget(buildApp());
-    expect(find.text('手数: 0'), findsOneWidget);
+    expect(find.textContaining('手数: 0'), findsOneWidget);
   });
 
   testWidgets('移動成功で手数が増える', (tester) async {
@@ -189,11 +189,11 @@ void main() {
 
     await tester.tap(find.byIcon(Icons.arrow_downward));
     await tester.pump();
-    expect(find.text('手数: 1'), findsOneWidget);
+    expect(find.textContaining('手数: 1'), findsOneWidget);
 
     await tester.tap(find.byIcon(Icons.arrow_upward));
     await tester.pump();
-    expect(find.text('手数: 2'), findsOneWidget);
+    expect(find.textContaining('手数: 2'), findsOneWidget);
   });
 
   testWidgets('壁にぶつかる移動では手数が増えない', (tester) async {
@@ -202,12 +202,12 @@ void main() {
     // 左に移動（成功: (2,2) → (1,2)）
     await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pump();
-    expect(find.text('手数: 1'), findsOneWidget);
+    expect(find.textContaining('手数: 1'), findsOneWidget);
 
     // さらに左に移動（壁 (0,2) で blocked）
     await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pump();
-    expect(find.text('手数: 1'), findsOneWidget);
+    expect(find.textContaining('手数: 1'), findsOneWidget);
   });
 
   testWidgets('Undo で手数が 1 戻る', (tester) async {
@@ -215,11 +215,11 @@ void main() {
 
     await tester.tap(find.byIcon(Icons.arrow_downward));
     await tester.pump();
-    expect(find.text('手数: 1'), findsOneWidget);
+    expect(find.textContaining('手数: 1'), findsOneWidget);
 
     await tester.tap(find.byIcon(Icons.undo).first);
     await tester.pump();
-    expect(find.text('手数: 0'), findsOneWidget);
+    expect(find.textContaining('手数: 0'), findsOneWidget);
   });
 
   testWidgets('リスタートで手数が 0 に戻る', (tester) async {
@@ -229,11 +229,11 @@ void main() {
     await tester.pump();
     await tester.tap(find.byIcon(Icons.arrow_upward));
     await tester.pump();
-    expect(find.text('手数: 2'), findsOneWidget);
+    expect(find.textContaining('手数: 2'), findsOneWidget);
 
     await tester.tap(find.byIcon(Icons.refresh).first);
     await tester.pump();
-    expect(find.text('手数: 0'), findsOneWidget);
+    expect(find.textContaining('手数: 0'), findsOneWidget);
   });
 
   testWidgets('クリア後も手数が表示される', (tester) async {
@@ -250,7 +250,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('クリア！ 4手'), findsOneWidget);
-    expect(find.text('手数: 4'), findsOneWidget);
+    expect(find.textContaining('手数: 4'), findsOneWidget);
   });
 
   // --- クリア後の方向ボタン無効化テスト ---
@@ -350,7 +350,7 @@ void main() {
 
     // クリア表示が消え、手数が 0 に戻る
     expect(find.textContaining('クリア！'), findsNothing);
-    expect(find.text('手数: 0'), findsOneWidget);
+    expect(find.textContaining('手数: 0'), findsOneWidget);
 
     // 方向ボタンが再び有効になる
     final upButton = tester.widget<IconButton>(
@@ -393,11 +393,11 @@ void main() {
 
     await tester.tap(find.byIcon(Icons.arrow_downward));
     await tester.pump();
-    expect(find.text('手数: 1'), findsOneWidget);
+    expect(find.textContaining('手数: 1'), findsOneWidget);
 
     await tester.tap(find.widgetWithText(TextButton, '元に戻す'));
     await tester.pump();
-    expect(find.text('手数: 0'), findsOneWidget);
+    expect(find.textContaining('手数: 0'), findsOneWidget);
   });
 
   testWidgets('画面下部の Restart ボタンで初期状態に戻る', (tester) async {
@@ -405,11 +405,60 @@ void main() {
 
     await tester.tap(find.byIcon(Icons.arrow_downward));
     await tester.pump();
-    expect(find.text('手数: 1'), findsOneWidget);
+    expect(find.textContaining('手数: 1'), findsOneWidget);
 
     await tester.tap(find.widgetWithText(TextButton, 'リスタート'));
     await tester.pump();
-    expect(find.text('手数: 0'), findsOneWidget);
+    expect(find.textContaining('手数: 0'), findsOneWidget);
     expect(find.byIcon(Icons.person), findsOneWidget);
+  });
+
+  // --- 残り箱数表示のテスト ---
+
+  testWidgets('初期状態で残り箱数が 2 と表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    expect(find.textContaining('残り箱: 2'), findsOneWidget);
+  });
+
+  testWidgets('箱をゴールに押すと残り箱数が減る', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // 下に移動: box(2,3)→(2,4) がゴールに乗る
+    await tester.tap(find.byIcon(Icons.arrow_downward));
+    await tester.pump();
+    expect(find.textContaining('残り箱: 1'), findsOneWidget);
+  });
+
+  testWidgets('Undo で箱がゴールから外れると残り箱数が戻る', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // 下に移動: box(2,3)→(2,4) がゴールに乗る
+    await tester.tap(find.byIcon(Icons.arrow_downward));
+    await tester.pump();
+    expect(find.textContaining('残り箱: 1'), findsOneWidget);
+
+    // Undo: 箱がゴールから外れる
+    await tester.tap(find.byIcon(Icons.undo).first);
+    await tester.pump();
+    expect(find.textContaining('残り箱: 2'), findsOneWidget);
+  });
+
+  testWidgets('リスタートで残り箱数が初期値に戻る', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    await tester.tap(find.byIcon(Icons.arrow_downward));
+    await tester.pump();
+    expect(find.textContaining('残り箱: 1'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.refresh).first);
+    await tester.pump();
+    expect(find.textContaining('残り箱: 2'), findsOneWidget);
+  });
+
+  testWidgets('クリア時に残り箱数が 0 になる', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+
+    expect(find.textContaining('残り箱: 0'), findsOneWidget);
   });
 }

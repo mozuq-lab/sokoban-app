@@ -187,6 +187,35 @@ void main() {
       expect(state.isSolved, isFalse);
     });
 
+    test('remainingBoxes がゴール上にない箱の数を返す', () {
+      // 箱 1 つ、ゴール 1 つ、箱はゴール外
+      expect(state.remainingBoxes, 1);
+    });
+
+    test('箱をゴールに押すと remainingBoxes が減る', () {
+      final s = GameState.parse([
+        '#####',
+        '#   #',
+        '#@\$.#',
+        '#   #',
+        '#####',
+      ]);
+      expect(s.remainingBoxes, 1);
+      final solved = s.move(Direction.right);
+      expect(solved.remainingBoxes, 0);
+    });
+
+    test('全箱ゴール上で remainingBoxes が 0', () {
+      final s = GameState.parse([
+        '####',
+        '#* #',
+        '# @#',
+        '####',
+      ]);
+      expect(s.remainingBoxes, 0);
+      expect(s.isSolved, isTrue);
+    });
+
     test('複数の箱とゴールでクリア判定が正しい', () {
       // 2つの箱、2つのゴール — 1つだけゴール上
       final s = GameState.parse([
