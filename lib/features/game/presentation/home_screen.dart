@@ -119,7 +119,10 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          _DirectionPad(onMove: _move),
+          _DirectionPad(
+            onMove: _move,
+            enabled: !_gameState.isSolved,
+          ),
           const SizedBox(height: 16),
         ],
       ),
@@ -217,9 +220,10 @@ class _CellWidget extends StatelessWidget {
 
 /// 方向パッド（上下左右ボタン）。
 class _DirectionPad extends StatelessWidget {
-  const _DirectionPad({required this.onMove});
+  const _DirectionPad({required this.onMove, this.enabled = true});
 
   final void Function(Direction) onMove;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -230,7 +234,7 @@ class _DirectionPad extends StatelessWidget {
         width: btnSize,
         height: btnSize,
         child: IconButton.filled(
-          onPressed: () => onMove(dir),
+          onPressed: enabled ? () => onMove(dir) : null,
           icon: Icon(icon),
           tooltip: label,
         ),

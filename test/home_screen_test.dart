@@ -252,4 +252,92 @@ void main() {
     expect(find.text('クリア！ 4手'), findsOneWidget);
     expect(find.text('手数: 4'), findsOneWidget);
   });
+
+  // --- クリア後の方向ボタン無効化テスト ---
+
+  /// ステージを解法手順でクリアするヘルパー。
+  Future<void> solveStage(WidgetTester tester) async {
+    // 解法: 下, 上, 右, 下
+    await tester.tap(find.byIcon(Icons.arrow_downward));
+    await tester.pump();
+    await tester.tap(find.byIcon(Icons.arrow_upward));
+    await tester.pump();
+    await tester.tap(find.byIcon(Icons.arrow_forward));
+    await tester.pump();
+    await tester.tap(find.byIcon(Icons.arrow_downward));
+    await tester.pump();
+  }
+
+  testWidgets('クリア後に方向ボタンが無効になる', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+
+    expect(find.text('クリア！ 4手'), findsOneWidget);
+
+    // 各方向ボタンの onPressed が null であることを確認
+    for (final icon in [
+      Icons.arrow_upward,
+      Icons.arrow_downward,
+      Icons.arrow_back,
+      Icons.arrow_forward,
+    ]) {
+      final button = tester.widget<IconButton>(
+        find.widgetWithIcon(IconButton, icon),
+      );
+      expect(button.onPressed, isNull, reason: '$icon should be disabled');
+    }
+  });
+
+  testWidgets('クリア後でも Undo でクリア状態を戻せる', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+
+    expect(find.text('クリア！ 4手'), findsOneWidget);
+
+    // Undo ボタンが有効であることを確認
+    final undoButton = tester.widget<IconButton>(
+      find.widgetWithIcon(IconButton, Icons.undo),
+    );
+    expect(undoButton.onPressed, isNotNull);
+
+    // Undo を実行
+    await tester.tap(find.byIcon(Icons.undo));
+    await tester.pump();
+
+    // クリア表示が消える
+    expect(find.textContaining('クリア！'), findsNothing);
+
+    // 方向ボタンが再び有効になる
+    final upButton = tester.widget<IconButton>(
+      find.widgetWithIcon(IconButton, Icons.arrow_upward),
+    );
+    expect(upButton.onPressed, isNotNull);
+  });
+
+  testWidgets('クリア後でも Restart が使える', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+
+    expect(find.text('クリア！ 4手'), findsOneWidget);
+
+    // Restart ボタンが有効であることを確認
+    final restartButton = tester.widget<IconButton>(
+      find.widgetWithIcon(IconButton, Icons.refresh),
+    );
+    expect(restartButton.onPressed, isNotNull);
+
+    // Restart を実行
+    await tester.tap(find.byIcon(Icons.refresh));
+    await tester.pump();
+
+    // クリア表示が消え、手数が 0 に戻る
+    expect(find.textContaining('クリア！'), findsNothing);
+    expect(find.text('手数: 0'), findsOneWidget);
+
+    // 方向ボタンが再び有効になる
+    final upButton = tester.widget<IconButton>(
+      find.widgetWithIcon(IconButton, Icons.arrow_upward),
+    );
+    expect(upButton.onPressed, isNotNull);
+  });
 }
