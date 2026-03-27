@@ -129,6 +129,22 @@ class _HomeScreenState extends State<HomeScreen> {
                     onMove: _move,
                     enabled: !_gameState.isSolved,
                   ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextButton.icon(
+                        onPressed: _history.isNotEmpty ? _undo : null,
+                        icon: const Icon(Icons.undo),
+                        label: const Text('元に戻す'),
+                      ),
+                      const SizedBox(width: 16),
+                      TextButton.icon(
+                        onPressed: _restart,
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('リスタート'),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 16),
                 ],
               ),
