@@ -314,6 +314,24 @@ void main() {
     expect(upButton.onPressed, isNotNull);
   });
 
+  // --- SafeArea・レイアウトのテスト ---
+
+  testWidgets('body が SafeArea で囲まれ最大幅 480 の制約がある', (tester) async {
+    await tester.pumpWidget(buildApp());
+    // maxWidth: 480 の ConstrainedBox を探す
+    final finder = find.byWidgetPredicate(
+      (w) => w is ConstrainedBox && w.constraints.maxWidth == 480,
+    );
+    expect(finder, findsOneWidget);
+
+    // その ConstrainedBox が SafeArea の子孫であることを確認
+    final safeAreaFinder = find.ancestor(
+      of: finder,
+      matching: find.byType(SafeArea),
+    );
+    expect(safeAreaFinder, findsWidgets);
+  });
+
   testWidgets('クリア後でも Restart が使える', (tester) async {
     await tester.pumpWidget(buildApp());
     await solveStage(tester);

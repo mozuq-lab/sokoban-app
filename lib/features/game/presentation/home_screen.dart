@@ -77,54 +77,64 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          if (_gameState.isSolved)
-            Container(
-              width: double.infinity,
-              color: Colors.green.shade100,
-              padding: const EdgeInsets.all(12),
-              child: Text(
-                'クリア！ $_moveCount手',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
-                ),
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                children: [
+                  if (_gameState.isSolved)
+                    Container(
+                      width: double.infinity,
+                      color: Colors.green.shade100,
+                      padding: const EdgeInsets.all(12),
+                      child: Text(
+                        'クリア！ $_moveCount手',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Text(
+                      '手数: $_moveCount',
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ),
+                  Expanded(
+                    child: Center(
+                      child: AspectRatio(
+                        aspectRatio:
+                            _gameState.board.width / _gameState.board.height,
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final cellSize = constraints.maxWidth /
+                                _gameState.board.width;
+                            return _BoardView(
+                              gameState: _gameState,
+                              cellSize: cellSize,
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                  _DirectionPad(
+                    onMove: _move,
+                    enabled: !_gameState.isSolved,
+                  ),
+                  const SizedBox(height: 16),
+                ],
               ),
             ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Text(
-              '手数: $_moveCount',
-              style: const TextStyle(fontSize: 16),
-            ),
           ),
-          Expanded(
-            child: Center(
-              child: AspectRatio(
-                aspectRatio:
-                    _gameState.board.width / _gameState.board.height,
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final cellSize = constraints.maxWidth /
-                        _gameState.board.width;
-                    return _BoardView(
-                      gameState: _gameState,
-                      cellSize: cellSize,
-                    );
-                  },
-                ),
-              ),
-            ),
-          ),
-          _DirectionPad(
-            onMove: _move,
-            enabled: !_gameState.isSolved,
-          ),
-          const SizedBox(height: 16),
-        ],
+        ),
       ),
     );
   }
