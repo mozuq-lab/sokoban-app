@@ -129,21 +129,33 @@ class _HomeScreenState extends State<HomeScreen> {
                     onMove: _move,
                     enabled: !_gameState.isSolved,
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      TextButton.icon(
-                        onPressed: _history.isNotEmpty ? _undo : null,
-                        icon: const Icon(Icons.undo),
-                        label: const Text('元に戻す'),
-                      ),
-                      const SizedBox(width: 16),
-                      TextButton.icon(
-                        onPressed: _restart,
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('リスタート'),
-                      ),
-                    ],
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _history.isNotEmpty ? _undo : null,
+                            icon: const Icon(Icons.undo),
+                            label: const Text('元に戻す'),
+                            style: OutlinedButton.styleFrom(
+                              minimumSize: const Size(0, 48),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _restart,
+                            icon: const Icon(Icons.refresh),
+                            label: const Text('リスタート'),
+                            style: OutlinedButton.styleFrom(
+                              minimumSize: const Size(0, 48),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 16),
                 ],

@@ -370,8 +370,8 @@ void main() {
 
   testWidgets('画面下部の Undo ボタンが初期状態で無効', (tester) async {
     await tester.pumpWidget(buildApp());
-    final bottomUndo = tester.widget<TextButton>(
-      find.widgetWithText(TextButton, '元に戻す'),
+    final bottomUndo = tester.widget<OutlinedButton>(
+      find.widgetWithText(OutlinedButton, '元に戻す'),
     );
     expect(bottomUndo.onPressed, isNull);
   });
@@ -382,8 +382,8 @@ void main() {
     await tester.tap(find.byIcon(Icons.arrow_downward));
     await tester.pump();
 
-    final bottomUndo = tester.widget<TextButton>(
-      find.widgetWithText(TextButton, '元に戻す'),
+    final bottomUndo = tester.widget<OutlinedButton>(
+      find.widgetWithText(OutlinedButton, '元に戻す'),
     );
     expect(bottomUndo.onPressed, isNotNull);
   });
@@ -395,7 +395,7 @@ void main() {
     await tester.pump();
     expect(find.textContaining('手数: 1'), findsOneWidget);
 
-    await tester.tap(find.widgetWithText(TextButton, '元に戻す'));
+    await tester.tap(find.widgetWithText(OutlinedButton, '元に戻す'));
     await tester.pump();
     expect(find.textContaining('手数: 0'), findsOneWidget);
   });
@@ -407,10 +407,32 @@ void main() {
     await tester.pump();
     expect(find.textContaining('手数: 1'), findsOneWidget);
 
-    await tester.tap(find.widgetWithText(TextButton, 'リスタート'));
+    await tester.tap(find.widgetWithText(OutlinedButton, 'リスタート'));
     await tester.pump();
     expect(find.textContaining('手数: 0'), findsOneWidget);
     expect(find.byIcon(Icons.person), findsOneWidget);
+  });
+
+  testWidgets('下部ボタンが Expanded で均等幅になっている', (tester) async {
+    await tester.pumpWidget(buildApp());
+    // OutlinedButton が 2 つ Expanded の子として存在する
+    final expandedButtons = find.ancestor(
+      of: find.byType(OutlinedButton),
+      matching: find.byType(Expanded),
+    );
+    expect(expandedButtons, findsNWidgets(2));
+  });
+
+  testWidgets('下部ボタンの最小高さが 48 以上である', (tester) async {
+    await tester.pumpWidget(buildApp());
+    final undoButton = tester.getSize(
+      find.widgetWithText(OutlinedButton, '元に戻す'),
+    );
+    final restartButton = tester.getSize(
+      find.widgetWithText(OutlinedButton, 'リスタート'),
+    );
+    expect(undoButton.height, greaterThanOrEqualTo(48));
+    expect(restartButton.height, greaterThanOrEqualTo(48));
   });
 
   // --- 残り箱数表示のテスト ---
