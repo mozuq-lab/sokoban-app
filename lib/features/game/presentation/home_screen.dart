@@ -73,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'リスタート',
-            onPressed: _restart,
+            onPressed: _history.isNotEmpty ? _restart : null,
           ),
         ],
       ),
@@ -146,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: OutlinedButton.icon(
-                            onPressed: _restart,
+                            onPressed: _history.isNotEmpty ? _restart : null,
                             icon: const Icon(Icons.refresh),
                             label: const Text('リスタート'),
                             style: OutlinedButton.styleFrom(

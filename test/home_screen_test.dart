@@ -369,6 +369,79 @@ void main() {
     expect(find.text('リスタート'), findsOneWidget);
   });
 
+  // --- リスタートボタン初期無効化のテスト ---
+
+  testWidgets('初期状態では AppBar のリスタートボタンが無効', (tester) async {
+    await tester.pumpWidget(buildApp());
+    final restartButton = tester.widget<IconButton>(
+      find.widgetWithIcon(IconButton, Icons.refresh),
+    );
+    expect(restartButton.onPressed, isNull);
+  });
+
+  testWidgets('初期状態では画面下部のリスタートボタンが無効', (tester) async {
+    await tester.pumpWidget(buildApp());
+    final bottomRestart = tester.widget<OutlinedButton>(
+      find.widgetWithText(OutlinedButton, 'リスタート'),
+    );
+    expect(bottomRestart.onPressed, isNull);
+  });
+
+  testWidgets('移動後にリスタートボタンが有効になる', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    await tester.tap(find.byIcon(Icons.arrow_downward));
+    await tester.pump();
+
+    final restartButton = tester.widget<IconButton>(
+      find.widgetWithIcon(IconButton, Icons.refresh),
+    );
+    expect(restartButton.onPressed, isNotNull);
+
+    final bottomRestart = tester.widget<OutlinedButton>(
+      find.widgetWithText(OutlinedButton, 'リスタート'),
+    );
+    expect(bottomRestart.onPressed, isNotNull);
+  });
+
+  testWidgets('リスタート実行後にリスタートボタンが再び無効になる', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    await tester.tap(find.byIcon(Icons.arrow_downward));
+    await tester.pump();
+
+    // リスタート実行
+    await tester.tap(find.byIcon(Icons.refresh).first);
+    await tester.pump();
+
+    final restartButton = tester.widget<IconButton>(
+      find.widgetWithIcon(IconButton, Icons.refresh),
+    );
+    expect(restartButton.onPressed, isNull);
+
+    final bottomRestart = tester.widget<OutlinedButton>(
+      find.widgetWithText(OutlinedButton, 'リスタート'),
+    );
+    expect(bottomRestart.onPressed, isNull);
+  });
+
+  testWidgets('Undo で初期状態に戻るとリスタートボタンが無効になる',
+      (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    await tester.tap(find.byIcon(Icons.arrow_downward));
+    await tester.pump();
+
+    // Undo で初期状態に戻す
+    await tester.tap(find.byIcon(Icons.undo).first);
+    await tester.pump();
+
+    final restartButton = tester.widget<IconButton>(
+      find.widgetWithIcon(IconButton, Icons.refresh),
+    );
+    expect(restartButton.onPressed, isNull);
+  });
+
   testWidgets('画面下部の Undo ボタンが初期状態で無効', (tester) async {
     await tester.pumpWidget(buildApp());
     final bottomUndo = tester.widget<OutlinedButton>(
