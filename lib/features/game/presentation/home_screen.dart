@@ -105,8 +105,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: _ProgressBar(
                       moveCount: _moveCount,
                       remainingBoxes: _gameState.remainingBoxes,
-                      totalBoxes: _gameState.board.goals.length,
-                      isSolved: _gameState.isSolved,
                     ),
                   ),
                   Expanded(
@@ -175,14 +173,10 @@ class _ProgressBar extends StatelessWidget {
   const _ProgressBar({
     required this.moveCount,
     required this.remainingBoxes,
-    required this.totalBoxes,
-    required this.isSolved,
   });
 
   final int moveCount;
   final int remainingBoxes;
-  final int totalBoxes;
-  final bool isSolved;
 
   @override
   Widget build(BuildContext context) {
