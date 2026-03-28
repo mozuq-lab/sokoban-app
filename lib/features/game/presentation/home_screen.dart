@@ -186,12 +186,9 @@ class _ProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final placedBoxes = totalBoxes - remainingBoxes;
-    final boxColor = isSolved
-        ? Colors.green
-        : remainingBoxes == 0
-            ? Colors.green
-            : Colors.orange.shade800;
+    final allPlaced = remainingBoxes == 0;
+    final boxColor = allPlaced ? Colors.green : Colors.orange.shade800;
+    final boxValue = allPlaced ? '全配置！' : 'あと$remainingBoxes個';
 
     return Row(
       children: [
@@ -209,7 +206,7 @@ class _ProgressBar extends StatelessWidget {
             icon: Icons.inventory_2,
             iconColor: boxColor,
             label: '配置',
-            value: '$placedBoxes / $totalBoxes',
+            value: boxValue,
           ),
         ),
       ],

@@ -438,51 +438,51 @@ void main() {
 
   // --- 残り箱数表示のテスト ---
 
-  testWidgets('初期状態で配置数が 0 / 2 と表示される', (tester) async {
+  testWidgets('初期状態で残り箱数が表示される', (tester) async {
     await tester.pumpWidget(buildApp());
     expect(find.text('配置'), findsOneWidget);
-    expect(find.text('0 / 2'), findsOneWidget);
+    expect(find.text('あと2個'), findsOneWidget);
   });
 
-  testWidgets('箱をゴールに押すと配置数が増える', (tester) async {
+  testWidgets('箱をゴールに押すと残り数が減る', (tester) async {
     await tester.pumpWidget(buildApp());
 
     // 下に移動: box(2,3)→(2,4) がゴールに乗る
     await tester.tap(find.byIcon(Icons.arrow_downward));
     await tester.pump();
-    expect(find.text('1 / 2'), findsOneWidget);
+    expect(find.text('あと1個'), findsOneWidget);
   });
 
-  testWidgets('Undo で箱がゴールから外れると配置数が戻る', (tester) async {
+  testWidgets('Undo で箱がゴールから外れると残り数が戻る', (tester) async {
     await tester.pumpWidget(buildApp());
 
     // 下に移動: box(2,3)→(2,4) がゴールに乗る
     await tester.tap(find.byIcon(Icons.arrow_downward));
     await tester.pump();
-    expect(find.text('1 / 2'), findsOneWidget);
+    expect(find.text('あと1個'), findsOneWidget);
 
     // Undo: 箱がゴールから外れる
     await tester.tap(find.byIcon(Icons.undo).first);
     await tester.pump();
-    expect(find.text('0 / 2'), findsOneWidget);
+    expect(find.text('あと2個'), findsOneWidget);
   });
 
-  testWidgets('リスタートで配置数が初期値に戻る', (tester) async {
+  testWidgets('リスタートで残り箱数が初期値に戻る', (tester) async {
     await tester.pumpWidget(buildApp());
 
     await tester.tap(find.byIcon(Icons.arrow_downward));
     await tester.pump();
-    expect(find.text('1 / 2'), findsOneWidget);
+    expect(find.text('あと1個'), findsOneWidget);
 
     await tester.tap(find.byIcon(Icons.refresh).first);
     await tester.pump();
-    expect(find.text('0 / 2'), findsOneWidget);
+    expect(find.text('あと2個'), findsOneWidget);
   });
 
-  testWidgets('クリア時に配置数が 2 / 2 になる', (tester) async {
+  testWidgets('クリア時に全配置と表示される', (tester) async {
     await tester.pumpWidget(buildApp());
     await solveStage(tester);
 
-    expect(find.text('2 / 2'), findsOneWidget);
+    expect(find.text('全配置！'), findsOneWidget);
   });
 }
