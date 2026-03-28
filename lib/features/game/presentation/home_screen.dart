@@ -208,7 +208,7 @@ class _ProgressBar extends StatelessWidget {
           child: _ProgressCard(
             icon: Icons.inventory_2,
             iconColor: boxColor,
-            label: '残り箱',
+            label: '配置',
             value: '$placedBoxes / $totalBoxes',
           ),
         ),

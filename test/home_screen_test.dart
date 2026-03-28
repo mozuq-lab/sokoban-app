@@ -440,7 +440,7 @@ void main() {
 
   testWidgets('初期状態で配置数が 0 / 2 と表示される', (tester) async {
     await tester.pumpWidget(buildApp());
-    expect(find.text('残り箱'), findsOneWidget);
+    expect(find.text('配置'), findsOneWidget);
     expect(find.text('0 / 2'), findsOneWidget);
   });
 
