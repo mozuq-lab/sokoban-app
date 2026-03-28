@@ -102,9 +102,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Text(
-                      '手数: $_moveCount　残り箱: ${_gameState.remainingBoxes}',
-                      style: const TextStyle(fontSize: 16),
+                    child: _ProgressBar(
+                      moveCount: _moveCount,
+                      remainingBoxes: _gameState.remainingBoxes,
+                      totalBoxes: _gameState.board.goals.length,
+                      isSolved: _gameState.isSolved,
                     ),
                   ),
                   Expanded(
@@ -163,6 +165,104 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// 手数・残り箱数を並べて表示する進捗バー。
+class _ProgressBar extends StatelessWidget {
+  const _ProgressBar({
+    required this.moveCount,
+    required this.remainingBoxes,
+    required this.totalBoxes,
+    required this.isSolved,
+  });
+
+  final int moveCount;
+  final int remainingBoxes;
+  final int totalBoxes;
+  final bool isSolved;
+
+  @override
+  Widget build(BuildContext context) {
+    final placedBoxes = totalBoxes - remainingBoxes;
+    final boxColor = isSolved
+        ? Colors.green
+        : remainingBoxes == 0
+            ? Colors.green
+            : Colors.orange.shade800;
+
+    return Row(
+      children: [
+        Expanded(
+          child: _ProgressCard(
+            icon: Icons.directions_walk,
+            iconColor: Colors.blue,
+            label: '手数',
+            value: '$moveCount',
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _ProgressCard(
+            icon: Icons.inventory_2,
+            iconColor: boxColor,
+            label: '配置',
+            value: '$placedBoxes / $totalBoxes',
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// 個別の進捗カード（アイコン + ラベル + 値）。
+class _ProgressCard extends StatelessWidget {
+  const _ProgressCard({
+    required this.icon,
+    required this.iconColor,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final Color iconColor;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 20, color: iconColor),
+          const SizedBox(width: 6),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+              ),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
