@@ -593,6 +593,113 @@ void main() {
     );
   });
 
+  // --- 移動失敗フィードバックのテスト ---
+
+  testWidgets('壁に向かって移動するとブロック文言が表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // 左に移動（成功: (2,2) → (1,2)）
+    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.pump();
+    // さらに左に移動（壁 (0,2) で blocked）
+    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.pump();
+
+    expect(find.text('その方向には進めません'), findsOneWidget);
+    expect(
+      find.text('方向ボタンで移動 ／ 元に戻す・リスタートでやり直し'),
+      findsNothing,
+    );
+  });
+
+  testWidgets('ブロック後に成功移動するとヒントが通常文言に戻る', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // 左に移動（成功）
+    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.pump();
+    // さらに左（壁で blocked）
+    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.pump();
+    expect(find.text('その方向には進めません'), findsOneWidget);
+
+    // 右に移動（成功）
+    await tester.tap(find.byIcon(Icons.arrow_forward));
+    await tester.pump();
+
+    expect(find.text('その方向には進めません'), findsNothing);
+    expect(
+      find.text('方向ボタンで移動 ／ 元に戻す・リスタートでやり直し'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('ブロック後に Undo するとヒントが通常文言に戻る', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // 下に移動（成功）
+    await tester.tap(find.byIcon(Icons.arrow_downward));
+    await tester.pump();
+
+    // 左に移動（成功: (2,3) → (1,3)）
+    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.pump();
+    // さらに左（壁で blocked）
+    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.pump();
+    expect(find.text('その方向には進めません'), findsOneWidget);
+
+    // Undo
+    await tester.tap(find.byIcon(Icons.undo).first);
+    await tester.pump();
+
+    expect(find.text('その方向には進めません'), findsNothing);
+    expect(
+      find.text('方向ボタンで移動 ／ 元に戻す・リスタートでやり直し'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('ブロック後に Restart するとヒントが通常文言に戻る', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // 下に移動（成功）
+    await tester.tap(find.byIcon(Icons.arrow_downward));
+    await tester.pump();
+
+    // 上に移動（箱を押せない — 壁で blocked）
+    // player(2,3) → 上(2,2) は空なので成功する。
+    // instead: 左に移動して壁にぶつける
+    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.pump();
+    // player at (1,3), try left again → wall
+    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.pump();
+    expect(find.text('その方向には進めません'), findsOneWidget);
+
+    // Restart
+    await tester.tap(find.byIcon(Icons.refresh).first);
+    await tester.pump();
+
+    expect(find.text('その方向には進めません'), findsNothing);
+    expect(
+      find.text('方向ボタンで移動 ／ 元に戻す・リスタートでやり直し'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('クリア時はブロック文言ではなくクリア済み文言が表示される',
+      (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+
+    expect(
+      find.text('クリア済み — 元に戻す・リスタートで続けられます'),
+      findsOneWidget,
+    );
+    expect(find.text('その方向には進めません'), findsNothing);
+  });
+
   testWidgets('クリア時に全配置と表示される', (tester) async {
     await tester.pumpWidget(buildApp());
     await solveStage(tester);

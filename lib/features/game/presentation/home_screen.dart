@@ -25,6 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late GameState _gameState;
   final List<GameState> _history = [];
   int _moveCount = 0;
+  bool _moveBlocked = false;
 
   @override
   void initState() {
@@ -39,6 +40,11 @@ class _HomeScreenState extends State<HomeScreen> {
         _history.add(_gameState);
         _gameState = next;
         _moveCount++;
+        _moveBlocked = false;
+      });
+    } else {
+      setState(() {
+        _moveBlocked = true;
       });
     }
   }
@@ -48,6 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _gameState = _history.removeLast();
       _moveCount--;
+      _moveBlocked = false;
     });
   }
 
@@ -55,6 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _history.clear();
       _moveCount = 0;
+      _moveBlocked = false;
       _gameState = GameState.parse(HomeScreen.initialLevel);
     });
   }
@@ -162,10 +170,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Text(
                       _gameState.isSolved
                           ? 'クリア済み — 元に戻す・リスタートで続けられます'
-                          : '方向ボタンで移動 ／ 元に戻す・リスタートでやり直し',
+                          : _moveBlocked
+                              ? 'その方向には進めません'
+                              : '方向ボタンで移動 ／ 元に戻す・リスタートでやり直し',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey.shade500,
+                        color: _moveBlocked && !_gameState.isSolved
+                            ? Colors.red.shade400
+                            : Colors.grey.shade500,
                       ),
                       textAlign: TextAlign.center,
                     ),
