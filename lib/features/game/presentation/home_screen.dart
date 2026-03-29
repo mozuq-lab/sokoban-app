@@ -296,11 +296,15 @@ class _ProgressCard extends StatelessWidget {
                 label,
                 style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
               ),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: Text(
+                  value,
+                  key: ValueKey(value),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
