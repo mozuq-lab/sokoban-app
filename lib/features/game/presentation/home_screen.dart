@@ -157,6 +157,19 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      _gameState.isSolved
+                          ? 'クリア済み — 元に戻す・リスタートで続けられます'
+                          : '方向ボタンで移動 ／ 元に戻す・リスタートでやり直し',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade500,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                   const SizedBox(height: 16),
                 ],
               ),
