@@ -93,21 +93,38 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 children: [
-                  if (_gameState.isSolved)
-                    Container(
-                      width: double.infinity,
-                      color: Colors.green.shade100,
-                      padding: const EdgeInsets.all(12),
-                      child: Text(
-                        'クリア！ $_moveCount手',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    transitionBuilder: (child, animation) {
+                      return FadeTransition(
+                        opacity: animation,
+                        child: SizeTransition(
+                          sizeFactor: animation,
+                          axisAlignment: -1,
+                          child: child,
                         ),
-                      ),
-                    ),
+                      );
+                    },
+                    child: _gameState.isSolved
+                        ? Container(
+                            key: const ValueKey('clear-banner'),
+                            width: double.infinity,
+                            color: Colors.green.shade100,
+                            padding: const EdgeInsets.all(12),
+                            child: Text(
+                              'クリア！ $_moveCount手',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green,
+                              ),
+                            ),
+                          )
+                        : const SizedBox.shrink(
+                            key: ValueKey('no-banner'),
+                          ),
+                  ),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: _ProgressBar(
@@ -167,19 +184,29 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      _gameState.isSolved
-                          ? 'クリア済み — 元に戻す・リスタートで続けられます'
-                          : _moveBlocked
-                              ? 'その方向には進めません'
-                              : '方向ボタンで移動 ／ 元に戻す・リスタートでやり直し',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: _moveBlocked && !_gameState.isSolved
-                            ? Colors.red.shade400
-                            : Colors.grey.shade500,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      child: Text(
+                        _gameState.isSolved
+                            ? 'クリア済み — 元に戻す・リスタートで続けられます'
+                            : _moveBlocked
+                                ? 'その方向には進めません'
+                                : '方向ボタンで移動 ／ 元に戻す・リスタートでやり直し',
+                        key: ValueKey(
+                          _gameState.isSolved
+                              ? 'hint-cleared'
+                              : _moveBlocked
+                                  ? 'hint-blocked'
+                                  : 'hint-normal',
+                        ),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: _moveBlocked && !_gameState.isSolved
+                              ? Colors.red.shade400
+                              : Colors.grey.shade500,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                      textAlign: TextAlign.center,
                     ),
                   ),
                   const SizedBox(height: 16),
