@@ -565,6 +565,7 @@ void main() {
   testWidgets('クリア後にヒントがクリア済み文言に切り替わる', (tester) async {
     await tester.pumpWidget(buildApp());
     await solveStage(tester);
+    await tester.pumpAndSettle();
 
     expect(
       find.text('クリア済み — 元に戻す・リスタートで続けられます'),
@@ -603,7 +604,7 @@ void main() {
     await tester.pump();
     // さらに左に移動（壁 (0,2) で blocked）
     await tester.tap(find.byIcon(Icons.arrow_back));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.text('その方向には進めません'), findsOneWidget);
     expect(
