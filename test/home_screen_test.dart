@@ -552,6 +552,47 @@ void main() {
     expect(find.text('あと2個'), findsOneWidget);
   });
 
+  // --- 操作ヒント表示のテスト ---
+
+  testWidgets('通常時に操作ヒントが表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    expect(
+      find.text('方向ボタンで移動 ／ 元に戻す・リスタートでやり直し'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('クリア後にヒントがクリア済み文言に切り替わる', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+
+    expect(
+      find.text('クリア済み — 元に戻す・リスタートで続けられます'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('方向ボタンで移動 ／ 元に戻す・リスタートでやり直し'),
+      findsNothing,
+    );
+  });
+
+  testWidgets('クリア後に Undo するとヒントが通常文言に戻る', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+
+    await tester.tap(find.byIcon(Icons.undo).first);
+    await tester.pump();
+
+    expect(
+      find.text('方向ボタンで移動 ／ 元に戻す・リスタートでやり直し'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('クリア済み — 元に戻す・リスタートで続けられます'),
+      findsNothing,
+    );
+  });
+
   testWidgets('クリア時に全配置と表示される', (tester) async {
     await tester.pumpWidget(buildApp());
     await solveStage(tester);
