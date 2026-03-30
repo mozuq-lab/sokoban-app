@@ -274,10 +274,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         duration: const Duration(milliseconds: 200),
                         child: Text(
                           _gameState.isSolved
-                              ? 'クリア済み — 元に戻す・リスタートで続けられます'
+                              ? 'クリア済み — Ctrl+Z で戻す・R でやり直し'
                               : _moveBlocked
                                   ? 'その方向には進めません'
-                                  : '方向ボタンで移動 ／ 元に戻す・リスタートでやり直し',
+                                  : '移動: ボタン／矢印・WASD ｜ 戻す: Ctrl+Z ｜ やり直し: R',
                           key: ValueKey(
                             _gameState.isSolved
                                 ? 'hint-cleared'
