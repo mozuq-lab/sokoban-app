@@ -117,9 +117,11 @@ class _HomeScreenState extends State<HomeScreen> {
         _moveBlocked = true;
       });
       _blockedHintTimer = Timer(const Duration(seconds: 1), () {
-        setState(() {
-          _moveBlocked = false;
-        });
+        if (mounted) {
+          setState(() {
+            _moveBlocked = false;
+          });
+        }
       });
     }
   }
