@@ -839,6 +839,81 @@ void main() {
     expect(find.text('0'), findsOneWidget);
   });
 
+  // --- ボタン操作後のキーボードフォーカス維持テスト ---
+
+  testWidgets('方向ボタン押下後もキーボード操作が有効', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // 方向ボタンでプレイヤーを移動
+    await tester.tap(find.byIcon(Icons.arrow_downward));
+    await tester.pump();
+    expect(find.text('1'), findsOneWidget);
+
+    // ボタン操作後にキーボードで移動できることを確認
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    expect(find.text('2'), findsOneWidget);
+  });
+
+  testWidgets('Undo ボタン押下後もキーボード操作が有効', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // キーボードで移動
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(find.text('1'), findsOneWidget);
+
+    // 画面下部の Undo ボタンをタップ
+    await tester.tap(find.widgetWithText(OutlinedButton, '元に戻す'));
+    await tester.pump();
+    expect(find.text('0'), findsOneWidget);
+
+    // ボタン操作後にキーボードで移動できることを確認
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(find.text('1'), findsOneWidget);
+  });
+
+  testWidgets('Restart ボタン押下後もキーボード操作が有効', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // キーボードで移動
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(find.text('1'), findsOneWidget);
+
+    // 画面下部のリスタートボタンをタップ
+    await tester.tap(find.widgetWithText(OutlinedButton, 'リスタート'));
+    await tester.pump();
+    expect(find.text('0'), findsOneWidget);
+
+    // ボタン操作後にキーボードで移動できることを確認
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(find.text('1'), findsOneWidget);
+  });
+
+  testWidgets('AppBar の Undo ボタン押下後もキーボード操作が有効', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // キーボードで移動
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(find.text('1'), findsOneWidget);
+
+    // AppBar の Undo ボタンをタップ（AppBar 内の undo アイコン）
+    final undoButtons = find.byIcon(Icons.undo);
+    // AppBar のボタンは最初に見つかる
+    await tester.tap(undoButtons.first);
+    await tester.pump();
+    expect(find.text('0'), findsOneWidget);
+
+    // ボタン操作後にキーボードで移動できることを確認
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(find.text('1'), findsOneWidget);
+  });
+
   testWidgets('キーボードで解法を入力するとクリアできる', (tester) async {
     await tester.pumpWidget(buildApp());
 
