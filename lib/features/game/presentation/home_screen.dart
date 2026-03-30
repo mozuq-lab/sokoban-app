@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../domain/direction.dart';
 import '../domain/game_state.dart';
@@ -26,11 +27,74 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<GameState> _history = [];
   int _moveCount = 0;
   bool _moveBlocked = false;
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _gameState = GameState.parse(HomeScreen.initialLevel);
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  /// キーボードイベントを処理する。
+  KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+      return KeyEventResult.ignored;
+    }
+
+    final key = event.logicalKey;
+    final isCtrlOrMeta = HardwareKeyboard.instance.isControlPressed ||
+        HardwareKeyboard.instance.isMetaPressed;
+
+    // Undo: Ctrl+Z / Cmd+Z
+    if (isCtrlOrMeta && key == LogicalKeyboardKey.keyZ) {
+      _undo();
+      return KeyEventResult.handled;
+    }
+
+    // Restart: R キー（修飾キーなし・履歴があるときのみ）
+    if (!isCtrlOrMeta && key == LogicalKeyboardKey.keyR) {
+      if (_history.isNotEmpty) {
+        _restart();
+      }
+      return KeyEventResult.handled;
+    }
+
+    // 方向キー（クリア後は無効）
+    final direction = _directionFromKey(key);
+    if (direction != null) {
+      if (!_gameState.isSolved) {
+        _move(direction);
+      }
+      return KeyEventResult.handled;
+    }
+
+    return KeyEventResult.ignored;
+  }
+
+  /// キーから方向を返す。対応しないキーは null。
+  static Direction? _directionFromKey(LogicalKeyboardKey key) {
+    // 矢印キー
+    if (key == LogicalKeyboardKey.arrowUp) return Direction.up;
+    if (key == LogicalKeyboardKey.arrowDown) return Direction.down;
+    if (key == LogicalKeyboardKey.arrowLeft) return Direction.left;
+    if (key == LogicalKeyboardKey.arrowRight) return Direction.right;
+    // WASD
+    if (key == LogicalKeyboardKey.keyW) return Direction.up;
+    if (key == LogicalKeyboardKey.keyS) return Direction.down;
+    if (key == LogicalKeyboardKey.keyA) return Direction.left;
+    if (key == LogicalKeyboardKey.keyD) return Direction.right;
+    // HJKL (Vim 風)
+    if (key == LogicalKeyboardKey.keyH) return Direction.left;
+    if (key == LogicalKeyboardKey.keyJ) return Direction.down;
+    if (key == LogicalKeyboardKey.keyK) return Direction.up;
+    if (key == LogicalKeyboardKey.keyL) return Direction.right;
+    return null;
   }
 
   void _move(Direction dir) {
@@ -69,7 +133,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Focus(
+      focusNode: _focusNode,
+      autofocus: true,
+      onKeyEvent: _handleKeyEvent,
+      child: Scaffold(
       appBar: AppBar(
         title: const Text('Sokoban'),
         actions: [
@@ -215,6 +283,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

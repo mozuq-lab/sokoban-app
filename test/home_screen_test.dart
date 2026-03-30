@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sokoban_app/features/game/presentation/home_screen.dart';
 
@@ -706,5 +707,130 @@ void main() {
     await solveStage(tester);
 
     expect(find.text('全配置！'), findsOneWidget);
+  });
+
+  // --- キーボード操作のテスト ---
+
+  testWidgets('矢印キーでプレイヤーが移動する', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // 下矢印キーで移動
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+
+    // 手数が 1 に増える
+    expect(find.text('1'), findsOneWidget);
+    expect(find.byIcon(Icons.person), findsOneWidget);
+  });
+
+  testWidgets('WASD キーで移動できる', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // S キー（下）で移動
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyS);
+    await tester.pump();
+    expect(find.text('1'), findsOneWidget);
+
+    // W キー（上）で移動
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyW);
+    await tester.pump();
+    expect(find.text('2'), findsOneWidget);
+  });
+
+  testWidgets('HJKL キーで移動できる', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // J キー（下）で移動
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyJ);
+    await tester.pump();
+    expect(find.text('1'), findsOneWidget);
+
+    // K キー（上）で移動
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyK);
+    await tester.pump();
+    expect(find.text('2'), findsOneWidget);
+  });
+
+  testWidgets('クリア後はキーボード移動が無効になる', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // キーボードで解法: 下, 上, 右, 下
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+
+    expect(find.text('クリア！ 4手'), findsOneWidget);
+
+    // クリア後に矢印キーを押しても手数が変わらない
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    expect(find.text('4'), findsOneWidget);
+  });
+
+  testWidgets('Ctrl+Z で Undo できる', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // 下に移動
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(find.text('1'), findsOneWidget);
+
+    // Ctrl+Z で Undo
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyZ);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pump();
+
+    expect(find.text('0'), findsOneWidget);
+  });
+
+  testWidgets('初期状態では R キーで Restart されない', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // 初期状態で R キーを押す
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyR);
+    await tester.pump();
+
+    // 手数が 0 のまま変わらない
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('あと2個'), findsOneWidget);
+  });
+
+  testWidgets('R キーで Restart できる', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // 数手動かす
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    expect(find.text('2'), findsOneWidget);
+
+    // R キーで Restart
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyR);
+    await tester.pump();
+
+    expect(find.text('0'), findsOneWidget);
+  });
+
+  testWidgets('キーボードで解法を入力するとクリアできる', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // 解法: 下, 上, 右, 下
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+
+    expect(find.text('クリア！ 4手'), findsOneWidget);
   });
 }
