@@ -124,6 +124,7 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       });
     }
+    _focusNode.requestFocus();
   }
 
   void _undo() {
@@ -134,6 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _moveCount--;
       _moveBlocked = false;
     });
+    _focusNode.requestFocus();
   }
 
   void _restart() {
@@ -144,6 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _moveBlocked = false;
       _gameState = GameState.parse(HomeScreen.initialLevel);
     });
+    _focusNode.requestFocus();
   }
 
   @override
