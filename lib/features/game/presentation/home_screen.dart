@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -27,6 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<GameState> _history = [];
   int _moveCount = 0;
   bool _moveBlocked = false;
+  Timer? _blockedHintTimer;
   final FocusNode _focusNode = FocusNode();
 
   @override
@@ -37,6 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    _blockedHintTimer?.cancel();
     _focusNode.dispose();
     super.dispose();
   }
@@ -100,6 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _move(Direction dir) {
     final next = _gameState.move(dir);
     if (!identical(next, _gameState)) {
+      _blockedHintTimer?.cancel();
       setState(() {
         _history.add(_gameState);
         _gameState = next;
@@ -107,14 +112,21 @@ class _HomeScreenState extends State<HomeScreen> {
         _moveBlocked = false;
       });
     } else {
+      _blockedHintTimer?.cancel();
       setState(() {
         _moveBlocked = true;
+      });
+      _blockedHintTimer = Timer(const Duration(seconds: 1), () {
+        setState(() {
+          _moveBlocked = false;
+        });
       });
     }
   }
 
   void _undo() {
     if (_history.isEmpty) return;
+    _blockedHintTimer?.cancel();
     setState(() {
       _gameState = _history.removeLast();
       _moveCount--;
@@ -123,6 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _restart() {
+    _blockedHintTimer?.cancel();
     setState(() {
       _history.clear();
       _moveCount = 0;
@@ -138,152 +151,152 @@ class _HomeScreenState extends State<HomeScreen> {
       autofocus: true,
       onKeyEvent: _handleKeyEvent,
       child: Scaffold(
-      appBar: AppBar(
-        title: const Text('Sokoban'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.undo),
-            tooltip: '元に戻す',
-            onPressed: _history.isNotEmpty ? _undo : null,
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'リスタート',
-            onPressed: _history.isNotEmpty ? _restart : null,
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 480),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                children: [
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    transitionBuilder: (child, animation) {
-                      return FadeTransition(
-                        opacity: animation,
-                        child: SizeTransition(
-                          sizeFactor: animation,
-                          axisAlignment: -1,
-                          child: child,
+        appBar: AppBar(
+          title: const Text('Sokoban'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.undo),
+              tooltip: '元に戻す',
+              onPressed: _history.isNotEmpty ? _undo : null,
+            ),
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              tooltip: 'リスタート',
+              onPressed: _history.isNotEmpty ? _restart : null,
+            ),
+          ],
+        ),
+        body: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  children: [
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      transitionBuilder: (child, animation) {
+                        return FadeTransition(
+                          opacity: animation,
+                          child: SizeTransition(
+                            sizeFactor: animation,
+                            axisAlignment: -1,
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: _gameState.isSolved
+                          ? Container(
+                              key: const ValueKey('clear-banner'),
+                              width: double.infinity,
+                              color: Colors.green.shade100,
+                              padding: const EdgeInsets.all(12),
+                              child: Text(
+                                'クリア！ $_moveCount手',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green,
+                                ),
+                              ),
+                            )
+                          : const SizedBox.shrink(
+                              key: ValueKey('no-banner'),
+                            ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: _ProgressBar(
+                        moveCount: _moveCount,
+                        remainingBoxes: _gameState.remainingBoxes,
+                      ),
+                    ),
+                    Expanded(
+                      child: Center(
+                        child: AspectRatio(
+                          aspectRatio:
+                              _gameState.board.width / _gameState.board.height,
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              final cellSize =
+                                  constraints.maxWidth / _gameState.board.width;
+                              return _BoardView(
+                                gameState: _gameState,
+                                cellSize: cellSize,
+                              );
+                            },
+                          ),
                         ),
-                      );
-                    },
-                    child: _gameState.isSolved
-                        ? Container(
-                            key: const ValueKey('clear-banner'),
-                            width: double.infinity,
-                            color: Colors.green.shade100,
-                            padding: const EdgeInsets.all(12),
-                            child: Text(
-                              'クリア！ $_moveCount手',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.green,
+                      ),
+                    ),
+                    _DirectionPad(
+                      onMove: _move,
+                      enabled: !_gameState.isSolved,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: _history.isNotEmpty ? _undo : null,
+                              icon: const Icon(Icons.undo),
+                              label: const Text('元に戻す'),
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size(0, 48),
                               ),
                             ),
-                          )
-                        : const SizedBox.shrink(
-                            key: ValueKey('no-banner'),
                           ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: _ProgressBar(
-                      moveCount: _moveCount,
-                      remainingBoxes: _gameState.remainingBoxes,
-                    ),
-                  ),
-                  Expanded(
-                    child: Center(
-                      child: AspectRatio(
-                        aspectRatio:
-                            _gameState.board.width / _gameState.board.height,
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            final cellSize = constraints.maxWidth /
-                                _gameState.board.width;
-                            return _BoardView(
-                              gameState: _gameState,
-                              cellSize: cellSize,
-                            );
-                          },
-                        ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: _history.isNotEmpty ? _restart : null,
+                              icon: const Icon(Icons.refresh),
+                              label: const Text('リスタート'),
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size(0, 48),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                  _DirectionPad(
-                    onMove: _move,
-                    enabled: !_gameState.isSolved,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: _history.isNotEmpty ? _undo : null,
-                            icon: const Icon(Icons.undo),
-                            label: const Text('元に戻す'),
-                            style: OutlinedButton.styleFrom(
-                              minimumSize: const Size(0, 48),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: _history.isNotEmpty ? _restart : null,
-                            icon: const Icon(Icons.refresh),
-                            label: const Text('リスタート'),
-                            style: OutlinedButton.styleFrom(
-                              minimumSize: const Size(0, 48),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 200),
-                      child: Text(
-                        _gameState.isSolved
-                            ? 'クリア済み — 元に戻す・リスタートで続けられます'
-                            : _moveBlocked
-                                ? 'その方向には進めません'
-                                : '方向ボタンで移動 ／ 元に戻す・リスタートでやり直し',
-                        key: ValueKey(
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        child: Text(
                           _gameState.isSolved
-                              ? 'hint-cleared'
+                              ? 'クリア済み — 元に戻す・リスタートで続けられます'
                               : _moveBlocked
-                                  ? 'hint-blocked'
-                                  : 'hint-normal',
+                                  ? 'その方向には進めません'
+                                  : '方向ボタンで移動 ／ 元に戻す・リスタートでやり直し',
+                          key: ValueKey(
+                            _gameState.isSolved
+                                ? 'hint-cleared'
+                                : _moveBlocked
+                                    ? 'hint-blocked'
+                                    : 'hint-normal',
+                          ),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: _moveBlocked && !_gameState.isSolved
+                                ? Colors.red.shade400
+                                : Colors.grey.shade500,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: _moveBlocked && !_gameState.isSolved
-                              ? Colors.red.shade400
-                              : Colors.grey.shade500,
-                        ),
-                        textAlign: TextAlign.center,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
+                    const SizedBox(height: 16),
+                  ],
+                ),
               ),
             ),
           ),
         ),
-      ),
       ),
     );
   }
@@ -449,8 +462,7 @@ class _CellWidget extends StatelessWidget {
     }
 
     if (isBox) {
-      final boxColor =
-          isGoal ? Colors.green.shade700 : Colors.orange.shade800;
+      final boxColor = isGoal ? Colors.green.shade700 : Colors.orange.shade800;
       return Container(
         color: bgColor,
         child: FittedBox(

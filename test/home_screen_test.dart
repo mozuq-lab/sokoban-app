@@ -145,8 +145,7 @@ void main() {
     expect(find.textContaining('クリア！'), findsNothing);
   });
 
-  testWidgets('全箱をゴールに載せるとクリアメッセージが表示される',
-      (tester) async {
+  testWidgets('全箱をゴールに載せるとクリアメッセージが表示される', (tester) async {
     await tester.pumpWidget(buildApp());
 
     // 盤面:
@@ -363,8 +362,7 @@ void main() {
 
   // --- 画面下部の補助ボタンのテスト ---
 
-  testWidgets('画面下部に「元に戻す」「リスタート」テキストが表示される',
-      (tester) async {
+  testWidgets('画面下部に「元に戻す」「リスタート」テキストが表示される', (tester) async {
     await tester.pumpWidget(buildApp());
     expect(find.text('元に戻す'), findsOneWidget);
     expect(find.text('リスタート'), findsOneWidget);
@@ -426,8 +424,7 @@ void main() {
     expect(bottomRestart.onPressed, isNull);
   });
 
-  testWidgets('Undo で初期状態に戻るとリスタートボタンが無効になる',
-      (tester) async {
+  testWidgets('Undo で初期状態に戻るとリスタートボタンが無効になる', (tester) async {
     await tester.pumpWidget(buildApp());
 
     await tester.tap(find.byIcon(Icons.arrow_downward));
@@ -605,12 +602,37 @@ void main() {
     await tester.pump();
     // さらに左に移動（壁 (0,2) で blocked）
     await tester.tap(find.byIcon(Icons.arrow_back));
-    await tester.pumpAndSettle();
+    // AnimatedSwitcher の遷移を完了させる（タイマー 1 秒より前）
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
 
     expect(find.text('その方向には進めません'), findsOneWidget);
     expect(
       find.text('方向ボタンで移動 ／ 元に戻す・リスタートでやり直し'),
       findsNothing,
+    );
+  });
+
+  testWidgets('ブロック文言が約 1 秒後に自動で消える', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // 左に移動（成功）
+    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.pump();
+    // さらに左（壁で blocked）
+    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('その方向には進めません'), findsOneWidget);
+
+    // 1 秒経過させてタイマー発火
+    await tester.pump(const Duration(seconds: 1));
+    // AnimatedSwitcher 遷移を完了させる
+    await tester.pumpAndSettle();
+
+    expect(find.text('その方向には進めません'), findsNothing);
+    expect(
+      find.text('方向ボタンで移動 ／ 元に戻す・リスタートでやり直し'),
+      findsOneWidget,
     );
   });
 
@@ -690,8 +712,7 @@ void main() {
     );
   });
 
-  testWidgets('クリア時はブロック文言ではなくクリア済み文言が表示される',
-      (tester) async {
+  testWidgets('クリア時はブロック文言ではなくクリア済み文言が表示される', (tester) async {
     await tester.pumpWidget(buildApp());
     await solveStage(tester);
 
