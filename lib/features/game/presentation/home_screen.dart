@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,24 +9,22 @@ import '../domain/game_state.dart';
 
 /// 固定 1 ステージの倉庫番プレイ画面。
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.initialLevel});
 
-  /// 初期ステージ定義（標準 Sokoban テキスト形式）。
-  static const List<String> initialLevel = [
-    '######',
-    '#    #',
-    '# @  #',
-    '# \$\$ #',
-    '# .. #',
-    '######',
-  ];
+  /// テスト等で直接レベルデータを渡す場合に使う。
+  /// null の場合は asset から読み込む。
+  final List<String>? initialLevel;
+
+  /// asset のレベルファイルパス。
+  static const String levelAssetPath = 'assets/levels/level_001.txt';
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late GameState _gameState;
+  GameState? _gameState;
+  late List<String> _levelLines;
   final List<GameState> _history = [];
   int _moveCount = 0;
   bool _moveBlocked = false;
@@ -35,7 +34,27 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _gameState = GameState.parse(HomeScreen.initialLevel);
+    if (widget.initialLevel != null) {
+      _levelLines = widget.initialLevel!;
+      _gameState = GameState.parse(_levelLines);
+    } else {
+      _loadLevelFromAsset();
+    }
+  }
+
+  Future<void> _loadLevelFromAsset() async {
+    final text = await rootBundle.loadString(HomeScreen.levelAssetPath);
+    final lines = const LineSplitter().convert(text);
+    // 末尾の空行を除去
+    while (lines.isNotEmpty && lines.last.isEmpty) {
+      lines.removeLast();
+    }
+    if (mounted) {
+      setState(() {
+        _levelLines = lines;
+        _gameState = GameState.parse(_levelLines);
+      });
+    }
   }
 
   @override
@@ -47,6 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// キーボードイベントを処理する。
   KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
+    if (_gameState == null) return KeyEventResult.ignored;
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
       return KeyEventResult.ignored;
     }
@@ -72,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // 方向キー（クリア後は無効）
     final direction = _directionFromKey(key);
     if (direction != null) {
-      if (!_gameState.isSolved) {
+      if (!_gameState!.isSolved) {
         _move(direction);
       }
       return KeyEventResult.handled;
@@ -102,11 +122,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _move(Direction dir) {
-    final next = _gameState.move(dir);
-    if (!identical(next, _gameState)) {
+    final current = _gameState!;
+    final next = current.move(dir);
+    if (!identical(next, current)) {
       _blockedHintTimer?.cancel();
       setState(() {
-        _history.add(_gameState);
+        _history.add(current);
         _gameState = next;
         _moveCount++;
         _moveBlocked = false;
@@ -144,13 +165,21 @@ class _HomeScreenState extends State<HomeScreen> {
       _history.clear();
       _moveCount = 0;
       _moveBlocked = false;
-      _gameState = GameState.parse(HomeScreen.initialLevel);
+      _gameState = GameState.parse(_levelLines);
     });
     _focusNode.requestFocus();
   }
 
   @override
   Widget build(BuildContext context) {
+    final gameState = _gameState;
+    if (gameState == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Sokoban')),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Focus(
       focusNode: _focusNode,
       autofocus: true,
@@ -191,7 +220,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         );
                       },
-                      child: _gameState.isSolved
+                      child: gameState.isSolved
                           ? Container(
                               key: const ValueKey('clear-banner'),
                               width: double.infinity,
@@ -215,20 +244,20 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 4),
                       child: _ProgressBar(
                         moveCount: _moveCount,
-                        remainingBoxes: _gameState.remainingBoxes,
+                        remainingBoxes: gameState.remainingBoxes,
                       ),
                     ),
                     Expanded(
                       child: Center(
                         child: AspectRatio(
                           aspectRatio:
-                              _gameState.board.width / _gameState.board.height,
+                              gameState.board.width / gameState.board.height,
                           child: LayoutBuilder(
                             builder: (context, constraints) {
                               final cellSize =
-                                  constraints.maxWidth / _gameState.board.width;
+                                  constraints.maxWidth / gameState.board.width;
                               return _BoardView(
-                                gameState: _gameState,
+                                gameState: gameState,
                                 cellSize: cellSize,
                               );
                             },
@@ -238,7 +267,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     _DirectionPad(
                       onMove: _move,
-                      enabled: !_gameState.isSolved,
+                      enabled: !gameState.isSolved,
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -273,13 +302,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 200),
                         child: Text(
-                          _gameState.isSolved
+                          gameState.isSolved
                               ? 'クリア済み — Ctrl+Z で戻す・R でやり直し'
                               : _moveBlocked
                                   ? 'その方向には進めません'
                                   : '移動: ボタン／矢印・WASD ｜ 戻す: Ctrl+Z ｜ やり直し: R',
                           key: ValueKey(
-                            _gameState.isSolved
+                            gameState.isSolved
                                 ? 'hint-cleared'
                                 : _moveBlocked
                                     ? 'hint-blocked'
@@ -287,7 +316,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           style: TextStyle(
                             fontSize: 12,
-                            color: _moveBlocked && !_gameState.isSolved
+                            color: _moveBlocked && !gameState.isSolved
                                 ? Colors.red.shade400
                                 : Colors.grey.shade500,
                           ),
