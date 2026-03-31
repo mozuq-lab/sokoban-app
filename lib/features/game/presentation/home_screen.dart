@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -43,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadLevelFromAsset() async {
     final text = await rootBundle.loadString(HomeScreen.levelAssetPath);
-    final lines = text.split('\n');
+    final lines = const LineSplitter().convert(text);
     // 末尾の空行を除去
     while (lines.isNotEmpty && lines.last.isEmpty) {
       lines.removeLast();
