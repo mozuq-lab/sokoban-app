@@ -4,7 +4,19 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sokoban_app/features/game/presentation/home_screen.dart';
 
 void main() {
-  Widget buildApp() => const MaterialApp(home: HomeScreen());
+  /// テスト用の初期レベルデータ。
+  const testLevel = [
+    '######',
+    '#    #',
+    '# @  #',
+    '# \$\$ #',
+    '# .. #',
+    '######',
+  ];
+
+  Widget buildApp() => const MaterialApp(
+        home: HomeScreen(initialLevel: testLevel),
+      );
 
   testWidgets('AppBar にタイトルが表示される', (tester) async {
     await tester.pumpWidget(buildApp());

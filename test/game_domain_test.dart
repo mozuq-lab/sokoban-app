@@ -378,6 +378,22 @@ void main() {
       );
     });
 
+    test('テキストファイル形式の文字列から盤面をパースできる', () {
+      // asset から読み込んだテキストを split して末尾空行を除去する想定
+      const fileContent = '######\n#    #\n# @  #\n# \$\$ #\n# .. #\n######\n';
+      final lines = fileContent.split('\n');
+      while (lines.isNotEmpty && lines.last.isEmpty) {
+        lines.removeLast();
+      }
+      final s = GameState.parse(lines);
+      expect(s.playerX, 2);
+      expect(s.playerY, 2);
+      expect(s.boxes, containsAll([(2, 3), (3, 3)]));
+      expect(s.board.isGoal(2, 4), isTrue);
+      expect(s.board.isGoal(3, 4), isTrue);
+      expect(s.isSolved, isFalse);
+    });
+
     test('* は箱とゴールの両方として認識される', () {
       final s = GameState.parse([
         '####',
