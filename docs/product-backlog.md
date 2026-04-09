@@ -163,20 +163,30 @@ v1 の基準:
   - `flutter build web` など、目的に合う最小限の確認に絞られている
   - 失敗時に Web 系の破損だと分かる
 
+### 15. GitHub Pages で Web 版を公開できるようにする
+- **Status:** `ready`
+- **Purpose:** Flutter Web 版を GitHub Pages で継続的に公開できる状態を整え、ローカル環境がなくても遊べる確認導線を作る。
+- **Acceptance ideas:**
+  - GitHub Pages 公開に必要な手順または workflow が repo 内で整理されている
+  - `main` 更新時に Web 版を公開できる最小構成が決まっている
+  - 公開 URL の扱いが明確になっている
+  - Flutter Web / SPA として必要な最低限の調整点が洗い出されている
+- **Notes:** 実際の公開設定変更や外向き公開は確認を挟んでから行う。
+
 ---
 
 ## Icebox
 
-### 15. レベルエディタ
+### 16. レベルエディタ
 - **Status:** `needs-clarification`
 - **Purpose:** アプリ内で Sokoban ステージを作成・編集できるようにする。
 
-### 16. クラウド同期
+### 17. クラウド同期
 - **Status:** `blocked`
 - **Purpose:** 端末間で進捗を同期する。
 - **Reason:** 最初の有用バージョンには不要。
 
-### 17. デイリーチャレンジ / キュレーションパック
+### 18. デイリーチャレンジ / キュレーションパック
 - **Status:** `blocked`
 - **Purpose:** コアゲームが固まったあとに再遊性を足す。
 
