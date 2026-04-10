@@ -209,6 +209,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
                   children: [
+                    // --- クリアバナー ---
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 300),
                       transitionBuilder: (child, animation) {
@@ -225,95 +226,149 @@ class _HomeScreenState extends State<HomeScreen> {
                           ? Container(
                               key: const ValueKey('clear-banner'),
                               width: double.infinity,
-                              color: Colors.green.shade100,
-                              padding: const EdgeInsets.all(12),
-                              child: Text(
-                                'クリア！ $_moveCount手',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green,
+                              margin: const EdgeInsets.only(bottom: 8),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 12, horizontal: 16),
+                              decoration: BoxDecoration(
+                                color: Colors.green.shade50,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Colors.green.shade200,
                                 ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.emoji_events,
+                                      color: Colors.green.shade600, size: 24),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'クリア！ $_moveCount手',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.green.shade700,
+                                    ),
+                                  ),
+                                ],
                               ),
                             )
                           : const SizedBox.shrink(
                               key: ValueKey('no-banner'),
                             ),
                     ),
+                    // --- 進捗バー ---
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      padding: const EdgeInsets.only(bottom: 8),
                       child: _ProgressBar(
                         moveCount: _moveCount,
                         remainingBoxes: gameState.remainingBoxes,
                       ),
                     ),
+                    // --- 盤面セクション ---
                     Expanded(
                       child: Center(
-                        child: AspectRatio(
-                          aspectRatio:
-                              gameState.board.width / gameState.board.height,
-                          child: LayoutBuilder(
-                            builder: (context, constraints) {
-                              final cellSize =
-                                  constraints.maxWidth / gameState.board.width;
-                              return _BoardView(
-                                gameState: gameState,
-                                cellSize: cellSize,
-                              );
-                            },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.brown.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.08),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          padding: const EdgeInsets.all(6),
+                          child: AspectRatio(
+                            aspectRatio:
+                                gameState.board.width / gameState.board.height,
+                            child: LayoutBuilder(
+                              builder: (context, constraints) {
+                                final cellSize = constraints.maxWidth /
+                                    gameState.board.width;
+                                return _BoardView(
+                                  gameState: gameState,
+                                  cellSize: cellSize,
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ),
                     ),
-                    _DirectionPad(
-                      onMove: _move,
-                      enabled: !gameState.isSolved,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Row(
+                    const SizedBox(height: 12),
+                    // --- コントロールセクション ---
+                    Container(
+                      padding: const EdgeInsets.only(
+                          top: 8, left: 12, right: 12, bottom: 12),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerLow,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .outlineVariant
+                              .withValues(alpha: 0.4),
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Expanded(
-                            child: FilledButton.tonalIcon(
-                              onPressed: _history.isNotEmpty ? _undo : null,
-                              icon: const Icon(Icons.undo, size: 20),
-                              label: const Text('元に戻す'),
-                              style: FilledButton.styleFrom(
-                                minimumSize: const Size(0, 48),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            ),
+                          // --- 方向パッド ---
+                          _DirectionPad(
+                            onMove: _move,
+                            enabled: !gameState.isSolved,
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: FilledButton.tonalIcon(
-                              onPressed: _history.isNotEmpty ? _restart : null,
-                              icon: const Icon(Icons.refresh, size: 20),
-                              label: const Text('リスタート'),
-                              style: FilledButton.styleFrom(
-                                minimumSize: const Size(0, 48),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                          const SizedBox(height: 8),
+                          // --- 操作ボタン ---
+                          Row(
+                            children: [
+                              Expanded(
+                                child: FilledButton.tonalIcon(
+                                  onPressed:
+                                      _history.isNotEmpty ? _undo : null,
+                                  icon: const Icon(Icons.undo, size: 20),
+                                  label: const Text('元に戻す'),
+                                  style: FilledButton.styleFrom(
+                                    minimumSize: const Size(0, 48),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(12),
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: FilledButton.tonalIcon(
+                                  onPressed:
+                                      _history.isNotEmpty ? _restart : null,
+                                  icon: const Icon(Icons.refresh, size: 20),
+                                  label: const Text('リスタート'),
+                                  style: FilledButton.styleFrom(
+                                    minimumSize: const Size(0, 48),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
                     ),
+                    // --- ヒントテキスト ---
                     Padding(
-                      padding: const EdgeInsets.only(top: 8),
+                      padding: const EdgeInsets.only(top: 8, bottom: 12),
                       child: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 200),
-                        child: Text(
-                          gameState.isSolved
-                              ? 'クリア済み — Ctrl+Z で戻す・R でやり直し'
-                              : _moveBlocked
-                                  ? 'その方向には進めません'
-                                  : '移動: ボタン／矢印・WASD ｜ 戻す: Ctrl+Z ｜ やり直し: R',
+                        child: Container(
                           key: ValueKey(
                             gameState.isSolved
                                 ? 'hint-cleared'
@@ -321,17 +376,31 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ? 'hint-blocked'
                                     : 'hint-normal',
                           ),
-                          style: TextStyle(
-                            fontSize: 12,
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 6, horizontal: 14),
+                          decoration: BoxDecoration(
                             color: _moveBlocked && !gameState.isSolved
-                                ? Colors.red.shade400
-                                : Colors.grey.shade500,
+                                ? Colors.red.shade50
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                          textAlign: TextAlign.center,
+                          child: Text(
+                            gameState.isSolved
+                                ? 'クリア済み — Ctrl+Z で戻す・R でやり直し'
+                                : _moveBlocked
+                                    ? 'その方向には進めません'
+                                    : '移動: ボタン／矢印・WASD ｜ 戻す: Ctrl+Z ｜ やり直し: R',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: _moveBlocked && !gameState.isSolved
+                                  ? Colors.red.shade400
+                                  : Colors.grey.shade500,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
                   ],
                 ),
               ),
