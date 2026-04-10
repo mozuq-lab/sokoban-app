@@ -64,7 +64,8 @@ void main() {
       await tester.pump();
 
       // クリアメッセージが表示される
-      expect(find.text('クリア！ 4手'), findsOneWidget);
+      expect(find.text('クリア！'), findsOneWidget);
+      expect(find.text('4手でクリア'), findsOneWidget);
 
       // --- Phase 4: リスタートで初期状態に戻る ---
       await tester.tap(find.byTooltip('リスタート').first);
