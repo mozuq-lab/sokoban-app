@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../domain/direction.dart';
+
 /// 盤面上のプレイヤーを描画するウィジェット。
 ///
 /// テスト等で `find.byType(PlayerWidget)` として検索可能。
@@ -330,7 +332,7 @@ class _CratePainter extends CustomPainter {
       onGoal != oldDelegate.onGoal;
 }
 
-/// ゴールマーカー（床に描かれたひし形ターゲット）を描画する。
+/// ゴールマーカー（床に描かれた同心円ターゲット）を描画する。
 class _GoalMarkerPainter extends CustomPainter {
   const _GoalMarkerPainter();
 
@@ -342,66 +344,218 @@ class _GoalMarkerPainter extends CustomPainter {
     final cy = h / 2;
     final r = math.min(w, h) * 0.34;
 
-    // 外側のひし形（薄い影）
-    _drawDiamond(canvas, cx, cy, r * 1.08, Paint()..color = const Color(0x18000000));
-
-    // 外側のひし形
-    _drawDiamond(
-      canvas,
-      cx,
-      cy,
+    // 外側リング（薄い影）
+    canvas.drawCircle(
+      Offset(cx + r * 0.04, cy + r * 0.06),
       r,
       Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            const Color(0xFF66BB6A),
-            const Color(0xFF388E3C),
-          ],
-        ).createShader(Rect.fromCenter(center: Offset(cx, cy), width: r * 2, height: r * 2)),
+        ..color = const Color(0x18000000)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
     );
 
-    // 外枠
-    _drawDiamond(
-      canvas,
-      cx,
-      cy,
+    // 外側リング
+    canvas.drawCircle(
+      Offset(cx, cy),
       r,
       Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = r * 0.10
-        ..strokeJoin = StrokeJoin.round
-        ..color = const Color(0xFF2E7D32),
+        ..strokeWidth = r * 0.22
+        ..color = const Color(0xFF43A047),
     );
 
-    // 内側のひし形
-    _drawDiamond(
-      canvas,
-      cx,
-      cy,
-      r * 0.50,
-      Paint()..color = const Color(0xFFA5D6A7),
-    );
-
-    // 中心の点
+    // 中間リング
     canvas.drawCircle(
       Offset(cx, cy),
-      r * 0.12,
-      Paint()..color = const Color(0xFFFFFFFF),
+      r * 0.58,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = r * 0.16
+        ..color = const Color(0xFF66BB6A),
     );
-  }
 
-  void _drawDiamond(Canvas canvas, double cx, double cy, double r, Paint paint) {
-    final path = Path()
-      ..moveTo(cx, cy - r)
-      ..lineTo(cx + r, cy)
-      ..lineTo(cx, cy + r)
-      ..lineTo(cx - r, cy)
-      ..close();
-    canvas.drawPath(path, paint);
+    // 中心の丸
+    canvas.drawCircle(
+      Offset(cx, cy),
+      r * 0.22,
+      Paint()..color = const Color(0xFF81C784),
+    );
+
+    // 十字線（照準風）
+    final crossPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = r * 0.06
+      ..strokeCap = StrokeCap.round
+      ..color = const Color(0x442E7D32);
+    // 上
+    canvas.drawLine(Offset(cx, cy - r * 1.1), Offset(cx, cy - r * 0.40), crossPaint);
+    // 下
+    canvas.drawLine(Offset(cx, cy + r * 0.40), Offset(cx, cy + r * 1.1), crossPaint);
+    // 左
+    canvas.drawLine(Offset(cx - r * 1.1, cy), Offset(cx - r * 0.40, cy), crossPaint);
+    // 右
+    canvas.drawLine(Offset(cx + r * 0.40, cy), Offset(cx + r * 1.1, cy), crossPaint);
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// 壁セルを描画する（レンガ調テクスチャ）。
+class WallPainter extends CustomPainter {
+  const WallPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+    final rect = Offset.zero & size;
+
+    // ベース色
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF6D4C41), Color(0xFF4E342E)],
+        ).createShader(rect),
+    );
+
+    // レンガ模様
+    final mortarPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = w * 0.04
+      ..color = const Color(0xFF3E2723);
+    final brickH = h / 3;
+
+    // 横目地
+    for (var i = 1; i < 3; i++) {
+      canvas.drawLine(Offset(0, brickH * i), Offset(w, brickH * i), mortarPaint);
+    }
+
+    // 縦目地（互い違い）
+    for (var row = 0; row < 3; row++) {
+      final y0 = brickH * row;
+      final y1 = y0 + brickH;
+      final offset = (row % 2 == 0) ? 0.0 : w * 0.5;
+      for (var bx = offset; bx < w; bx += w) {
+        if (bx > 0 && bx < w) {
+          canvas.drawLine(Offset(bx, y0), Offset(bx, y1), mortarPaint);
+        }
+      }
+      // 中間の縦目地
+      final mid = offset + w * 0.5;
+      if (mid > 0 && mid < w) {
+        canvas.drawLine(Offset(mid, y0), Offset(mid, y1), mortarPaint);
+      }
+    }
+
+    // 各レンガにハイライト
+    final highlightPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = w * 0.03
+      ..color = const Color(0x20FFFFFF);
+    for (var row = 0; row < 3; row++) {
+      final y0 = brickH * row;
+      final offset = (row % 2 == 0) ? 0.0 : w * 0.5;
+      // 上辺ハイライト
+      canvas.drawLine(
+        Offset(math.max(0, offset) + w * 0.02, y0 + w * 0.03),
+        Offset(math.min(w, offset + w) - w * 0.02, y0 + w * 0.03),
+        highlightPaint,
+      );
+    }
+
+    // 外枠
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.5
+        ..color = const Color(0xFF3E2723),
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// 床セルを描画する（タイル調テクスチャ）。
+class FloorPainter extends CustomPainter {
+  const FloorPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+    final rect = Offset.zero & size;
+
+    // ベース色
+    canvas.drawRect(rect, Paint()..color = const Color(0xFFF5E6CC));
+
+    // タイル溝（十字）
+    final groovePaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = w * 0.02
+      ..color = const Color(0x18000000);
+    // 下辺
+    canvas.drawLine(Offset(0, h - 0.5), Offset(w, h - 0.5), groovePaint);
+    // 右辺
+    canvas.drawLine(Offset(w - 0.5, 0), Offset(w - 0.5, h), groovePaint);
+
+    // 微妙な内側ハイライト（左上角）
+    final hlPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = w * 0.02
+      ..color = const Color(0x0AFFFFFF);
+    canvas.drawLine(Offset(0.5, 0.5), Offset(w * 0.8, 0.5), hlPaint);
+    canvas.drawLine(Offset(0.5, 0.5), Offset(0.5, h * 0.8), hlPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// 方向パッドの矢印ボタン内に三角形を描画する。
+class ArrowPainter extends CustomPainter {
+  const ArrowPainter({required this.direction, required this.color});
+
+  final Direction direction;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+    final cx = w / 2;
+    final cy = h / 2;
+    final s = math.min(w, h) * 0.32;
+
+    final path = Path();
+    switch (direction) {
+      case Direction.up:
+        path.moveTo(cx, cy - s);
+        path.lineTo(cx + s * 0.85, cy + s * 0.6);
+        path.lineTo(cx - s * 0.85, cy + s * 0.6);
+      case Direction.down:
+        path.moveTo(cx, cy + s);
+        path.lineTo(cx + s * 0.85, cy - s * 0.6);
+        path.lineTo(cx - s * 0.85, cy - s * 0.6);
+      case Direction.left:
+        path.moveTo(cx - s, cy);
+        path.lineTo(cx + s * 0.6, cy - s * 0.85);
+        path.lineTo(cx + s * 0.6, cy + s * 0.85);
+      case Direction.right:
+        path.moveTo(cx + s, cy);
+        path.lineTo(cx - s * 0.6, cy - s * 0.85);
+        path.lineTo(cx - s * 0.6, cy + s * 0.85);
+    }
+    path.close();
+
+    canvas.drawPath(path, Paint()..color = color);
+  }
+
+  @override
+  bool shouldRepaint(covariant ArrowPainter oldDelegate) =>
+      direction != oldDelegate.direction || color != oldDelegate.color;
 }

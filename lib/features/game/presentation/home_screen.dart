@@ -253,15 +253,35 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: AspectRatio(
                           aspectRatio:
                               gameState.board.width / gameState.board.height,
-                          child: LayoutBuilder(
-                            builder: (context, constraints) {
-                              final cellSize =
-                                  constraints.maxWidth / gameState.board.width;
-                              return _BoardView(
-                                gameState: gameState,
-                                cellSize: cellSize,
-                              );
-                            },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: const Color(0xFF4E342E),
+                                width: 3,
+                              ),
+                              borderRadius: BorderRadius.circular(2),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color(0x30000000),
+                                  blurRadius: 6,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(1),
+                              child: LayoutBuilder(
+                                builder: (context, constraints) {
+                                  final cellSize =
+                                      constraints.maxWidth /
+                                      gameState.board.width;
+                                  return _BoardView(
+                                    gameState: gameState,
+                                    cellSize: cellSize,
+                                  );
+                                },
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -489,31 +509,19 @@ class _CellWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     // --- 壁 ---
     if (isWall) {
-      return Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Colors.brown.shade600, Colors.brown.shade800],
-          ),
-          border: Border.all(color: Colors.brown.shade900, width: 0.5),
-        ),
-      );
+      return const CustomPaint(painter: WallPainter());
     }
 
-    final floorColor = Colors.amber.shade50;
-    final goalBgColor = Colors.green.shade50;
+    const goalBgColor = Color(0xFFE8F5E9);
 
     // --- ゴール上のプレイヤー ---
     if (isPlayer && isGoal) {
       return Container(
         color: goalBgColor,
-        child: Stack(
+        child: const Stack(
           children: [
-            const Positioned.fill(
-              child: GoalMarkerWidget(),
-            ),
-            const Positioned.fill(
+            Positioned.fill(child: GoalMarkerWidget()),
+            Positioned.fill(
               child: Padding(
                 padding: EdgeInsets.all(2),
                 child: PlayerWidget(),
@@ -526,10 +534,16 @@ class _CellWidget extends StatelessWidget {
 
     // --- プレイヤー ---
     if (isPlayer) {
-      return Container(
-        color: floorColor,
-        padding: const EdgeInsets.all(2),
-        child: const PlayerWidget(),
+      return const Stack(
+        children: [
+          Positioned.fill(child: CustomPaint(painter: FloorPainter())),
+          Positioned.fill(
+            child: Padding(
+              padding: EdgeInsets.all(2),
+              child: PlayerWidget(),
+            ),
+          ),
+        ],
       );
     }
 
@@ -544,10 +558,16 @@ class _CellWidget extends StatelessWidget {
 
     // --- 箱 ---
     if (isBox) {
-      return Container(
-        color: floorColor,
-        padding: const EdgeInsets.all(1),
-        child: const BoxWidget(),
+      return const Stack(
+        children: [
+          Positioned.fill(child: CustomPaint(painter: FloorPainter())),
+          Positioned.fill(
+            child: Padding(
+              padding: EdgeInsets.all(1),
+              child: BoxWidget(),
+            ),
+          ),
+        ],
       );
     }
 
@@ -560,12 +580,7 @@ class _CellWidget extends StatelessWidget {
     }
 
     // --- 床 ---
-    return Container(
-      decoration: BoxDecoration(
-        color: floorColor,
-        border: Border.all(color: Colors.amber.shade100, width: 0.5),
-      ),
-    );
+    return const CustomPaint(painter: FloorPainter());
   }
 }
 
@@ -580,35 +595,44 @@ class _DirectionPad extends StatelessWidget {
   Widget build(BuildContext context) {
     const btnSize = 60.0;
 
-    Widget dirButton(Direction dir, IconData icon, String label) {
+    final activeColor = const Color(0xFF5D4037);
+    final disabledColor = Colors.grey.shade400;
+
+    Widget dirButton(Direction dir, String label) {
+      final arrowColor = enabled ? activeColor : disabledColor;
       return SizedBox(
         width: btnSize,
         height: btnSize,
-        child: IconButton(
-          onPressed: enabled ? () => onMove(dir) : null,
-          icon: Icon(icon, size: 28),
-          tooltip: label,
-          style: IconButton.styleFrom(
-            backgroundColor:
-                Theme.of(context).colorScheme.primaryContainer,
-            disabledBackgroundColor:
-                Theme.of(context).colorScheme.surfaceContainerHighest,
-            shape: RoundedRectangleBorder(
+        child: Tooltip(
+          message: label,
+          child: Material(
+            color: enabled
+                ? const Color(0xFFF5E6CC)
+                : Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(14),
+            elevation: enabled ? 3 : 0,
+            shadowColor: const Color(0x40000000),
+            child: InkWell(
+              onTap: enabled ? () => onMove(dir) : null,
               borderRadius: BorderRadius.circular(14),
-              side: BorderSide(
-                color: enabled
-                    ? Theme.of(context)
-                        .colorScheme
-                        .primary
-                        .withValues(alpha: 0.3)
-                    : Theme.of(context)
-                        .colorScheme
-                        .outline
-                        .withValues(alpha: 0.2),
-                width: 1.5,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: enabled
+                        ? const Color(0xFF8D6E63)
+                        : Colors.grey.shade300,
+                    width: 1.5,
+                  ),
+                ),
+                child: CustomPaint(
+                  painter: ArrowPainter(
+                    direction: dir,
+                    color: arrowColor,
+                  ),
+                ),
               ),
             ),
-            elevation: enabled ? 2 : 0,
           ),
         ),
       );
@@ -619,18 +643,18 @@ class _DirectionPad extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          dirButton(Direction.up, Icons.keyboard_arrow_up, '上'),
+          dirButton(Direction.up, '上'),
           const SizedBox(height: 4),
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              dirButton(Direction.left, Icons.keyboard_arrow_left, '左'),
+              dirButton(Direction.left, '左'),
               const SizedBox(width: btnSize + 8, height: btnSize),
-              dirButton(Direction.right, Icons.keyboard_arrow_right, '右'),
+              dirButton(Direction.right, '右'),
             ],
           ),
           const SizedBox(height: 4),
-          dirButton(Direction.down, Icons.keyboard_arrow_down, '下'),
+          dirButton(Direction.down, '下'),
         ],
       ),
     );
