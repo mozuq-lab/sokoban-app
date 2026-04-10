@@ -226,82 +226,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
                   children: [
-                    // --- クリアバナー ---
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      transitionBuilder: (child, animation) {
-                        return FadeTransition(
-                          opacity: animation,
-                          child: SizeTransition(
-                            sizeFactor: animation,
-                            axisAlignment: -1,
-                            child: child,
-                          ),
-                        );
-                      },
-                      child: gameState.isSolved
-                          ? Container(
-                              key: const ValueKey('clear-banner'),
-                              width: double.infinity,
-                              margin: const EdgeInsets.only(bottom: 8),
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 14, horizontal: 16),
-                              decoration: BoxDecoration(
-                                color: Colors.green.shade50,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: Colors.green.shade200,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(6),
-                                    decoration: BoxDecoration(
-                                      color: Colors.green.shade100,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Icon(Icons.emoji_events,
-                                        color: Colors.green.shade600,
-                                        size: 24),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        'クリア！',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.green.shade700,
-                                        ),
-                                      ),
-                                      Text(
-                                        '$_moveCount手でクリア',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          color: Colors.green.shade600,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            )
-                          : const SizedBox.shrink(
-                              key: ValueKey('no-banner'),
-                            ),
-                    ),
-                    // --- 進捗バー ---
+                    // --- 統合ステータスカード ---
                     Padding(
                       padding: const EdgeInsets.only(bottom: 12),
-                      child: _ProgressBar(
+                      child: _StatusCard(
                         moveCount: _moveCount,
                         remainingBoxes: gameState.remainingBoxes,
+                        isSolved: gameState.isSolved,
+                        moveBlocked: _moveBlocked,
                       ),
                     ),
                     // --- 盤面セクション ---
@@ -402,44 +334,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                     ),
-                    // --- ヒントテキスト ---
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8, bottom: 12),
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 200),
-                        child: Container(
-                          key: ValueKey(
-                            gameState.isSolved
-                                ? 'hint-cleared'
-                                : _moveBlocked
-                                    ? 'hint-blocked'
-                                    : 'hint-normal',
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 6, horizontal: 14),
-                          decoration: BoxDecoration(
-                            color: _moveBlocked && !gameState.isSolved
-                                ? Colors.red.shade50
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Text(
-                            gameState.isSolved
-                                ? 'クリア済み — Ctrl+Z で戻す・R でやり直し'
-                                : _moveBlocked
-                                    ? 'その方向には進めません'
-                                    : '移動: ボタン／矢印・WASD ｜ 戻す: Ctrl+Z ｜ やり直し: R',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: _moveBlocked && !gameState.isSolved
-                                  ? Colors.red.shade400
-                                  : Colors.grey.shade500,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                    ),
+                    const SizedBox(height: 12),
                   ],
                 ),
               ),
@@ -451,49 +346,171 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-/// 手数・残り箱数を並べて表示する進捗バー。
-class _ProgressBar extends StatelessWidget {
-  const _ProgressBar({
+/// 手数・残り箱数・クリア状態・ヒントを統合表示するステータスカード。
+class _StatusCard extends StatelessWidget {
+  const _StatusCard({
     required this.moveCount,
     required this.remainingBoxes,
+    required this.isSolved,
+    required this.moveBlocked,
   });
 
   final int moveCount;
   final int remainingBoxes;
+  final bool isSolved;
+  final bool moveBlocked;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final allPlaced = remainingBoxes == 0;
-    final boxColor = allPlaced ? Colors.green : Colors.orange.shade800;
-    final boxValue = allPlaced ? '全配置！' : 'あと$remainingBoxes個';
 
-    return Row(
-      children: [
-        Expanded(
-          child: _ProgressCard(
-            icon: Icons.directions_walk,
-            iconColor: Colors.blue,
-            label: '手数',
-            value: '$moveCount',
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        color: isSolved
+            ? Colors.green.shade50
+            : theme.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isSolved
+              ? Colors.green.shade200
+              : theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
         ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _ProgressCard(
-            icon: Icons.inventory_2,
-            iconColor: boxColor,
-            label: '配置',
-            value: boxValue,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // --- クリアバナー（クリア時のみ表示） ---
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            transitionBuilder: (child, animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: SizeTransition(
+                  sizeFactor: animation,
+                  axisAlignment: -1,
+                  child: child,
+                ),
+              );
+            },
+            child: isSolved
+                ? Container(
+                    key: const ValueKey('clear-banner'),
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade100,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(Icons.emoji_events,
+                              color: Colors.green.shade600, size: 24),
+                        ),
+                        const SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'クリア！',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green.shade700,
+                              ),
+                            ),
+                            Text(
+                              '$moveCount手でクリア',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.green.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  )
+                : const SizedBox.shrink(
+                    key: ValueKey('no-banner'),
+                  ),
           ),
-        ),
-      ],
+          // --- 進捗情報（手数・残り箱数） ---
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _StatItem(
+                    icon: Icons.directions_walk,
+                    iconColor: Colors.blue,
+                    label: '手数',
+                    value: '$moveCount',
+                  ),
+                ),
+                Container(
+                  width: 1,
+                  height: 28,
+                  color: theme.colorScheme.outlineVariant
+                      .withValues(alpha: 0.3),
+                ),
+                Expanded(
+                  child: _StatItem(
+                    icon: Icons.inventory_2,
+                    iconColor:
+                        allPlaced ? Colors.green : Colors.orange.shade800,
+                    label: '配置',
+                    value: allPlaced ? '全配置！' : 'あと$remainingBoxes個',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // --- ヒントテキスト ---
+          Container(
+            width: double.infinity,
+            padding:
+                const EdgeInsets.only(left: 14, right: 14, bottom: 8, top: 2),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: Text(
+                isSolved
+                    ? 'クリア済み — Ctrl+Z で戻す・R でやり直し'
+                    : moveBlocked
+                        ? 'その方向には進めません'
+                        : '移動: ボタン／矢印・WASD ｜ 戻す: Ctrl+Z ｜ やり直し: R',
+                key: ValueKey(
+                  isSolved
+                      ? 'hint-cleared'
+                      : moveBlocked
+                          ? 'hint-blocked'
+                          : 'hint-normal',
+                ),
+                style: TextStyle(
+                  fontSize: 11,
+                  color: moveBlocked && !isSolved
+                      ? Colors.red.shade400
+                      : theme.colorScheme.onSurfaceVariant
+                          .withValues(alpha: 0.6),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
-/// 個別の進捗カード（アイコン + ラベル + 値）。
-class _ProgressCard extends StatelessWidget {
-  const _ProgressCard({
+/// 進捗カード内の個別項目（アイコン + ラベル + 値）。
+class _StatItem extends StatelessWidget {
+  const _StatItem({
     required this.icon,
     required this.iconColor,
     required this.label,
@@ -508,57 +525,46 @@ class _ProgressCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(5),
+          decoration: BoxDecoration(
+            color: iconColor.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(7),
+          ),
+          child: Icon(icon, size: 18, color: iconColor),
         ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(8),
+        const SizedBox(width: 8),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+              ),
             ),
-            child: Icon(icon, size: 20, color: iconColor),
-          ),
-          const SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                label,
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: Text(
+                value,
+                key: ValueKey(value),
                 style: TextStyle(
-                  fontSize: 11,
-                  color: theme.colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
-              const SizedBox(height: 1),
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                child: Text(
-                  value,
-                  key: ValueKey(value),
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
