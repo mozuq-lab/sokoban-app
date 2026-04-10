@@ -186,6 +186,9 @@ class _HomeScreenState extends State<HomeScreen> {
       autofocus: true,
       onKeyEvent: _handleKeyEvent,
       child: Scaffold(
+        backgroundColor:
+            Color.lerp(Theme.of(context).colorScheme.surface,
+                Colors.brown.shade50, 0.3),
         appBar: AppBar(
           title: Row(
             mainAxisSize: MainAxisSize.min,
@@ -226,9 +229,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
                   children: [
+                    const SizedBox(height: 8),
                     // --- 統合ステータスカード ---
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.only(bottom: 16),
                       child: _StatusCard(
                         moveCount: _moveCount,
                         remainingBoxes: gameState.remainingBoxes,
@@ -269,7 +273,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
                     // --- コントロールセクション ---
                     Container(
                       padding: const EdgeInsets.only(
@@ -334,7 +338,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
                   ],
                 ),
               ),
