@@ -149,7 +149,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
     await tester.pump();
 
-    expect(find.text('クリア！ 4手'), findsOneWidget);
+    expect(find.text('クリア！'), findsOneWidget);
 
     // Undo
     await tester.tap(find.byIcon(Icons.undo).first);
@@ -187,7 +187,7 @@ void main() {
     await tester.pump();
     // box(3,3)→(3,4) [goal!], player→(3,3). Solved!
 
-    expect(find.text('クリア！ 4手'), findsOneWidget);
+    expect(find.text('クリア！'), findsOneWidget);
   });
 
   // --- 手数カウンタのテスト ---
@@ -263,7 +263,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
     await tester.pump();
 
-    expect(find.text('クリア！ 4手'), findsOneWidget);
+    expect(find.text('クリア！'), findsOneWidget);
     expect(find.text('4'), findsOneWidget);
   });
 
@@ -286,7 +286,7 @@ void main() {
     await tester.pumpWidget(buildApp());
     await solveStage(tester);
 
-    expect(find.text('クリア！ 4手'), findsOneWidget);
+    expect(find.text('クリア！'), findsOneWidget);
 
     // 各方向ボタンの onPressed が null であることを確認
     for (final icon in [
@@ -306,7 +306,7 @@ void main() {
     await tester.pumpWidget(buildApp());
     await solveStage(tester);
 
-    expect(find.text('クリア！ 4手'), findsOneWidget);
+    expect(find.text('クリア！'), findsOneWidget);
 
     // Undo ボタンが有効であることを確認
     final undoButton = tester.widget<IconButton>(
@@ -350,7 +350,7 @@ void main() {
     await tester.pumpWidget(buildApp());
     await solveStage(tester);
 
-    expect(find.text('クリア！ 4手'), findsOneWidget);
+    expect(find.text('クリア！'), findsOneWidget);
 
     // Restart ボタンが有効であることを確認
     final restartButton = tester.widget<IconButton>(
@@ -798,7 +798,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pump();
 
-    expect(find.text('クリア！ 4手'), findsOneWidget);
+    expect(find.text('クリア！'), findsOneWidget);
 
     // クリア後に矢印キーを押しても手数が変わらない
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
@@ -940,6 +940,6 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pump();
 
-    expect(find.text('クリア！ 4手'), findsOneWidget);
+    expect(find.text('クリア！'), findsOneWidget);
   });
 }
