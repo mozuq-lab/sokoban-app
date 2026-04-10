@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 
 import '../domain/direction.dart';
 import '../domain/game_state.dart';
+import 'game_painters.dart';
 
 /// 固定 1 ステージの倉庫番プレイ画面。
 class HomeScreen extends StatefulWidget {
@@ -490,13 +491,12 @@ class _CellWidget extends StatelessWidget {
     if (isWall) {
       return Container(
         decoration: BoxDecoration(
-          color: Colors.brown.shade700,
-          border: Border.all(color: Colors.brown.shade900, width: 0.5),
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [Colors.brown.shade600, Colors.brown.shade800],
           ),
+          border: Border.all(color: Colors.brown.shade900, width: 0.5),
         ),
       );
     }
@@ -508,17 +508,16 @@ class _CellWidget extends StatelessWidget {
     if (isPlayer && isGoal) {
       return Container(
         color: goalBgColor,
-        padding: const EdgeInsets.all(2),
         child: Stack(
-          alignment: Alignment.center,
           children: [
-            // ゴールマーカー（背景）
-            FittedBox(
-              child: Icon(Icons.diamond_outlined, color: Colors.green.shade200),
+            const Positioned.fill(
+              child: GoalMarkerWidget(),
             ),
-            // プレイヤー
-            FittedBox(
-              child: _buildPlayerIcon(),
+            const Positioned.fill(
+              child: Padding(
+                padding: EdgeInsets.all(2),
+                child: PlayerWidget(),
+              ),
             ),
           ],
         ),
@@ -530,9 +529,7 @@ class _CellWidget extends StatelessWidget {
       return Container(
         color: floorColor,
         padding: const EdgeInsets.all(2),
-        child: FittedBox(
-          child: _buildPlayerIcon(),
-        ),
+        child: const PlayerWidget(),
       );
     }
 
@@ -540,26 +537,8 @@ class _CellWidget extends StatelessWidget {
     if (isBox && isGoal) {
       return Container(
         color: goalBgColor,
-        padding: const EdgeInsets.all(3),
-        child: FittedBox(
-          child: Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: Colors.green.shade600,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: Colors.green.shade800, width: 1.5),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.green.shade900.withValues(alpha: 0.3),
-                  offset: const Offset(1, 2),
-                  blurRadius: 2,
-                ),
-              ],
-            ),
-            child: const Icon(Icons.check, color: Colors.white, size: 30),
-          ),
-        ),
+        padding: const EdgeInsets.all(1),
+        child: const BoxWidget(onGoal: true),
       );
     }
 
@@ -567,26 +546,8 @@ class _CellWidget extends StatelessWidget {
     if (isBox) {
       return Container(
         color: floorColor,
-        padding: const EdgeInsets.all(3),
-        child: FittedBox(
-          child: Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: Colors.orange.shade700,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: Colors.orange.shade900, width: 1.5),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.brown.shade900.withValues(alpha: 0.3),
-                  offset: const Offset(1, 2),
-                  blurRadius: 2,
-                ),
-              ],
-            ),
-            child: Icon(Icons.inventory_2, color: Colors.orange.shade100, size: 28),
-          ),
-        ),
+        padding: const EdgeInsets.all(1),
+        child: const BoxWidget(),
       );
     }
 
@@ -594,12 +555,7 @@ class _CellWidget extends StatelessWidget {
     if (isGoal) {
       return Container(
         color: goalBgColor,
-        child: FittedBox(
-          child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: Icon(Icons.diamond_outlined, color: Colors.green.shade400),
-          ),
-        ),
+        child: const GoalMarkerWidget(),
       );
     }
 
@@ -609,27 +565,6 @@ class _CellWidget extends StatelessWidget {
         color: floorColor,
         border: Border.all(color: Colors.amber.shade100, width: 0.5),
       ),
-    );
-  }
-
-  /// プレイヤーアイコンを構築する。
-  static Widget _buildPlayerIcon() {
-    return Container(
-      width: 48,
-      height: 48,
-      decoration: BoxDecoration(
-        color: Colors.blue.shade600,
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.blue.shade800, width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.blue.shade900.withValues(alpha: 0.3),
-            offset: const Offset(1, 2),
-            blurRadius: 2,
-          ),
-        ],
-      ),
-      child: const Icon(Icons.person, color: Colors.white, size: 30),
     );
   }
 }

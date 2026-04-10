@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sokoban_app/features/game/presentation/game_painters.dart';
 import 'package:sokoban_app/features/game/presentation/home_screen.dart';
 
 void main() {
@@ -25,7 +26,7 @@ void main() {
 
   testWidgets('盤面とプレイヤーが表示される', (tester) async {
     await tester.pumpWidget(buildApp());
-    expect(find.byIcon(Icons.person), findsOneWidget);
+    expect(find.byType(PlayerWidget), findsOneWidget);
   });
 
   testWidgets('方向ボタンが 4 つ表示される', (tester) async {
@@ -45,14 +46,14 @@ void main() {
     await tester.pumpWidget(buildApp());
 
     // 箱アイコンが 3 つ（盤面 2 + 進捗カード 1）
-    expect(find.byIcon(Icons.inventory_2), findsNWidgets(3));
+    expect(find.byType(BoxWidget), findsNWidgets(2));
 
     // 下ボタンを押して盤面更新
     await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
     await tester.pump();
 
     // プレイヤーがまだ存在する
-    expect(find.byIcon(Icons.person), findsOneWidget);
+    expect(find.byType(PlayerWidget), findsOneWidget);
   });
 
   testWidgets('クリア前はクリアメッセージが表示されない', (tester) async {
@@ -72,8 +73,8 @@ void main() {
     await tester.pump();
 
     // プレイヤーと箱がまだ存在
-    expect(find.byIcon(Icons.person), findsOneWidget);
-    expect(find.byIcon(Icons.inventory_2), findsNWidgets(3));
+    expect(find.byType(PlayerWidget), findsOneWidget);
+    expect(find.byType(BoxWidget), findsNWidgets(2));
   });
 
   testWidgets('Undo ボタンが AppBar と画面下部に表示される', (tester) async {
@@ -107,8 +108,8 @@ void main() {
     await tester.pump();
 
     // プレイヤーと箱がまだ存在
-    expect(find.byIcon(Icons.person), findsOneWidget);
-    expect(find.byIcon(Icons.inventory_2), findsNWidgets(3));
+    expect(find.byType(PlayerWidget), findsOneWidget);
+    expect(find.byType(BoxWidget), findsNWidgets(2));
 
     // Undo 後は再び無効
     final undoAfterUndo = tester.widget<IconButton>(
@@ -494,7 +495,7 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, 'リスタート'));
     await tester.pump();
     expect(find.text('0'), findsOneWidget);
-    expect(find.byIcon(Icons.person), findsOneWidget);
+    expect(find.byType(PlayerWidget), findsOneWidget);
   });
 
   testWidgets('下部ボタンが Expanded で均等幅になっている', (tester) async {
@@ -753,7 +754,7 @@ void main() {
 
     // 手数が 1 に増える
     expect(find.text('1'), findsOneWidget);
-    expect(find.byIcon(Icons.person), findsOneWidget);
+    expect(find.byType(PlayerWidget), findsOneWidget);
   });
 
   testWidgets('WASD キーで移動できる', (tester) async {
