@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 
 import '../domain/direction.dart';
 import '../domain/game_state.dart';
+import 'game_painters.dart';
 
 /// 固定 1 ステージの倉庫番プレイ画面。
 class HomeScreen extends StatefulWidget {
@@ -274,23 +275,29 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Row(
                         children: [
                           Expanded(
-                            child: OutlinedButton.icon(
+                            child: FilledButton.tonalIcon(
                               onPressed: _history.isNotEmpty ? _undo : null,
-                              icon: const Icon(Icons.undo),
+                              icon: const Icon(Icons.undo, size: 20),
                               label: const Text('元に戻す'),
-                              style: OutlinedButton.styleFrom(
+                              style: FilledButton.styleFrom(
                                 minimumSize: const Size(0, 48),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
                             ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
-                            child: OutlinedButton.icon(
+                            child: FilledButton.tonalIcon(
                               onPressed: _history.isNotEmpty ? _restart : null,
-                              icon: const Icon(Icons.refresh),
+                              icon: const Icon(Icons.refresh, size: 20),
                               label: const Text('リスタート'),
-                              style: OutlinedButton.styleFrom(
+                              style: FilledButton.styleFrom(
                                 minimumSize: const Size(0, 48),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
                             ),
                           ),
@@ -480,41 +487,85 @@ class _CellWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // --- 壁 ---
     if (isWall) {
-      return Container(color: Colors.brown.shade700);
+      return Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Colors.brown.shade600, Colors.brown.shade800],
+          ),
+          border: Border.all(color: Colors.brown.shade900, width: 0.5),
+        ),
+      );
     }
 
-    final bgColor = isGoal ? Colors.green.shade50 : Colors.amber.shade50;
+    final floorColor = Colors.amber.shade50;
+    final goalBgColor = Colors.green.shade50;
 
+    // --- ゴール上のプレイヤー ---
+    if (isPlayer && isGoal) {
+      return Container(
+        color: goalBgColor,
+        child: Stack(
+          children: [
+            const Positioned.fill(
+              child: GoalMarkerWidget(),
+            ),
+            const Positioned.fill(
+              child: Padding(
+                padding: EdgeInsets.all(2),
+                child: PlayerWidget(),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // --- プレイヤー ---
     if (isPlayer) {
       return Container(
-        color: bgColor,
-        child: const FittedBox(
-          child: Icon(Icons.person, color: Colors.blue),
-        ),
+        color: floorColor,
+        padding: const EdgeInsets.all(2),
+        child: const PlayerWidget(),
       );
     }
 
-    if (isBox) {
-      final boxColor = isGoal ? Colors.green.shade700 : Colors.orange.shade800;
+    // --- ゴール上の箱 ---
+    if (isBox && isGoal) {
       return Container(
-        color: bgColor,
-        child: FittedBox(
-          child: Icon(Icons.inventory_2, color: boxColor),
-        ),
+        color: goalBgColor,
+        padding: const EdgeInsets.all(1),
+        child: const BoxWidget(onGoal: true),
       );
     }
 
+    // --- 箱 ---
+    if (isBox) {
+      return Container(
+        color: floorColor,
+        padding: const EdgeInsets.all(1),
+        child: const BoxWidget(),
+      );
+    }
+
+    // --- ゴール（空） ---
     if (isGoal) {
       return Container(
-        color: bgColor,
-        child: FittedBox(
-          child: Icon(Icons.close, color: Colors.green.shade300),
-        ),
+        color: goalBgColor,
+        child: const GoalMarkerWidget(),
       );
     }
 
-    return Container(color: bgColor);
+    // --- 床 ---
+    return Container(
+      decoration: BoxDecoration(
+        color: floorColor,
+        border: Border.all(color: Colors.amber.shade100, width: 0.5),
+      ),
+    );
   }
 }
 
@@ -527,16 +578,38 @@ class _DirectionPad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const btnSize = 56.0;
+    const btnSize = 60.0;
 
     Widget dirButton(Direction dir, IconData icon, String label) {
       return SizedBox(
         width: btnSize,
         height: btnSize,
-        child: IconButton.filled(
+        child: IconButton(
           onPressed: enabled ? () => onMove(dir) : null,
-          icon: Icon(icon),
+          icon: Icon(icon, size: 28),
           tooltip: label,
+          style: IconButton.styleFrom(
+            backgroundColor:
+                Theme.of(context).colorScheme.primaryContainer,
+            disabledBackgroundColor:
+                Theme.of(context).colorScheme.surfaceContainerHighest,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+              side: BorderSide(
+                color: enabled
+                    ? Theme.of(context)
+                        .colorScheme
+                        .primary
+                        .withValues(alpha: 0.3)
+                    : Theme.of(context)
+                        .colorScheme
+                        .outline
+                        .withValues(alpha: 0.2),
+                width: 1.5,
+              ),
+            ),
+            elevation: enabled ? 2 : 0,
+          ),
         ),
       );
     }
@@ -546,16 +619,18 @@ class _DirectionPad extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          dirButton(Direction.up, Icons.arrow_upward, '上'),
+          dirButton(Direction.up, Icons.keyboard_arrow_up, '上'),
+          const SizedBox(height: 4),
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              dirButton(Direction.left, Icons.arrow_back, '左'),
-              const SizedBox(width: btnSize, height: btnSize),
-              dirButton(Direction.right, Icons.arrow_forward, '右'),
+              dirButton(Direction.left, Icons.keyboard_arrow_left, '左'),
+              const SizedBox(width: btnSize + 8, height: btnSize),
+              dirButton(Direction.right, Icons.keyboard_arrow_right, '右'),
             ],
           ),
-          dirButton(Direction.down, Icons.arrow_downward, '下'),
+          const SizedBox(height: 4),
+          dirButton(Direction.down, Icons.keyboard_arrow_down, '下'),
         ],
       ),
     );
