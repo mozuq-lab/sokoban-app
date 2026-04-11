@@ -263,9 +263,19 @@ class _HomeScreenState extends State<HomeScreen> {
                               builder: (context, constraints) {
                                 final cellSize = constraints.maxWidth /
                                     gameState.board.width;
-                                return _BoardView(
-                                  gameState: gameState,
-                                  cellSize: cellSize,
+                                return Stack(
+                                  children: [
+                                    _BoardView(
+                                      gameState: gameState,
+                                      cellSize: cellSize,
+                                    ),
+                                    // --- クリア時の盤面オーバーレイ ---
+                                    if (gameState.isSolved)
+                                      _ClearOverlay(
+                                        moveCount: _moveCount,
+                                        onRestart: _restart,
+                                      ),
+                                  ],
                                 );
                               },
                             ),
@@ -569,6 +579,85 @@ class _StatItem extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+/// クリア時に盤面上へ表示する完了オーバーレイ。
+class _ClearOverlay extends StatelessWidget {
+  const _ClearOverlay({
+    required this.moveCount,
+    required this.onRestart,
+  });
+
+  final int moveCount;
+  final VoidCallback onRestart;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.45),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Center(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              color: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 24, vertical: 20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.emoji_events,
+                      size: 36,
+                      color: Colors.amber.shade600,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'クリア！',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green.shade700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '$moveCount手でクリア',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    FilledButton.icon(
+                      key: const ValueKey('overlay-restart'),
+                      onPressed: onRestart,
+                      icon: const Icon(Icons.refresh, size: 18),
+                      label: const Text('もう一度'),
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(120, 40),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

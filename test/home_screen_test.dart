@@ -149,7 +149,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
     await tester.pump();
 
-    expect(find.text('クリア！'), findsOneWidget);
+    expect(find.text('クリア！'), findsNWidgets(2));
 
     // Undo
     await tester.tap(find.byIcon(Icons.undo).first);
@@ -187,7 +187,7 @@ void main() {
     await tester.pump();
     // box(3,3)→(3,4) [goal!], player→(3,3). Solved!
 
-    expect(find.text('クリア！'), findsOneWidget);
+    expect(find.text('クリア！'), findsNWidgets(2));
   });
 
   // --- 手数カウンタのテスト ---
@@ -263,7 +263,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
     await tester.pump();
 
-    expect(find.text('クリア！'), findsOneWidget);
+    expect(find.text('クリア！'), findsNWidgets(2));
     expect(find.text('4'), findsOneWidget);
   });
 
@@ -286,7 +286,7 @@ void main() {
     await tester.pumpWidget(buildApp());
     await solveStage(tester);
 
-    expect(find.text('クリア！'), findsOneWidget);
+    expect(find.text('クリア！'), findsNWidgets(2));
 
     // 各方向ボタンの onPressed が null であることを確認
     for (final icon in [
@@ -306,7 +306,7 @@ void main() {
     await tester.pumpWidget(buildApp());
     await solveStage(tester);
 
-    expect(find.text('クリア！'), findsOneWidget);
+    expect(find.text('クリア！'), findsNWidgets(2));
 
     // Undo ボタンが有効であることを確認
     final undoButton = tester.widget<IconButton>(
@@ -350,7 +350,7 @@ void main() {
     await tester.pumpWidget(buildApp());
     await solveStage(tester);
 
-    expect(find.text('クリア！'), findsOneWidget);
+    expect(find.text('クリア！'), findsNWidgets(2));
 
     // Restart ボタンが有効であることを確認
     final restartButton = tester.widget<IconButton>(
@@ -798,7 +798,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pump();
 
-    expect(find.text('クリア！'), findsOneWidget);
+    expect(find.text('クリア！'), findsNWidgets(2));
 
     // クリア後に矢印キーを押しても手数が変わらない
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
@@ -940,6 +940,53 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pump();
 
-    expect(find.text('クリア！'), findsOneWidget);
+    expect(find.text('クリア！'), findsNWidgets(2));
+  });
+
+  // --- クリアオーバーレイのテスト ---
+
+  testWidgets('クリア時に盤面オーバーレイが表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+
+    // オーバーレイ内の「もう一度」ボタンが表示される
+    expect(find.text('もう一度'), findsOneWidget);
+    expect(find.byKey(const ValueKey('overlay-restart')), findsOneWidget);
+  });
+
+  testWidgets('クリア前にはオーバーレイが表示されない', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    expect(find.text('もう一度'), findsNothing);
+    expect(find.byKey(const ValueKey('overlay-restart')), findsNothing);
+  });
+
+  testWidgets('オーバーレイの「もう一度」ボタンで初期状態に戻る', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+
+    expect(find.text('もう一度'), findsOneWidget);
+
+    // オーバーレイのリスタートボタンをタップ
+    await tester.tap(find.byKey(const ValueKey('overlay-restart')));
+    await tester.pump();
+
+    // クリア表示が消え、初期状態に戻る
+    expect(find.text('もう一度'), findsNothing);
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('あと2個'), findsOneWidget);
+  });
+
+  testWidgets('Undo でクリア解除するとオーバーレイが消える', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+
+    expect(find.text('もう一度'), findsOneWidget);
+
+    // Undo
+    await tester.tap(find.byIcon(Icons.undo).first);
+    await tester.pump();
+
+    expect(find.text('もう一度'), findsNothing);
   });
 }
