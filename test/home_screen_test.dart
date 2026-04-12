@@ -1067,7 +1067,7 @@ void main() {
     });
   });
 
-  testWidgets('盤面セクションにステージ見出しが表示される', (tester) async {
+  testWidgets('AppBar にステージ見出しが表示される', (tester) async {
     await tester.pumpWidget(buildApp());
     expect(find.text('ステージ 1'), findsOneWidget);
   });

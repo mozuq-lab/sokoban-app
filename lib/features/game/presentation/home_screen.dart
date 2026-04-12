@@ -189,24 +189,45 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Color.lerp(
             Theme.of(context).colorScheme.surface, Colors.brown.shade50, 0.3),
         appBar: AppBar(
-          title: Row(
-            mainAxisSize: MainAxisSize.min,
+          titleSpacing: 16,
+          scrolledUnderElevation: 1,
+          surfaceTintColor: Colors.brown.shade100,
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                Icons.grid_view_rounded,
-                size: 22,
-                color: Theme.of(context).colorScheme.primary,
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.grid_view_rounded,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Sokoban',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                      fontSize: 18,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 8),
-              const Text(
-                'Sokoban',
+              Text(
+                'ステージ 1',
                 style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.5,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurfaceVariant
+                      .withValues(alpha: 0.7),
                 ),
               ),
             ],
           ),
+          toolbarHeight: 64,
           actions: [
             IconButton(
               icon: const Icon(Icons.undo),
@@ -281,68 +302,45 @@ class _BoardSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // --- 盤面の見出し ---
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Text(
-              'ステージ 1',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.5,
-                color:
-                    theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 400, maxHeight: 400),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.brown.shade50,
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
               ),
-            ),
+            ],
           ),
-          // --- 盤面カード ---
-          Flexible(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 400, maxHeight: 400),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.brown.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.08),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
+          padding: const EdgeInsets.all(6),
+          child: AspectRatio(
+            aspectRatio: gameState.board.width / gameState.board.height,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final cellSize =
+                    constraints.maxWidth / gameState.board.width;
+                return Stack(
+                  children: [
+                    _BoardView(
+                      gameState: gameState,
+                      cellSize: cellSize,
                     ),
+                    if (gameState.isSolved)
+                      _ClearOverlay(
+                        moveCount: moveCount,
+                        onRestart: onRestart,
+                      ),
                   ],
-                ),
-                padding: const EdgeInsets.all(6),
-                child: AspectRatio(
-                  aspectRatio: gameState.board.width / gameState.board.height,
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final cellSize =
-                          constraints.maxWidth / gameState.board.width;
-                      return Stack(
-                        children: [
-                          _BoardView(
-                            gameState: gameState,
-                            cellSize: cellSize,
-                          ),
-                          if (gameState.isSolved)
-                            _ClearOverlay(
-                              moveCount: moveCount,
-                              onRestart: onRestart,
-                            ),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-              ),
+                );
+              },
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -619,7 +617,7 @@ class _StatusCard extends StatelessWidget {
                 ),
                 Container(
                   width: 1,
-                  height: 28,
+                  height: 32,
                   color:
                       theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
                 ),
@@ -709,9 +707,11 @@ class _StatItem extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                fontSize: 10,
-                color: theme.colorScheme.onSurfaceVariant,
+                fontSize: 11,
+                color: theme.colorScheme.onSurfaceVariant
+                    .withValues(alpha: 0.8),
                 fontWeight: FontWeight.w500,
+                letterSpacing: 0.3,
               ),
             ),
             AnimatedSwitcher(
