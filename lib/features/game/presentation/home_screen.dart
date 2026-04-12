@@ -447,8 +447,20 @@ class _NarrowLayout extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 16),
                 child: statusCard,
               ),
+              _SectionHeading(
+                icon: Icons.grid_on,
+                label: 'パズル',
+                subtitle: '— 箱をゴールへ運ぼう',
+              ),
+              const SizedBox(height: 4),
               Expanded(child: boardSection),
               const SizedBox(height: 16),
+              _SectionHeading(
+                icon: Icons.gamepad_outlined,
+                label: '操作',
+                subtitle: '— ボタンまたはキーで移動',
+              ),
+              const SizedBox(height: 4),
               controlSection,
               const SizedBox(height: 16),
             ],
@@ -485,7 +497,18 @@ class _WideLayout extends StatelessWidget {
               // --- 左カラム: 盤面 ---
               Expanded(
                 flex: 3,
-                child: boardSection,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _SectionHeading(
+                      icon: Icons.grid_on,
+                      label: 'パズル',
+                      subtitle: '— 箱をゴールへ運ぼう',
+                    ),
+                    const SizedBox(height: 4),
+                    Flexible(child: boardSection),
+                  ],
+                ),
               ),
               const SizedBox(width: 24),
               // --- 右カラム: ステータス + 操作 ---
@@ -496,6 +519,12 @@ class _WideLayout extends StatelessWidget {
                   children: [
                     statusCard,
                     const SizedBox(height: 16),
+                    _SectionHeading(
+                      icon: Icons.gamepad_outlined,
+                      label: '操作',
+                      subtitle: '— ボタンまたはキーで移動',
+                    ),
+                    const SizedBox(height: 4),
                     controlSection,
                   ],
                 ),
@@ -504,6 +533,52 @@ class _WideLayout extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// セクション見出し（アイコン + ラベル + 補足テキスト）。
+class _SectionHeading extends StatelessWidget {
+  const _SectionHeading({
+    required this.icon,
+    required this.label,
+    this.subtitle,
+  });
+
+  final IconData icon;
+  final String label;
+  final String? subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final color =
+        Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6);
+    final subtitleColor =
+        Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4);
+    return Row(
+      children: [
+        Icon(icon, size: 14, color: color),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: color,
+            letterSpacing: 0.5,
+          ),
+        ),
+        if (subtitle != null) ...[
+          const SizedBox(width: 6),
+          Text(
+            subtitle!,
+            style: TextStyle(
+              fontSize: 10,
+              color: subtitleColor,
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
