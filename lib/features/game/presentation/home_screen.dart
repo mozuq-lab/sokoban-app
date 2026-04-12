@@ -222,137 +222,263 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         body: SafeArea(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 480),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: LayoutBuilder(
+            builder: (context, outerConstraints) {
+              final useWideLayout = outerConstraints.maxWidth >= 700;
+
+              final boardSection = _BoardSection(
+                gameState: gameState,
+                moveCount: _moveCount,
+                onRestart: _restart,
+              );
+
+              final statusCard = _StatusCard(
+                moveCount: _moveCount,
+                remainingBoxes: gameState.remainingBoxes,
+                isSolved: gameState.isSolved,
+                moveBlocked: _moveBlocked,
+              );
+
+              final controlSection = _ControlSection(
+                gameState: gameState,
+                history: _history,
+                onMove: _move,
+                onUndo: _undo,
+                onRestart: _restart,
+              );
+
+              if (useWideLayout) {
+                return _WideLayout(
+                  boardSection: boardSection,
+                  statusCard: statusCard,
+                  controlSection: controlSection,
+                );
+              }
+
+              return _NarrowLayout(
+                boardSection: boardSection,
+                statusCard: statusCard,
+                controlSection: controlSection,
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 盤面セクション（コンテナ装飾 + AspectRatio + オーバーレイ）。
+class _BoardSection extends StatelessWidget {
+  const _BoardSection({
+    required this.gameState,
+    required this.moveCount,
+    required this.onRestart,
+  });
+
+  final GameState gameState;
+  final int moveCount;
+  final VoidCallback onRestart;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.brown.shade50,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(6),
+        child: AspectRatio(
+          aspectRatio: gameState.board.width / gameState.board.height,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final cellSize =
+                  constraints.maxWidth / gameState.board.width;
+              return Stack(
+                children: [
+                  _BoardView(
+                    gameState: gameState,
+                    cellSize: cellSize,
+                  ),
+                  if (gameState.isSolved)
+                    _ClearOverlay(
+                      moveCount: moveCount,
+                      onRestart: onRestart,
+                    ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 操作パッド + Undo / Restart ボタンをまとめたセクション。
+class _ControlSection extends StatelessWidget {
+  const _ControlSection({
+    required this.gameState,
+    required this.history,
+    required this.onMove,
+    required this.onUndo,
+    required this.onRestart,
+  });
+
+  final GameState gameState;
+  final List<GameState> history;
+  final void Function(Direction) onMove;
+  final VoidCallback onUndo;
+  final VoidCallback onRestart;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding:
+          const EdgeInsets.only(top: 8, left: 12, right: 12, bottom: 12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Theme.of(context)
+              .colorScheme
+              .outlineVariant
+              .withValues(alpha: 0.4),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _DirectionPad(
+            onMove: onMove,
+            enabled: !gameState.isSolved,
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.tonalIcon(
+                  onPressed: history.isNotEmpty ? onUndo : null,
+                  icon: const Icon(Icons.undo, size: 20),
+                  label: const Text('元に戻す'),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(0, 48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton.tonalIcon(
+                  onPressed: history.isNotEmpty ? onRestart : null,
+                  icon: const Icon(Icons.refresh, size: 20),
+                  label: const Text('リスタート'),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(0, 48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 狭い画面向けの縦積みレイアウト（従来と同じ構成）。
+class _NarrowLayout extends StatelessWidget {
+  const _NarrowLayout({
+    required this.boardSection,
+    required this.statusCard,
+    required this.controlSection,
+  });
+
+  final Widget boardSection;
+  final Widget statusCard;
+  final Widget controlSection;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 480),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            children: [
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: statusCard,
+              ),
+              Expanded(child: boardSection),
+              const SizedBox(height: 16),
+              controlSection,
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 広い画面向けの 2 カラムレイアウト。
+/// 左に盤面、右にステータスカードと操作セクションを配置する。
+class _WideLayout extends StatelessWidget {
+  const _WideLayout({
+    required this.boardSection,
+    required this.statusCard,
+    required this.controlSection,
+  });
+
+  final Widget boardSection;
+  final Widget statusCard;
+  final Widget controlSection;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 960),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // --- 左カラム: 盤面 ---
+              Expanded(
+                flex: 3,
+                child: boardSection,
+              ),
+              const SizedBox(width: 24),
+              // --- 右カラム: ステータス + 操作 ---
+              Expanded(
+                flex: 2,
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    const SizedBox(height: 8),
-                    // --- 統合ステータスカード ---
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: _StatusCard(
-                        moveCount: _moveCount,
-                        remainingBoxes: gameState.remainingBoxes,
-                        isSolved: gameState.isSolved,
-                        moveBlocked: _moveBlocked,
-                      ),
-                    ),
-                    // --- 盤面セクション ---
-                    Expanded(
-                      child: Center(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.brown.shade50,
-                            borderRadius: BorderRadius.circular(8),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.08),
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          padding: const EdgeInsets.all(6),
-                          child: AspectRatio(
-                            aspectRatio:
-                                gameState.board.width / gameState.board.height,
-                            child: LayoutBuilder(
-                              builder: (context, constraints) {
-                                final cellSize = constraints.maxWidth /
-                                    gameState.board.width;
-                                return Stack(
-                                  children: [
-                                    _BoardView(
-                                      gameState: gameState,
-                                      cellSize: cellSize,
-                                    ),
-                                    // --- クリア時の盤面オーバーレイ ---
-                                    if (gameState.isSolved)
-                                      _ClearOverlay(
-                                        moveCount: _moveCount,
-                                        onRestart: _restart,
-                                      ),
-                                  ],
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                    statusCard,
                     const SizedBox(height: 16),
-                    // --- コントロールセクション ---
-                    Container(
-                      padding: const EdgeInsets.only(
-                          top: 8, left: 12, right: 12, bottom: 12),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerLow,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .outlineVariant
-                              .withValues(alpha: 0.4),
-                        ),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // --- 方向パッド ---
-                          _DirectionPad(
-                            onMove: _move,
-                            enabled: !gameState.isSolved,
-                          ),
-                          const SizedBox(height: 8),
-                          // --- 操作ボタン ---
-                          Row(
-                            children: [
-                              Expanded(
-                                child: FilledButton.tonalIcon(
-                                  onPressed:
-                                      _history.isNotEmpty ? _undo : null,
-                                  icon: const Icon(Icons.undo, size: 20),
-                                  label: const Text('元に戻す'),
-                                  style: FilledButton.styleFrom(
-                                    minimumSize: const Size(0, 48),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: FilledButton.tonalIcon(
-                                  onPressed:
-                                      _history.isNotEmpty ? _restart : null,
-                                  icon: const Icon(Icons.refresh, size: 20),
-                                  label: const Text('リスタート'),
-                                  style: FilledButton.styleFrom(
-                                    minimumSize: const Size(0, 48),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
+                    controlSection,
                   ],
                 ),
               ),
-            ),
+            ],
           ),
         ),
       ),

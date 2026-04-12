@@ -330,11 +330,13 @@ void main() {
 
   // --- SafeArea・レイアウトのテスト ---
 
-  testWidgets('body が SafeArea で囲まれ最大幅 480 の制約がある', (tester) async {
+  testWidgets('body が SafeArea で囲まれ ConstrainedBox の制約がある', (tester) async {
     await tester.pumpWidget(buildApp());
-    // maxWidth: 480 の ConstrainedBox を探す
+    // ConstrainedBox を探す（狭い画面: 480、広い画面: 960）
     final finder = find.byWidgetPredicate(
-      (w) => w is ConstrainedBox && w.constraints.maxWidth == 480,
+      (w) =>
+          w is ConstrainedBox &&
+          (w.constraints.maxWidth == 480 || w.constraints.maxWidth == 960),
     );
     expect(finder, findsOneWidget);
 
@@ -500,12 +502,13 @@ void main() {
 
   testWidgets('下部ボタンが Expanded で均等幅になっている', (tester) async {
     await tester.pumpWidget(buildApp());
-    // FilledButton が 2 つ Expanded の子として存在する
+    // FilledButton が Expanded の子として存在する（広い画面ではカラム用の
+    // Expanded も含まれるため、最低 2 つあることを確認）
     final expandedButtons = find.ancestor(
       of: find.byType(FilledButton),
       matching: find.byType(Expanded),
     );
-    expect(expandedButtons, findsNWidgets(2));
+    expect(expandedButtons, findsAtLeastNWidgets(2));
   });
 
   testWidgets('下部ボタンの最小高さが 48 以上である', (tester) async {
@@ -988,5 +991,79 @@ void main() {
     await tester.pump();
 
     expect(find.text('もう一度'), findsNothing);
+  });
+
+  // --- レスポンシブレイアウトのテスト ---
+
+  group('レスポンシブレイアウト', () {
+    Widget buildAppWithSize(Size size) => MaterialApp(
+          home: MediaQuery(
+            data: MediaQueryData(size: size),
+            child: SizedBox(
+              width: size.width,
+              height: size.height,
+              child: const HomeScreen(initialLevel: testLevel),
+            ),
+          ),
+        );
+
+    testWidgets('狭い画面（600px）では縦積みレイアウトになる', (tester) async {
+      tester.view.physicalSize = const Size(600, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(buildAppWithSize(const Size(600, 800)));
+
+      // maxWidth 480 の ConstrainedBox がある = 狭いレイアウト
+      final narrowConstraint = find.byWidgetPredicate(
+        (w) => w is ConstrainedBox && w.constraints.maxWidth == 480,
+      );
+      expect(narrowConstraint, findsOneWidget);
+
+      // 基本ウィジェットが描画されている
+      expect(find.byType(PlayerWidget), findsOneWidget);
+      expect(find.text('Sokoban'), findsOneWidget);
+    });
+
+    testWidgets('広い画面（900px）では 2 カラムレイアウトになる', (tester) async {
+      tester.view.physicalSize = const Size(900, 700);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(buildAppWithSize(const Size(900, 700)));
+
+      // maxWidth 960 の ConstrainedBox がある = 広いレイアウト
+      final wideConstraint = find.byWidgetPredicate(
+        (w) => w is ConstrainedBox && w.constraints.maxWidth == 960,
+      );
+      expect(wideConstraint, findsOneWidget);
+
+      // 基本ウィジェットが描画されている
+      expect(find.byType(PlayerWidget), findsOneWidget);
+      expect(find.text('Sokoban'), findsOneWidget);
+      expect(find.text('元に戻す'), findsOneWidget);
+      expect(find.text('リスタート'), findsOneWidget);
+    });
+
+    testWidgets('広い画面でも方向ボタンが機能する', (tester) async {
+      tester.view.physicalSize = const Size(900, 700);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(buildAppWithSize(const Size(900, 700)));
+
+      // 方向ボタンが存在する
+      expect(find.byIcon(Icons.keyboard_arrow_up), findsOneWidget);
+      expect(find.byIcon(Icons.keyboard_arrow_down), findsOneWidget);
+
+      // 移動できる
+      await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+      await tester.pump();
+
+      expect(find.text('1'), findsOneWidget);
+    });
   });
 }
