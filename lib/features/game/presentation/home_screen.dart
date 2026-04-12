@@ -450,6 +450,7 @@ class _NarrowLayout extends StatelessWidget {
               _SectionHeading(
                 icon: Icons.grid_on,
                 label: 'パズル',
+                subtitle: '— 箱をゴールへ運ぼう',
               ),
               const SizedBox(height: 4),
               Expanded(child: boardSection),
@@ -457,6 +458,7 @@ class _NarrowLayout extends StatelessWidget {
               _SectionHeading(
                 icon: Icons.gamepad_outlined,
                 label: '操作',
+                subtitle: '— ボタンまたはキーで移動',
               ),
               const SizedBox(height: 4),
               controlSection,
@@ -501,6 +503,7 @@ class _WideLayout extends StatelessWidget {
                     _SectionHeading(
                       icon: Icons.grid_on,
                       label: 'パズル',
+                      subtitle: '— 箱をゴールへ運ぼう',
                     ),
                     const SizedBox(height: 4),
                     Flexible(child: boardSection),
@@ -519,6 +522,7 @@ class _WideLayout extends StatelessWidget {
                     _SectionHeading(
                       icon: Icons.gamepad_outlined,
                       label: '操作',
+                      subtitle: '— ボタンまたはキーで移動',
                     ),
                     const SizedBox(height: 4),
                     controlSection,
@@ -533,20 +537,24 @@ class _WideLayout extends StatelessWidget {
   }
 }
 
-/// セクション見出し（アイコン + ラベル）。
+/// セクション見出し（アイコン + ラベル + 補足テキスト）。
 class _SectionHeading extends StatelessWidget {
   const _SectionHeading({
     required this.icon,
     required this.label,
+    this.subtitle,
   });
 
   final IconData icon;
   final String label;
+  final String? subtitle;
 
   @override
   Widget build(BuildContext context) {
     final color =
         Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6);
+    final subtitleColor =
+        Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4);
     return Row(
       children: [
         Icon(icon, size: 14, color: color),
@@ -560,6 +568,16 @@ class _SectionHeading extends StatelessWidget {
             letterSpacing: 0.5,
           ),
         ),
+        if (subtitle != null) ...[
+          const SizedBox(width: 6),
+          Text(
+            subtitle!,
+            style: TextStyle(
+              fontSize: 10,
+              color: subtitleColor,
+            ),
+          ),
+        ],
       ],
     );
   }
