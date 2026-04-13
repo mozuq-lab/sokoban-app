@@ -38,7 +38,9 @@ void main() {
 
   testWidgets('リスタートボタンが AppBar と画面下部に表示される', (tester) async {
     await tester.pumpWidget(buildApp());
-    expect(find.byIcon(Icons.refresh), findsNWidgets(2));
+    // AppBar に Icons.refresh、画面下部にテキスト「リスタート」
+    expect(find.byIcon(Icons.refresh), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'リスタート'), findsOneWidget);
   });
 
   testWidgets('方向ボタンを押すとプレイヤーが移動する', (tester) async {
@@ -78,7 +80,9 @@ void main() {
 
   testWidgets('Undo ボタンが AppBar と画面下部に表示される', (tester) async {
     await tester.pumpWidget(buildApp());
-    expect(find.byIcon(Icons.undo), findsNWidgets(2));
+    // AppBar に Icons.undo、画面下部にテキスト「元に戻す」
+    expect(find.byIcon(Icons.undo), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, '元に戻す'), findsOneWidget);
   });
 
   testWidgets('初期状態では Undo ボタンが無効', (tester) async {
@@ -148,7 +152,7 @@ void main() {
     await tester.tap(find.byTooltip('下'));
     await tester.pump();
 
-    expect(find.text('クリア！ 4手'), findsOneWidget);
+    expect(find.text('クリア！'), findsNWidgets(2));
 
     // Undo
     await tester.tap(find.byIcon(Icons.undo).first);
@@ -186,7 +190,7 @@ void main() {
     await tester.pump();
     // box(3,3)→(3,4) [goal!], player→(3,3). Solved!
 
-    expect(find.text('クリア！ 4手'), findsOneWidget);
+    expect(find.text('クリア！'), findsNWidgets(2));
   });
 
   // --- 手数カウンタのテスト ---
@@ -262,7 +266,7 @@ void main() {
     await tester.tap(find.byTooltip('下'));
     await tester.pump();
 
-    expect(find.text('クリア！ 4手'), findsOneWidget);
+    expect(find.text('クリア！'), findsNWidgets(2));
     expect(find.text('4'), findsOneWidget);
   });
 
@@ -285,7 +289,7 @@ void main() {
     await tester.pumpWidget(buildApp());
     await solveStage(tester);
 
-    expect(find.text('クリア！ 4手'), findsOneWidget);
+    expect(find.text('クリア！'), findsNWidgets(2));
 
     // 各方向ボタンの InkWell.onTap が null であることを確認
     for (final label in ['上', '下', '左', '右']) {
@@ -303,7 +307,7 @@ void main() {
     await tester.pumpWidget(buildApp());
     await solveStage(tester);
 
-    expect(find.text('クリア！ 4手'), findsOneWidget);
+    expect(find.text('クリア！'), findsNWidgets(2));
 
     // Undo ボタンが有効であることを確認
     final undoButton = tester.widget<IconButton>(
@@ -330,11 +334,13 @@ void main() {
 
   // --- SafeArea・レイアウトのテスト ---
 
-  testWidgets('body が SafeArea で囲まれ最大幅 480 の制約がある', (tester) async {
+  testWidgets('body が SafeArea で囲まれ ConstrainedBox の制約がある', (tester) async {
     await tester.pumpWidget(buildApp());
-    // maxWidth: 480 の ConstrainedBox を探す
+    // ConstrainedBox を探す（狭い画面: 480、広い画面: 960）
     final finder = find.byWidgetPredicate(
-      (w) => w is ConstrainedBox && w.constraints.maxWidth == 480,
+      (w) =>
+          w is ConstrainedBox &&
+          (w.constraints.maxWidth == 480 || w.constraints.maxWidth == 960),
     );
     expect(finder, findsOneWidget);
 
@@ -350,7 +356,7 @@ void main() {
     await tester.pumpWidget(buildApp());
     await solveStage(tester);
 
-    expect(find.text('クリア！ 4手'), findsOneWidget);
+    expect(find.text('クリア！'), findsNWidgets(2));
 
     // Restart ボタンが有効であることを確認
     final restartButton = tester.widget<IconButton>(
@@ -503,12 +509,13 @@ void main() {
 
   testWidgets('下部ボタンが Expanded で均等幅になっている', (tester) async {
     await tester.pumpWidget(buildApp());
-    // FilledButton が 2 つ Expanded の子として存在する
+    // FilledButton が Expanded の子として存在する（広い画面ではカラム用の
+    // Expanded も含まれるため、最低 2 つあることを確認）
     final expandedButtons = find.ancestor(
       of: find.byType(FilledButton),
       matching: find.byType(Expanded),
     );
-    expect(expandedButtons, findsNWidgets(2));
+    expect(expandedButtons, findsAtLeastNWidgets(2));
   });
 
   testWidgets('下部ボタンの最小高さが 48 以上である', (tester) async {
@@ -528,7 +535,7 @@ void main() {
   testWidgets('初期状態で残り箱数が表示される', (tester) async {
     await tester.pumpWidget(buildApp());
     expect(find.text('配置'), findsOneWidget);
-    expect(find.text('あと2個'), findsOneWidget);
+    expect(find.text('0 / 2'), findsOneWidget);
   });
 
   testWidgets('箱をゴールに押すと残り数が減る', (tester) async {
@@ -537,7 +544,7 @@ void main() {
     // 下に移動: box(2,3)→(2,4) がゴールに乗る
     await tester.tap(find.byTooltip('下'));
     await tester.pump();
-    expect(find.text('あと1個'), findsOneWidget);
+    expect(find.text('1 / 2'), findsOneWidget);
   });
 
   testWidgets('Undo で箱がゴールから外れると残り数が戻る', (tester) async {
@@ -546,12 +553,12 @@ void main() {
     // 下に移動: box(2,3)→(2,4) がゴールに乗る
     await tester.tap(find.byTooltip('下'));
     await tester.pump();
-    expect(find.text('あと1個'), findsOneWidget);
+    expect(find.text('1 / 2'), findsOneWidget);
 
     // Undo: 箱がゴールから外れる
     await tester.tap(find.byIcon(Icons.undo).first);
     await tester.pump();
-    expect(find.text('あと2個'), findsOneWidget);
+    expect(find.text('0 / 2'), findsOneWidget);
   });
 
   testWidgets('リスタートで残り箱数が初期値に戻る', (tester) async {
@@ -559,11 +566,11 @@ void main() {
 
     await tester.tap(find.byTooltip('下'));
     await tester.pump();
-    expect(find.text('あと1個'), findsOneWidget);
+    expect(find.text('1 / 2'), findsOneWidget);
 
     await tester.tap(find.byIcon(Icons.refresh).first);
     await tester.pump();
-    expect(find.text('あと2個'), findsOneWidget);
+    expect(find.text('0 / 2'), findsOneWidget);
   });
 
   // --- 操作ヒント表示のテスト ---
@@ -746,6 +753,27 @@ void main() {
     expect(find.text('全配置！'), findsOneWidget);
   });
 
+  // --- 配置プログレスバーのテスト ---
+
+  testWidgets('配置プログレスバーが表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+  });
+
+  testWidgets('初期状態でプログレスバーの値が 0', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+    final indicator = tester.widget<LinearProgressIndicator>(
+      find.byType(LinearProgressIndicator),
+    );
+    expect(indicator.value, closeTo(0.0, 0.01));
+  });
+
+  testWidgets('初期状態で配置が分数形式で表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    expect(find.text('0 / 2'), findsOneWidget);
+  });
+
   // --- キーボード操作のテスト ---
 
   testWidgets('矢印キーでプレイヤーが移動する', (tester) async {
@@ -801,7 +829,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pump();
 
-    expect(find.text('クリア！ 4手'), findsOneWidget);
+    expect(find.text('クリア！'), findsNWidgets(2));
 
     // クリア後に矢印キーを押しても手数が変わらない
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
@@ -835,7 +863,7 @@ void main() {
 
     // 手数が 0 のまま変わらない
     expect(find.text('0'), findsOneWidget);
-    expect(find.text('あと2個'), findsOneWidget);
+    expect(find.text('0 / 2'), findsOneWidget);
   });
 
   testWidgets('R キーで Restart できる', (tester) async {
@@ -943,6 +971,132 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pump();
 
-    expect(find.text('クリア！ 4手'), findsOneWidget);
+    expect(find.text('クリア！'), findsNWidgets(2));
+  });
+
+  // --- クリアオーバーレイのテスト ---
+
+  testWidgets('クリア時に盤面オーバーレイが表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+
+    // オーバーレイ内の「もう一度」ボタンが表示される
+    expect(find.text('もう一度'), findsOneWidget);
+    expect(find.byKey(const ValueKey('overlay-restart')), findsOneWidget);
+  });
+
+  testWidgets('クリア前にはオーバーレイが表示されない', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    expect(find.text('もう一度'), findsNothing);
+    expect(find.byKey(const ValueKey('overlay-restart')), findsNothing);
+  });
+
+  testWidgets('オーバーレイの「もう一度」ボタンで初期状態に戻る', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+
+    expect(find.text('もう一度'), findsOneWidget);
+
+    // オーバーレイのリスタートボタンをタップ
+    await tester.tap(find.byKey(const ValueKey('overlay-restart')));
+    await tester.pump();
+
+    // クリア表示が消え、初期状態に戻る
+    expect(find.text('もう一度'), findsNothing);
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('0 / 2'), findsOneWidget);
+  });
+
+  testWidgets('Undo でクリア解除するとオーバーレイが消える', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+
+    expect(find.text('もう一度'), findsOneWidget);
+
+    // Undo
+    await tester.tap(find.byIcon(Icons.undo).first);
+    await tester.pump();
+
+    expect(find.text('もう一度'), findsNothing);
+  });
+
+  // --- レスポンシブレイアウトのテスト ---
+
+  group('レスポンシブレイアウト', () {
+    Widget buildAppWithSize(Size size) => MaterialApp(
+          home: MediaQuery(
+            data: MediaQueryData(size: size),
+            child: SizedBox(
+              width: size.width,
+              height: size.height,
+              child: const HomeScreen(initialLevel: testLevel),
+            ),
+          ),
+        );
+
+    testWidgets('狭い画面（600px）では縦積みレイアウトになる', (tester) async {
+      tester.view.physicalSize = const Size(600, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(buildAppWithSize(const Size(600, 800)));
+
+      // maxWidth 480 の ConstrainedBox がある = 狭いレイアウト
+      final narrowConstraint = find.byWidgetPredicate(
+        (w) => w is ConstrainedBox && w.constraints.maxWidth == 480,
+      );
+      expect(narrowConstraint, findsOneWidget);
+
+      // 基本ウィジェットが描画されている
+      expect(find.byType(PlayerWidget), findsOneWidget);
+      expect(find.text('Sokoban'), findsOneWidget);
+    });
+
+    testWidgets('広い画面（900px）では 2 カラムレイアウトになる', (tester) async {
+      tester.view.physicalSize = const Size(900, 700);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(buildAppWithSize(const Size(900, 700)));
+
+      // maxWidth 960 の ConstrainedBox がある = 広いレイアウト
+      final wideConstraint = find.byWidgetPredicate(
+        (w) => w is ConstrainedBox && w.constraints.maxWidth == 960,
+      );
+      expect(wideConstraint, findsOneWidget);
+
+      // 基本ウィジェットが描画されている
+      expect(find.byType(PlayerWidget), findsOneWidget);
+      expect(find.text('Sokoban'), findsOneWidget);
+      expect(find.text('元に戻す'), findsOneWidget);
+      expect(find.text('リスタート'), findsOneWidget);
+    });
+
+    testWidgets('広い画面でも方向ボタンが機能する', (tester) async {
+      tester.view.physicalSize = const Size(900, 700);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(buildAppWithSize(const Size(900, 700)));
+
+      // 方向ボタンが存在する（Tooltip で探す）
+      expect(find.byTooltip('上'), findsOneWidget);
+      expect(find.byTooltip('下'), findsOneWidget);
+
+      // 移動できる
+      await tester.tap(find.byTooltip('下'));
+      await tester.pump();
+
+      expect(find.text('1'), findsOneWidget);
+    });
+  });
+
+  testWidgets('AppBar にステージ見出しが表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    expect(find.text('ステージ 1'), findsOneWidget);
   });
 }

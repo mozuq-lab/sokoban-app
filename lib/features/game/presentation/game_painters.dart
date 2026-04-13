@@ -559,3 +559,177 @@ class ArrowPainter extends CustomPainter {
   bool shouldRepaint(covariant ArrowPainter oldDelegate) =>
       direction != oldDelegate.direction || color != oldDelegate.color;
 }
+
+/// 手数カウントのアイコン（階段状の歩数パス）を描画する。
+class MoveCountIconPainter extends CustomPainter {
+  const MoveCountIconPainter({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = w * 0.11
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    // 階段状のパス（歩数を表す）
+    final path = Path()
+      ..moveTo(w * 0.15, h * 0.82)
+      ..lineTo(w * 0.15, h * 0.55)
+      ..lineTo(w * 0.45, h * 0.55)
+      ..lineTo(w * 0.45, h * 0.28)
+      ..lineTo(w * 0.72, h * 0.28);
+    canvas.drawPath(path, paint);
+
+    // 矢印の先端
+    final arrowPaint = Paint()..color = color;
+    final arrow = Path()
+      ..moveTo(w * 0.82, h * 0.28)
+      ..lineTo(w * 0.66, h * 0.17)
+      ..lineTo(w * 0.66, h * 0.39)
+      ..close();
+    canvas.drawPath(arrow, arrowPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant MoveCountIconPainter oldDelegate) =>
+      color != oldDelegate.color;
+}
+
+/// 配置状況のアイコン（ターゲットマーク）を描画する。
+class PlacementIconPainter extends CustomPainter {
+  const PlacementIconPainter({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+    final cx = w / 2;
+    final cy = h / 2;
+    final r = math.min(w, h) * 0.38;
+
+    // 外側リング
+    canvas.drawCircle(
+      Offset(cx, cy),
+      r,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = r * 0.22
+        ..color = color,
+    );
+
+    // 内側リング
+    canvas.drawCircle(
+      Offset(cx, cy),
+      r * 0.52,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = r * 0.16
+        ..color = color.withValues(alpha: 0.7),
+    );
+
+    // 中心の丸
+    canvas.drawCircle(
+      Offset(cx, cy),
+      r * 0.18,
+      Paint()..color = color,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant PlacementIconPainter oldDelegate) =>
+      color != oldDelegate.color;
+}
+
+/// 元に戻すアイコン（カーブした戻り矢印）を描画する。
+class UndoIconPainter extends CustomPainter {
+  const UndoIconPainter({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = w * 0.12
+      ..strokeCap = StrokeCap.round;
+
+    // カーブした矢印（左向き戻り）
+    final path = Path()
+      ..moveTo(w * 0.65, h * 0.28)
+      ..arcToPoint(
+        Offset(w * 0.35, h * 0.28),
+        radius: Radius.circular(w * 0.24),
+        clockwise: false,
+      )
+      ..lineTo(w * 0.35, h * 0.68);
+    canvas.drawPath(path, paint);
+
+    // 矢印の先端
+    final arrowPaint = Paint()..color = color;
+    final arrow = Path()
+      ..moveTo(w * 0.22, h * 0.28)
+      ..lineTo(w * 0.38, h * 0.14)
+      ..lineTo(w * 0.38, h * 0.42)
+      ..close();
+    canvas.drawPath(arrow, arrowPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant UndoIconPainter oldDelegate) =>
+      color != oldDelegate.color;
+}
+
+/// リスタートアイコン（円形の回転矢印）を描画する。
+class RestartIconPainter extends CustomPainter {
+  const RestartIconPainter({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+    final cx = w / 2;
+    final cy = h / 2;
+    final r = math.min(w, h) * 0.34;
+
+    // 円弧（270度）
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = r * 0.30
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: Offset(cx, cy), radius: r),
+      -math.pi * 0.5,
+      math.pi * 1.5,
+      false,
+      paint,
+    );
+
+    // 矢印の先端（上向き）
+    final arrowPaint = Paint()..color = color;
+    final arrow = Path()
+      ..moveTo(cx, cy - r - r * 0.32)
+      ..lineTo(cx - r * 0.38, cy - r + r * 0.18)
+      ..lineTo(cx + r * 0.38, cy - r + r * 0.18)
+      ..close();
+    canvas.drawPath(arrow, arrowPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant RestartIconPainter oldDelegate) =>
+      color != oldDelegate.color;
+}
