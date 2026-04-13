@@ -198,10 +198,14 @@ class _HomeScreenState extends State<HomeScreen> {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.grid_view_rounded,
-                    size: 20,
-                    color: Theme.of(context).colorScheme.primary,
+                  SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CustomPaint(
+                      painter: SokobanLogoPainter(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
                   ),
                   const SizedBox(width: 8),
                   const Text(
@@ -230,12 +234,40 @@ class _HomeScreenState extends State<HomeScreen> {
           toolbarHeight: 64,
           actions: [
             IconButton(
-              icon: const Icon(Icons.undo),
+              key: const ValueKey('appbar-undo'),
+              icon: SizedBox(
+                width: 22,
+                height: 22,
+                child: CustomPaint(
+                  painter: UndoIconPainter(
+                    color: _history.isNotEmpty
+                        ? Theme.of(context).colorScheme.onSurface
+                        : Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: 0.38),
+                  ),
+                ),
+              ),
               tooltip: '元に戻す',
               onPressed: _history.isNotEmpty ? _undo : null,
             ),
             IconButton(
-              icon: const Icon(Icons.refresh),
+              key: const ValueKey('appbar-restart'),
+              icon: SizedBox(
+                width: 22,
+                height: 22,
+                child: CustomPaint(
+                  painter: RestartIconPainter(
+                    color: _history.isNotEmpty
+                        ? Theme.of(context).colorScheme.onSurface
+                        : Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: 0.38),
+                  ),
+                ),
+              ),
               tooltip: 'リスタート',
               onPressed: _history.isNotEmpty ? _restart : null,
             ),
@@ -366,16 +398,14 @@ class _ControlSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasHistory = history.isNotEmpty;
     return Container(
       padding: const EdgeInsets.only(top: 8, left: 12, right: 12, bottom: 12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerLow,
+        color: const Color(0xFFFAF3E8),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Theme.of(context)
-              .colorScheme
-              .outlineVariant
-              .withValues(alpha: 0.4),
+          color: const Color(0xFFD7CCC8),
         ),
       ),
       child: Column(
@@ -390,13 +420,35 @@ class _ControlSection extends StatelessWidget {
             children: [
               Expanded(
                 child: FilledButton.tonalIcon(
-                  onPressed: history.isNotEmpty ? onUndo : null,
-                  icon: const Icon(Icons.undo, size: 20),
+                  onPressed: hasHistory ? onUndo : null,
+                  icon: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CustomPaint(
+                      painter: UndoIconPainter(
+                        color: hasHistory
+                            ? const Color(0xFF5D4037)
+                            : Colors.grey.shade400,
+                      ),
+                    ),
+                  ),
                   label: const Text('元に戻す'),
                   style: FilledButton.styleFrom(
                     minimumSize: const Size(0, 48),
+                    backgroundColor: hasHistory
+                        ? const Color(0xFFF5E6CC)
+                        : null,
+                    foregroundColor: hasHistory
+                        ? const Color(0xFF5D4037)
+                        : null,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(
+                        color: hasHistory
+                            ? const Color(0xFF8D6E63)
+                            : Colors.grey.shade300,
+                        width: 1,
+                      ),
                     ),
                   ),
                 ),
@@ -404,13 +456,35 @@ class _ControlSection extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: FilledButton.tonalIcon(
-                  onPressed: history.isNotEmpty ? onRestart : null,
-                  icon: const Icon(Icons.refresh, size: 20),
+                  onPressed: hasHistory ? onRestart : null,
+                  icon: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CustomPaint(
+                      painter: RestartIconPainter(
+                        color: hasHistory
+                            ? const Color(0xFF5D4037)
+                            : Colors.grey.shade400,
+                      ),
+                    ),
+                  ),
                   label: const Text('リスタート'),
                   style: FilledButton.styleFrom(
                     minimumSize: const Size(0, 48),
+                    backgroundColor: hasHistory
+                        ? const Color(0xFFF5E6CC)
+                        : null,
+                    foregroundColor: hasHistory
+                        ? const Color(0xFF5D4037)
+                        : null,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(
+                        color: hasHistory
+                            ? const Color(0xFF8D6E63)
+                            : Colors.grey.shade300,
+                        width: 1,
+                      ),
                     ),
                   ),
                 ),
@@ -450,7 +524,14 @@ class _NarrowLayout extends StatelessWidget {
                 child: statusCard,
               ),
               _SectionHeading(
-                icon: Icons.grid_on,
+                iconWidget: CustomPaint(
+                  painter: PuzzleSectionIconPainter(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurfaceVariant
+                        .withValues(alpha: 0.6),
+                  ),
+                ),
                 label: 'パズル',
                 subtitle: '— 箱をゴールへ運ぼう',
               ),
@@ -458,7 +539,14 @@ class _NarrowLayout extends StatelessWidget {
               Expanded(child: boardSection),
               const SizedBox(height: 16),
               _SectionHeading(
-                icon: Icons.gamepad_outlined,
+                iconWidget: CustomPaint(
+                  painter: ControlSectionIconPainter(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurfaceVariant
+                        .withValues(alpha: 0.6),
+                  ),
+                ),
                 label: '操作',
                 subtitle: '— ボタンまたはキーで移動',
               ),
@@ -503,7 +591,14 @@ class _WideLayout extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     _SectionHeading(
-                      icon: Icons.grid_on,
+                      iconWidget: CustomPaint(
+                        painter: PuzzleSectionIconPainter(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurfaceVariant
+                              .withValues(alpha: 0.6),
+                        ),
+                      ),
                       label: 'パズル',
                       subtitle: '— 箱をゴールへ運ぼう',
                     ),
@@ -522,7 +617,14 @@ class _WideLayout extends StatelessWidget {
                     statusCard,
                     const SizedBox(height: 16),
                     _SectionHeading(
-                      icon: Icons.gamepad_outlined,
+                      iconWidget: CustomPaint(
+                        painter: ControlSectionIconPainter(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurfaceVariant
+                              .withValues(alpha: 0.6),
+                        ),
+                      ),
                       label: '操作',
                       subtitle: '— ボタンまたはキーで移動',
                     ),
@@ -542,12 +644,12 @@ class _WideLayout extends StatelessWidget {
 /// セクション見出し（アイコン + ラベル + 補足テキスト）。
 class _SectionHeading extends StatelessWidget {
   const _SectionHeading({
-    required this.icon,
+    required this.iconWidget,
     required this.label,
     this.subtitle,
   });
 
-  final IconData icon;
+  final Widget iconWidget;
   final String label;
   final String? subtitle;
 
@@ -559,7 +661,7 @@ class _SectionHeading extends StatelessWidget {
         Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4);
     return Row(
       children: [
-        Icon(icon, size: 14, color: color),
+        SizedBox(width: 14, height: 14, child: iconWidget),
         const SizedBox(width: 4),
         Text(
           label,
@@ -649,8 +751,15 @@ class _StatusCard extends StatelessWidget {
                             color: Colors.green.shade100,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Icon(Icons.emoji_events,
-                              color: Colors.green.shade600, size: 24),
+                          child: SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CustomPaint(
+                              painter: TrophyIconPainter(
+                                color: Colors.green.shade600,
+                              ),
+                            ),
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Column(
@@ -688,8 +797,12 @@ class _StatusCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: _StatItem(
-                    icon: Icons.directions_walk,
-                    iconColor: Colors.blue,
+                    iconWidget: CustomPaint(
+                      painter: MoveCountIconPainter(
+                        color: const Color(0xFF1565C0),
+                      ),
+                    ),
+                    iconColor: const Color(0xFF1565C0),
                     label: '手数',
                     value: '$moveCount',
                   ),
@@ -702,7 +815,13 @@ class _StatusCard extends StatelessWidget {
                 ),
                 Expanded(
                   child: _StatItem(
-                    icon: Icons.inventory_2,
+                    iconWidget: CustomPaint(
+                      painter: PlacementIconPainter(
+                        color: allPlaced
+                            ? Colors.green
+                            : Colors.orange.shade800,
+                      ),
+                    ),
                     iconColor:
                         allPlaced ? Colors.green : Colors.orange.shade800,
                     label: '配置',
@@ -783,13 +902,13 @@ class _StatusCard extends StatelessWidget {
 /// 進捗カード内の個別項目（アイコン + ラベル + 値）。
 class _StatItem extends StatelessWidget {
   const _StatItem({
-    required this.icon,
+    required this.iconWidget,
     required this.iconColor,
     required this.label,
     required this.value,
   });
 
-  final IconData icon;
+  final Widget iconWidget;
   final Color iconColor;
   final String label;
   final String value;
@@ -802,12 +921,13 @@ class _StatItem extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          padding: const EdgeInsets.all(5),
+          width: 30,
+          height: 30,
           decoration: BoxDecoration(
             color: iconColor.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(7),
           ),
-          child: Icon(icon, size: 18, color: iconColor),
+          child: iconWidget,
         ),
         const SizedBox(width: 8),
         Column(
@@ -882,10 +1002,14 @@ class _ClearOverlay extends StatelessWidget {
                         color: Colors.amber.shade50,
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(
-                        Icons.emoji_events,
-                        size: 36,
-                        color: Colors.amber.shade600,
+                      child: SizedBox(
+                        width: 36,
+                        height: 36,
+                        child: CustomPaint(
+                          painter: TrophyIconPainter(
+                            color: Colors.amber.shade600,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -911,7 +1035,17 @@ class _ClearOverlay extends StatelessWidget {
                     FilledButton.icon(
                       key: const ValueKey('overlay-restart'),
                       onPressed: onRestart,
-                      icon: const Icon(Icons.refresh, size: 18),
+                      icon: SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CustomPaint(
+                          painter: RestartIconPainter(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimary,
+                          ),
+                        ),
+                      ),
                       label: const Text('もう一度'),
                       style: FilledButton.styleFrom(
                         minimumSize: const Size(130, 44),
@@ -982,31 +1116,19 @@ class _CellWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     // --- 壁 ---
     if (isWall) {
-      return Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Colors.brown.shade600, Colors.brown.shade800],
-          ),
-          border: Border.all(color: Colors.brown.shade900, width: 0.5),
-        ),
-      );
+      return const CustomPaint(painter: WallPainter());
     }
 
-    final floorColor = Colors.amber.shade50;
-    final goalBgColor = Colors.green.shade50;
+    const goalBgColor = Color(0xFFE8F5E9);
 
     // --- ゴール上のプレイヤー ---
     if (isPlayer && isGoal) {
       return Container(
         color: goalBgColor,
-        child: Stack(
+        child: const Stack(
           children: [
-            const Positioned.fill(
-              child: GoalMarkerWidget(),
-            ),
-            const Positioned.fill(
+            Positioned.fill(child: GoalMarkerWidget()),
+            Positioned.fill(
               child: Padding(
                 padding: EdgeInsets.all(2),
                 child: PlayerWidget(),
@@ -1019,10 +1141,16 @@ class _CellWidget extends StatelessWidget {
 
     // --- プレイヤー ---
     if (isPlayer) {
-      return Container(
-        color: floorColor,
-        padding: const EdgeInsets.all(2),
-        child: const PlayerWidget(),
+      return const Stack(
+        children: [
+          Positioned.fill(child: CustomPaint(painter: FloorPainter())),
+          Positioned.fill(
+            child: Padding(
+              padding: EdgeInsets.all(2),
+              child: PlayerWidget(),
+            ),
+          ),
+        ],
       );
     }
 
@@ -1037,10 +1165,16 @@ class _CellWidget extends StatelessWidget {
 
     // --- 箱 ---
     if (isBox) {
-      return Container(
-        color: floorColor,
-        padding: const EdgeInsets.all(1),
-        child: const BoxWidget(),
+      return const Stack(
+        children: [
+          Positioned.fill(child: CustomPaint(painter: FloorPainter())),
+          Positioned.fill(
+            child: Padding(
+              padding: EdgeInsets.all(1),
+              child: BoxWidget(),
+            ),
+          ),
+        ],
       );
     }
 
@@ -1053,12 +1187,7 @@ class _CellWidget extends StatelessWidget {
     }
 
     // --- 床 ---
-    return Container(
-      decoration: BoxDecoration(
-        color: floorColor,
-        border: Border.all(color: Colors.amber.shade100, width: 0.5),
-      ),
-    );
+    return const CustomPaint(painter: FloorPainter());
   }
 }
 
@@ -1073,34 +1202,44 @@ class _DirectionPad extends StatelessWidget {
   Widget build(BuildContext context) {
     const btnSize = 60.0;
 
-    Widget dirButton(Direction dir, IconData icon, String label) {
+    final activeColor = const Color(0xFF5D4037);
+    final disabledColor = Colors.grey.shade400;
+
+    Widget dirButton(Direction dir, String label) {
+      final arrowColor = enabled ? activeColor : disabledColor;
       return SizedBox(
         width: btnSize,
         height: btnSize,
-        child: IconButton(
-          onPressed: enabled ? () => onMove(dir) : null,
-          icon: Icon(icon, size: 28),
-          tooltip: label,
-          style: IconButton.styleFrom(
-            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-            disabledBackgroundColor:
-                Theme.of(context).colorScheme.surfaceContainerHighest,
-            shape: RoundedRectangleBorder(
+        child: Tooltip(
+          message: label,
+          child: Material(
+            color: enabled
+                ? const Color(0xFFF5E6CC)
+                : Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(14),
+            elevation: enabled ? 3 : 0,
+            shadowColor: const Color(0x40000000),
+            child: InkWell(
+              onTap: enabled ? () => onMove(dir) : null,
               borderRadius: BorderRadius.circular(14),
-              side: BorderSide(
-                color: enabled
-                    ? Theme.of(context)
-                        .colorScheme
-                        .primary
-                        .withValues(alpha: 0.3)
-                    : Theme.of(context)
-                        .colorScheme
-                        .outline
-                        .withValues(alpha: 0.2),
-                width: 1.5,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: enabled
+                        ? const Color(0xFF8D6E63)
+                        : Colors.grey.shade300,
+                    width: 1.5,
+                  ),
+                ),
+                child: CustomPaint(
+                  painter: ArrowPainter(
+                    direction: dir,
+                    color: arrowColor,
+                  ),
+                ),
               ),
             ),
-            elevation: enabled ? 2 : 0,
           ),
         ),
       );
@@ -1111,18 +1250,18 @@ class _DirectionPad extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          dirButton(Direction.up, Icons.keyboard_arrow_up, '上'),
+          dirButton(Direction.up, '上'),
           const SizedBox(height: 4),
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              dirButton(Direction.left, Icons.keyboard_arrow_left, '左'),
+              dirButton(Direction.left, '左'),
               const SizedBox(width: btnSize + 8, height: btnSize),
-              dirButton(Direction.right, Icons.keyboard_arrow_right, '右'),
+              dirButton(Direction.right, '右'),
             ],
           ),
           const SizedBox(height: 4),
-          dirButton(Direction.down, Icons.keyboard_arrow_down, '下'),
+          dirButton(Direction.down, '下'),
         ],
       ),
     );

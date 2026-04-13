@@ -31,15 +31,16 @@ void main() {
 
   testWidgets('方向ボタンが 4 つ表示される', (tester) async {
     await tester.pumpWidget(buildApp());
-    expect(find.byIcon(Icons.keyboard_arrow_up), findsOneWidget);
-    expect(find.byIcon(Icons.keyboard_arrow_down), findsOneWidget);
-    expect(find.byIcon(Icons.keyboard_arrow_left), findsOneWidget);
-    expect(find.byIcon(Icons.keyboard_arrow_right), findsOneWidget);
+    for (final label in ['上', '下', '左', '右']) {
+      expect(find.byTooltip(label), findsOneWidget);
+    }
   });
 
   testWidgets('リスタートボタンが AppBar と画面下部に表示される', (tester) async {
     await tester.pumpWidget(buildApp());
-    expect(find.byIcon(Icons.refresh), findsNWidgets(2));
+    // AppBar にリスタートアイコン、画面下部にテキスト「リスタート」
+    expect(find.byKey(const ValueKey('appbar-restart')), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'リスタート'), findsOneWidget);
   });
 
   testWidgets('方向ボタンを押すとプレイヤーが移動する', (tester) async {
@@ -49,7 +50,7 @@ void main() {
     expect(find.byType(BoxWidget), findsNWidgets(2));
 
     // 下ボタンを押して盤面更新
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+    await tester.tap(find.byTooltip('下'));
     await tester.pump();
 
     // プレイヤーがまだ存在する
@@ -65,11 +66,11 @@ void main() {
     await tester.pumpWidget(buildApp());
 
     // 何手か動かす
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+    await tester.tap(find.byTooltip('下'));
     await tester.pump();
 
     // リスタート
-    await tester.tap(find.byIcon(Icons.refresh).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-restart')).first);
     await tester.pump();
 
     // プレイヤーと箱がまだ存在
@@ -79,13 +80,15 @@ void main() {
 
   testWidgets('Undo ボタンが AppBar と画面下部に表示される', (tester) async {
     await tester.pumpWidget(buildApp());
-    expect(find.byIcon(Icons.undo), findsNWidgets(2));
+    // AppBar に元に戻すアイコン、画面下部にテキスト「元に戻す」
+    expect(find.byKey(const ValueKey('appbar-undo')), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, '元に戻す'), findsOneWidget);
   });
 
   testWidgets('初期状態では Undo ボタンが無効', (tester) async {
     await tester.pumpWidget(buildApp());
     final undoButton = tester.widget<IconButton>(
-      find.widgetWithIcon(IconButton, Icons.undo),
+      find.byKey(const ValueKey('appbar-undo')),
     );
     expect(undoButton.onPressed, isNull);
   });
@@ -94,17 +97,17 @@ void main() {
     await tester.pumpWidget(buildApp());
 
     // 下に移動
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+    await tester.tap(find.byTooltip('下'));
     await tester.pump();
 
     // Undo ボタンが有効になっている
     final undoAfterMove = tester.widget<IconButton>(
-      find.widgetWithIcon(IconButton, Icons.undo),
+      find.byKey(const ValueKey('appbar-undo')),
     );
     expect(undoAfterMove.onPressed, isNotNull);
 
     // Undo
-    await tester.tap(find.byIcon(Icons.undo).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-undo')).first);
     await tester.pump();
 
     // プレイヤーと箱がまだ存在
@@ -113,7 +116,7 @@ void main() {
 
     // Undo 後は再び無効
     final undoAfterUndo = tester.widget<IconButton>(
-      find.widgetWithIcon(IconButton, Icons.undo),
+      find.byKey(const ValueKey('appbar-undo')),
     );
     expect(undoAfterUndo.onPressed, isNull);
   });
@@ -122,16 +125,16 @@ void main() {
     await tester.pumpWidget(buildApp());
 
     // 移動
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+    await tester.tap(find.byTooltip('下'));
     await tester.pump();
 
     // リスタート
-    await tester.tap(find.byIcon(Icons.refresh).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-restart')).first);
     await tester.pump();
 
     // Undo ボタンが無効
     final undoButton = tester.widget<IconButton>(
-      find.widgetWithIcon(IconButton, Icons.undo),
+      find.byKey(const ValueKey('appbar-undo')),
     );
     expect(undoButton.onPressed, isNull);
   });
@@ -140,19 +143,19 @@ void main() {
     await tester.pumpWidget(buildApp());
 
     // 解法: 下, 上, 右, 下
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+    await tester.tap(find.byTooltip('下'));
     await tester.pump();
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_up));
+    await tester.tap(find.byTooltip('上'));
     await tester.pump();
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_right));
+    await tester.tap(find.byTooltip('右'));
     await tester.pump();
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+    await tester.tap(find.byTooltip('下'));
     await tester.pump();
 
     expect(find.text('クリア！'), findsNWidgets(2));
 
     // Undo
-    await tester.tap(find.byIcon(Icons.undo).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-undo')).first);
     await tester.pump();
 
     expect(find.textContaining('クリア！'), findsNothing);
@@ -171,19 +174,19 @@ void main() {
     //
     // 解法: 下(box(2,3)→(2,4)), 上, 右, 下(box(3,3)→(3,4))
 
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+    await tester.tap(find.byTooltip('下'));
     await tester.pump();
     // box(2,3)→(2,4) [goal!], player→(2,3)
 
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_up));
+    await tester.tap(find.byTooltip('上'));
     await tester.pump();
     // player→(2,2)
 
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_right));
+    await tester.tap(find.byTooltip('右'));
     await tester.pump();
     // player→(3,2)
 
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+    await tester.tap(find.byTooltip('下'));
     await tester.pump();
     // box(3,3)→(3,4) [goal!], player→(3,3). Solved!
 
@@ -201,11 +204,11 @@ void main() {
   testWidgets('移動成功で手数が増える', (tester) async {
     await tester.pumpWidget(buildApp());
 
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+    await tester.tap(find.byTooltip('下'));
     await tester.pump();
     expect(find.text('1'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_up));
+    await tester.tap(find.byTooltip('上'));
     await tester.pump();
     expect(find.text('2'), findsOneWidget);
   });
@@ -214,12 +217,12 @@ void main() {
     await tester.pumpWidget(buildApp());
 
     // 左に移動（成功: (2,2) → (1,2)）
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_left));
+    await tester.tap(find.byTooltip('左'));
     await tester.pump();
     expect(find.text('1'), findsOneWidget);
 
     // さらに左に移動（壁 (0,2) で blocked）
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_left));
+    await tester.tap(find.byTooltip('左'));
     await tester.pump();
     expect(find.text('1'), findsOneWidget);
   });
@@ -227,11 +230,11 @@ void main() {
   testWidgets('Undo で手数が 1 戻る', (tester) async {
     await tester.pumpWidget(buildApp());
 
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+    await tester.tap(find.byTooltip('下'));
     await tester.pump();
     expect(find.text('1'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.undo).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-undo')).first);
     await tester.pump();
     expect(find.text('0'), findsOneWidget);
   });
@@ -239,13 +242,13 @@ void main() {
   testWidgets('リスタートで手数が 0 に戻る', (tester) async {
     await tester.pumpWidget(buildApp());
 
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+    await tester.tap(find.byTooltip('下'));
     await tester.pump();
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_up));
+    await tester.tap(find.byTooltip('上'));
     await tester.pump();
     expect(find.text('2'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.refresh).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-restart')).first);
     await tester.pump();
     expect(find.text('0'), findsOneWidget);
   });
@@ -254,13 +257,13 @@ void main() {
     await tester.pumpWidget(buildApp());
 
     // 解法: 下, 上, 右, 下 (4 手)
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+    await tester.tap(find.byTooltip('下'));
     await tester.pump();
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_up));
+    await tester.tap(find.byTooltip('上'));
     await tester.pump();
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_right));
+    await tester.tap(find.byTooltip('右'));
     await tester.pump();
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+    await tester.tap(find.byTooltip('下'));
     await tester.pump();
 
     expect(find.text('クリア！'), findsNWidgets(2));
@@ -272,13 +275,13 @@ void main() {
   /// ステージを解法手順でクリアするヘルパー。
   Future<void> solveStage(WidgetTester tester) async {
     // 解法: 下, 上, 右, 下
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+    await tester.tap(find.byTooltip('下'));
     await tester.pump();
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_up));
+    await tester.tap(find.byTooltip('上'));
     await tester.pump();
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_right));
+    await tester.tap(find.byTooltip('右'));
     await tester.pump();
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+    await tester.tap(find.byTooltip('下'));
     await tester.pump();
   }
 
@@ -288,17 +291,15 @@ void main() {
 
     expect(find.text('クリア！'), findsNWidgets(2));
 
-    // 各方向ボタンの onPressed が null であることを確認
-    for (final icon in [
-      Icons.keyboard_arrow_up,
-      Icons.keyboard_arrow_down,
-      Icons.keyboard_arrow_left,
-      Icons.keyboard_arrow_right,
-    ]) {
-      final button = tester.widget<IconButton>(
-        find.widgetWithIcon(IconButton, icon),
+    // 各方向ボタンの InkWell.onTap が null であることを確認
+    for (final label in ['上', '下', '左', '右']) {
+      final inkWell = tester.widget<InkWell>(
+        find.descendant(
+          of: find.byTooltip(label),
+          matching: find.byType(InkWell),
+        ),
       );
-      expect(button.onPressed, isNull, reason: '$icon should be disabled');
+      expect(inkWell.onTap, isNull, reason: '$label should be disabled');
     }
   });
 
@@ -310,22 +311,25 @@ void main() {
 
     // Undo ボタンが有効であることを確認
     final undoButton = tester.widget<IconButton>(
-      find.widgetWithIcon(IconButton, Icons.undo),
+      find.byKey(const ValueKey('appbar-undo')),
     );
     expect(undoButton.onPressed, isNotNull);
 
     // Undo を実行
-    await tester.tap(find.byIcon(Icons.undo).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-undo')).first);
     await tester.pump();
 
     // クリア表示が消える
     expect(find.textContaining('クリア！'), findsNothing);
 
     // 方向ボタンが再び有効になる
-    final upButton = tester.widget<IconButton>(
-      find.widgetWithIcon(IconButton, Icons.keyboard_arrow_up),
+    final upInkWell = tester.widget<InkWell>(
+      find.descendant(
+        of: find.byTooltip('上'),
+        matching: find.byType(InkWell),
+      ),
     );
-    expect(upButton.onPressed, isNotNull);
+    expect(upInkWell.onTap, isNotNull);
   });
 
   // --- SafeArea・レイアウトのテスト ---
@@ -356,12 +360,12 @@ void main() {
 
     // Restart ボタンが有効であることを確認
     final restartButton = tester.widget<IconButton>(
-      find.widgetWithIcon(IconButton, Icons.refresh),
+      find.byKey(const ValueKey('appbar-restart')),
     );
     expect(restartButton.onPressed, isNotNull);
 
     // Restart を実行
-    await tester.tap(find.byIcon(Icons.refresh).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-restart')).first);
     await tester.pump();
 
     // クリア表示が消え、手数が 0 に戻る
@@ -369,10 +373,13 @@ void main() {
     expect(find.text('0'), findsOneWidget);
 
     // 方向ボタンが再び有効になる
-    final upButton = tester.widget<IconButton>(
-      find.widgetWithIcon(IconButton, Icons.keyboard_arrow_up),
+    final upInkWell2 = tester.widget<InkWell>(
+      find.descendant(
+        of: find.byTooltip('上'),
+        matching: find.byType(InkWell),
+      ),
     );
-    expect(upButton.onPressed, isNotNull);
+    expect(upInkWell2.onTap, isNotNull);
   });
 
   // --- 画面下部の補助ボタンのテスト ---
@@ -388,7 +395,7 @@ void main() {
   testWidgets('初期状態では AppBar のリスタートボタンが無効', (tester) async {
     await tester.pumpWidget(buildApp());
     final restartButton = tester.widget<IconButton>(
-      find.widgetWithIcon(IconButton, Icons.refresh),
+      find.byKey(const ValueKey('appbar-restart')),
     );
     expect(restartButton.onPressed, isNull);
   });
@@ -404,11 +411,11 @@ void main() {
   testWidgets('移動後にリスタートボタンが有効になる', (tester) async {
     await tester.pumpWidget(buildApp());
 
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+    await tester.tap(find.byTooltip('下'));
     await tester.pump();
 
     final restartButton = tester.widget<IconButton>(
-      find.widgetWithIcon(IconButton, Icons.refresh),
+      find.byKey(const ValueKey('appbar-restart')),
     );
     expect(restartButton.onPressed, isNotNull);
 
@@ -421,15 +428,15 @@ void main() {
   testWidgets('リスタート実行後にリスタートボタンが再び無効になる', (tester) async {
     await tester.pumpWidget(buildApp());
 
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+    await tester.tap(find.byTooltip('下'));
     await tester.pump();
 
     // リスタート実行
-    await tester.tap(find.byIcon(Icons.refresh).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-restart')).first);
     await tester.pump();
 
     final restartButton = tester.widget<IconButton>(
-      find.widgetWithIcon(IconButton, Icons.refresh),
+      find.byKey(const ValueKey('appbar-restart')),
     );
     expect(restartButton.onPressed, isNull);
 
@@ -442,15 +449,15 @@ void main() {
   testWidgets('Undo で初期状態に戻るとリスタートボタンが無効になる', (tester) async {
     await tester.pumpWidget(buildApp());
 
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+    await tester.tap(find.byTooltip('下'));
     await tester.pump();
 
     // Undo で初期状態に戻す
-    await tester.tap(find.byIcon(Icons.undo).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-undo')).first);
     await tester.pump();
 
     final restartButton = tester.widget<IconButton>(
-      find.widgetWithIcon(IconButton, Icons.refresh),
+      find.byKey(const ValueKey('appbar-restart')),
     );
     expect(restartButton.onPressed, isNull);
   });
@@ -466,7 +473,7 @@ void main() {
   testWidgets('画面下部の Undo ボタンが移動後に有効になる', (tester) async {
     await tester.pumpWidget(buildApp());
 
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+    await tester.tap(find.byTooltip('下'));
     await tester.pump();
 
     final bottomUndo = tester.widget<FilledButton>(
@@ -478,7 +485,7 @@ void main() {
   testWidgets('画面下部の Undo ボタンで手数が戻る', (tester) async {
     await tester.pumpWidget(buildApp());
 
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+    await tester.tap(find.byTooltip('下'));
     await tester.pump();
     expect(find.text('1'), findsOneWidget);
 
@@ -490,7 +497,7 @@ void main() {
   testWidgets('画面下部の Restart ボタンで初期状態に戻る', (tester) async {
     await tester.pumpWidget(buildApp());
 
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+    await tester.tap(find.byTooltip('下'));
     await tester.pump();
     expect(find.text('1'), findsOneWidget);
 
@@ -535,7 +542,7 @@ void main() {
     await tester.pumpWidget(buildApp());
 
     // 下に移動: box(2,3)→(2,4) がゴールに乗る
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+    await tester.tap(find.byTooltip('下'));
     await tester.pump();
     expect(find.text('1 / 2'), findsOneWidget);
   });
@@ -544,12 +551,12 @@ void main() {
     await tester.pumpWidget(buildApp());
 
     // 下に移動: box(2,3)→(2,4) がゴールに乗る
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+    await tester.tap(find.byTooltip('下'));
     await tester.pump();
     expect(find.text('1 / 2'), findsOneWidget);
 
     // Undo: 箱がゴールから外れる
-    await tester.tap(find.byIcon(Icons.undo).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-undo')).first);
     await tester.pump();
     expect(find.text('0 / 2'), findsOneWidget);
   });
@@ -557,11 +564,11 @@ void main() {
   testWidgets('リスタートで残り箱数が初期値に戻る', (tester) async {
     await tester.pumpWidget(buildApp());
 
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+    await tester.tap(find.byTooltip('下'));
     await tester.pump();
     expect(find.text('1 / 2'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.refresh).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-restart')).first);
     await tester.pump();
     expect(find.text('0 / 2'), findsOneWidget);
   });
@@ -595,7 +602,7 @@ void main() {
     await tester.pumpWidget(buildApp());
     await solveStage(tester);
 
-    await tester.tap(find.byIcon(Icons.undo).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-undo')).first);
     await tester.pump();
 
     expect(
@@ -614,10 +621,10 @@ void main() {
     await tester.pumpWidget(buildApp());
 
     // 左に移動（成功: (2,2) → (1,2)）
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_left));
+    await tester.tap(find.byTooltip('左'));
     await tester.pump();
     // さらに左に移動（壁 (0,2) で blocked）
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_left));
+    await tester.tap(find.byTooltip('左'));
     // AnimatedSwitcher の遷移を完了させる（タイマー 1 秒より前）
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
@@ -633,10 +640,10 @@ void main() {
     await tester.pumpWidget(buildApp());
 
     // 左に移動（成功）
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_left));
+    await tester.tap(find.byTooltip('左'));
     await tester.pump();
     // さらに左（壁で blocked）
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_left));
+    await tester.tap(find.byTooltip('左'));
     await tester.pump(const Duration(milliseconds: 200));
     expect(find.text('その方向には進めません'), findsOneWidget);
 
@@ -656,15 +663,15 @@ void main() {
     await tester.pumpWidget(buildApp());
 
     // 左に移動（成功）
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_left));
+    await tester.tap(find.byTooltip('左'));
     await tester.pump();
     // さらに左（壁で blocked）
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_left));
+    await tester.tap(find.byTooltip('左'));
     await tester.pump();
     expect(find.text('その方向には進めません'), findsOneWidget);
 
     // 右に移動（成功）
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_right));
+    await tester.tap(find.byTooltip('右'));
     await tester.pump();
 
     expect(find.text('その方向には進めません'), findsNothing);
@@ -678,19 +685,19 @@ void main() {
     await tester.pumpWidget(buildApp());
 
     // 下に移動（成功）
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+    await tester.tap(find.byTooltip('下'));
     await tester.pump();
 
     // 左に移動（成功: (2,3) → (1,3)）
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_left));
+    await tester.tap(find.byTooltip('左'));
     await tester.pump();
     // さらに左（壁で blocked）
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_left));
+    await tester.tap(find.byTooltip('左'));
     await tester.pump();
     expect(find.text('その方向には進めません'), findsOneWidget);
 
     // Undo
-    await tester.tap(find.byIcon(Icons.undo).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-undo')).first);
     await tester.pump();
 
     expect(find.text('その方向には進めません'), findsNothing);
@@ -704,21 +711,21 @@ void main() {
     await tester.pumpWidget(buildApp());
 
     // 下に移動（成功）
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+    await tester.tap(find.byTooltip('下'));
     await tester.pump();
 
     // 上に移動（箱を押せない — 壁で blocked）
     // player(2,3) → 上(2,2) は空なので成功する。
     // instead: 左に移動して壁にぶつける
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_left));
+    await tester.tap(find.byTooltip('左'));
     await tester.pump();
     // player at (1,3), try left again → wall
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_left));
+    await tester.tap(find.byTooltip('左'));
     await tester.pump();
     expect(find.text('その方向には進めません'), findsOneWidget);
 
     // Restart
-    await tester.tap(find.byIcon(Icons.refresh).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-restart')).first);
     await tester.pump();
 
     expect(find.text('その方向には進めません'), findsNothing);
@@ -882,7 +889,7 @@ void main() {
     await tester.pumpWidget(buildApp());
 
     // 方向ボタンでプレイヤーを移動
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+    await tester.tap(find.byTooltip('下'));
     await tester.pump();
     expect(find.text('1'), findsOneWidget);
 
@@ -939,7 +946,7 @@ void main() {
     expect(find.text('1'), findsOneWidget);
 
     // AppBar の Undo ボタンをタップ（AppBar 内の undo アイコン）
-    final undoButtons = find.byIcon(Icons.undo);
+    final undoButtons = find.byKey(const ValueKey('appbar-undo'));
     // AppBar のボタンは最初に見つかる
     await tester.tap(undoButtons.first);
     await tester.pump();
@@ -1008,7 +1015,7 @@ void main() {
     expect(find.text('もう一度'), findsOneWidget);
 
     // Undo
-    await tester.tap(find.byIcon(Icons.undo).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-undo')).first);
     await tester.pump();
 
     expect(find.text('もう一度'), findsNothing);
@@ -1076,12 +1083,12 @@ void main() {
 
       await tester.pumpWidget(buildAppWithSize(const Size(900, 700)));
 
-      // 方向ボタンが存在する
-      expect(find.byIcon(Icons.keyboard_arrow_up), findsOneWidget);
-      expect(find.byIcon(Icons.keyboard_arrow_down), findsOneWidget);
+      // 方向ボタンが存在する（Tooltip で探す）
+      expect(find.byTooltip('上'), findsOneWidget);
+      expect(find.byTooltip('下'), findsOneWidget);
 
       // 移動できる
-      await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+      await tester.tap(find.byTooltip('下'));
       await tester.pump();
 
       expect(find.text('1'), findsOneWidget);
