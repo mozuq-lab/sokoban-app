@@ -38,8 +38,8 @@ void main() {
 
   testWidgets('リスタートボタンが AppBar と画面下部に表示される', (tester) async {
     await tester.pumpWidget(buildApp());
-    // AppBar に Icons.refresh、画面下部にテキスト「リスタート」
-    expect(find.byIcon(Icons.refresh), findsOneWidget);
+    // AppBar にリスタートアイコン、画面下部にテキスト「リスタート」
+    expect(find.byKey(const ValueKey('appbar-restart')), findsOneWidget);
     expect(find.widgetWithText(FilledButton, 'リスタート'), findsOneWidget);
   });
 
@@ -70,7 +70,7 @@ void main() {
     await tester.pump();
 
     // リスタート
-    await tester.tap(find.byIcon(Icons.refresh).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-restart')).first);
     await tester.pump();
 
     // プレイヤーと箱がまだ存在
@@ -80,15 +80,15 @@ void main() {
 
   testWidgets('Undo ボタンが AppBar と画面下部に表示される', (tester) async {
     await tester.pumpWidget(buildApp());
-    // AppBar に Icons.undo、画面下部にテキスト「元に戻す」
-    expect(find.byIcon(Icons.undo), findsOneWidget);
+    // AppBar に元に戻すアイコン、画面下部にテキスト「元に戻す」
+    expect(find.byKey(const ValueKey('appbar-undo')), findsOneWidget);
     expect(find.widgetWithText(FilledButton, '元に戻す'), findsOneWidget);
   });
 
   testWidgets('初期状態では Undo ボタンが無効', (tester) async {
     await tester.pumpWidget(buildApp());
     final undoButton = tester.widget<IconButton>(
-      find.widgetWithIcon(IconButton, Icons.undo),
+      find.byKey(const ValueKey('appbar-undo')),
     );
     expect(undoButton.onPressed, isNull);
   });
@@ -102,12 +102,12 @@ void main() {
 
     // Undo ボタンが有効になっている
     final undoAfterMove = tester.widget<IconButton>(
-      find.widgetWithIcon(IconButton, Icons.undo),
+      find.byKey(const ValueKey('appbar-undo')),
     );
     expect(undoAfterMove.onPressed, isNotNull);
 
     // Undo
-    await tester.tap(find.byIcon(Icons.undo).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-undo')).first);
     await tester.pump();
 
     // プレイヤーと箱がまだ存在
@@ -116,7 +116,7 @@ void main() {
 
     // Undo 後は再び無効
     final undoAfterUndo = tester.widget<IconButton>(
-      find.widgetWithIcon(IconButton, Icons.undo),
+      find.byKey(const ValueKey('appbar-undo')),
     );
     expect(undoAfterUndo.onPressed, isNull);
   });
@@ -129,12 +129,12 @@ void main() {
     await tester.pump();
 
     // リスタート
-    await tester.tap(find.byIcon(Icons.refresh).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-restart')).first);
     await tester.pump();
 
     // Undo ボタンが無効
     final undoButton = tester.widget<IconButton>(
-      find.widgetWithIcon(IconButton, Icons.undo),
+      find.byKey(const ValueKey('appbar-undo')),
     );
     expect(undoButton.onPressed, isNull);
   });
@@ -155,7 +155,7 @@ void main() {
     expect(find.text('クリア！'), findsNWidgets(2));
 
     // Undo
-    await tester.tap(find.byIcon(Icons.undo).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-undo')).first);
     await tester.pump();
 
     expect(find.textContaining('クリア！'), findsNothing);
@@ -234,7 +234,7 @@ void main() {
     await tester.pump();
     expect(find.text('1'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.undo).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-undo')).first);
     await tester.pump();
     expect(find.text('0'), findsOneWidget);
   });
@@ -248,7 +248,7 @@ void main() {
     await tester.pump();
     expect(find.text('2'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.refresh).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-restart')).first);
     await tester.pump();
     expect(find.text('0'), findsOneWidget);
   });
@@ -311,12 +311,12 @@ void main() {
 
     // Undo ボタンが有効であることを確認
     final undoButton = tester.widget<IconButton>(
-      find.widgetWithIcon(IconButton, Icons.undo),
+      find.byKey(const ValueKey('appbar-undo')),
     );
     expect(undoButton.onPressed, isNotNull);
 
     // Undo を実行
-    await tester.tap(find.byIcon(Icons.undo).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-undo')).first);
     await tester.pump();
 
     // クリア表示が消える
@@ -360,12 +360,12 @@ void main() {
 
     // Restart ボタンが有効であることを確認
     final restartButton = tester.widget<IconButton>(
-      find.widgetWithIcon(IconButton, Icons.refresh),
+      find.byKey(const ValueKey('appbar-restart')),
     );
     expect(restartButton.onPressed, isNotNull);
 
     // Restart を実行
-    await tester.tap(find.byIcon(Icons.refresh).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-restart')).first);
     await tester.pump();
 
     // クリア表示が消え、手数が 0 に戻る
@@ -395,7 +395,7 @@ void main() {
   testWidgets('初期状態では AppBar のリスタートボタンが無効', (tester) async {
     await tester.pumpWidget(buildApp());
     final restartButton = tester.widget<IconButton>(
-      find.widgetWithIcon(IconButton, Icons.refresh),
+      find.byKey(const ValueKey('appbar-restart')),
     );
     expect(restartButton.onPressed, isNull);
   });
@@ -415,7 +415,7 @@ void main() {
     await tester.pump();
 
     final restartButton = tester.widget<IconButton>(
-      find.widgetWithIcon(IconButton, Icons.refresh),
+      find.byKey(const ValueKey('appbar-restart')),
     );
     expect(restartButton.onPressed, isNotNull);
 
@@ -432,11 +432,11 @@ void main() {
     await tester.pump();
 
     // リスタート実行
-    await tester.tap(find.byIcon(Icons.refresh).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-restart')).first);
     await tester.pump();
 
     final restartButton = tester.widget<IconButton>(
-      find.widgetWithIcon(IconButton, Icons.refresh),
+      find.byKey(const ValueKey('appbar-restart')),
     );
     expect(restartButton.onPressed, isNull);
 
@@ -453,11 +453,11 @@ void main() {
     await tester.pump();
 
     // Undo で初期状態に戻す
-    await tester.tap(find.byIcon(Icons.undo).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-undo')).first);
     await tester.pump();
 
     final restartButton = tester.widget<IconButton>(
-      find.widgetWithIcon(IconButton, Icons.refresh),
+      find.byKey(const ValueKey('appbar-restart')),
     );
     expect(restartButton.onPressed, isNull);
   });
@@ -556,7 +556,7 @@ void main() {
     expect(find.text('1 / 2'), findsOneWidget);
 
     // Undo: 箱がゴールから外れる
-    await tester.tap(find.byIcon(Icons.undo).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-undo')).first);
     await tester.pump();
     expect(find.text('0 / 2'), findsOneWidget);
   });
@@ -568,7 +568,7 @@ void main() {
     await tester.pump();
     expect(find.text('1 / 2'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.refresh).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-restart')).first);
     await tester.pump();
     expect(find.text('0 / 2'), findsOneWidget);
   });
@@ -602,7 +602,7 @@ void main() {
     await tester.pumpWidget(buildApp());
     await solveStage(tester);
 
-    await tester.tap(find.byIcon(Icons.undo).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-undo')).first);
     await tester.pump();
 
     expect(
@@ -697,7 +697,7 @@ void main() {
     expect(find.text('その方向には進めません'), findsOneWidget);
 
     // Undo
-    await tester.tap(find.byIcon(Icons.undo).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-undo')).first);
     await tester.pump();
 
     expect(find.text('その方向には進めません'), findsNothing);
@@ -725,7 +725,7 @@ void main() {
     expect(find.text('その方向には進めません'), findsOneWidget);
 
     // Restart
-    await tester.tap(find.byIcon(Icons.refresh).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-restart')).first);
     await tester.pump();
 
     expect(find.text('その方向には進めません'), findsNothing);
@@ -946,7 +946,7 @@ void main() {
     expect(find.text('1'), findsOneWidget);
 
     // AppBar の Undo ボタンをタップ（AppBar 内の undo アイコン）
-    final undoButtons = find.byIcon(Icons.undo);
+    final undoButtons = find.byKey(const ValueKey('appbar-undo'));
     // AppBar のボタンは最初に見つかる
     await tester.tap(undoButtons.first);
     await tester.pump();
@@ -1015,7 +1015,7 @@ void main() {
     expect(find.text('もう一度'), findsOneWidget);
 
     // Undo
-    await tester.tap(find.byIcon(Icons.undo).first);
+    await tester.tap(find.byKey(const ValueKey('appbar-undo')).first);
     await tester.pump();
 
     expect(find.text('もう一度'), findsNothing);

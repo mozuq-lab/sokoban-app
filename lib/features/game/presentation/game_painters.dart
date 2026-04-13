@@ -733,3 +733,275 @@ class RestartIconPainter extends CustomPainter {
   bool shouldRepaint(covariant RestartIconPainter oldDelegate) =>
       color != oldDelegate.color;
 }
+
+/// アプリロゴアイコン（箱とゴールを組み合わせた倉庫番モチーフ）を描画する。
+class SokobanLogoPainter extends CustomPainter {
+  const SokobanLogoPainter({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+
+    // --- ゴールマーカー（背景の同心円） ---
+    final cx = w * 0.52;
+    final cy = h * 0.48;
+    final r = math.min(w, h) * 0.38;
+    canvas.drawCircle(
+      Offset(cx, cy),
+      r,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = r * 0.18
+        ..color = color.withValues(alpha: 0.25),
+    );
+    canvas.drawCircle(
+      Offset(cx, cy),
+      r * 0.50,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = r * 0.14
+        ..color = color.withValues(alpha: 0.18),
+    );
+
+    // --- 箱（手前に重ねた角丸四角） ---
+    final boxSize = math.min(w, h) * 0.48;
+    final boxRect = Rect.fromCenter(
+      center: Offset(cx, cy),
+      width: boxSize,
+      height: boxSize,
+    );
+    final rr = RRect.fromRectAndRadius(boxRect, Radius.circular(boxSize * 0.12));
+
+    // 箱の塗り
+    canvas.drawRRect(rr, Paint()..color = color.withValues(alpha: 0.85));
+
+    // 箱の十字
+    final crossPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = boxSize * 0.07
+      ..strokeCap = StrokeCap.round
+      ..color = Colors.white.withValues(alpha: 0.6);
+    canvas.drawLine(
+      Offset(boxRect.left + boxSize * 0.22, cy),
+      Offset(boxRect.right - boxSize * 0.22, cy),
+      crossPaint,
+    );
+    canvas.drawLine(
+      Offset(cx, boxRect.top + boxSize * 0.22),
+      Offset(cx, boxRect.bottom - boxSize * 0.22),
+      crossPaint,
+    );
+
+    // 箱の外枠
+    canvas.drawRRect(
+      rr,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = boxSize * 0.06
+        ..color = color,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant SokobanLogoPainter oldDelegate) =>
+      color != oldDelegate.color;
+}
+
+/// トロフィーアイコンを描画する。
+class TrophyIconPainter extends CustomPainter {
+  const TrophyIconPainter({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+
+    final lighterColor = Color.lerp(color, Colors.white, 0.3) ?? color;
+
+    // --- カップ本体 ---
+    final cupPath = Path()
+      ..moveTo(w * 0.22, h * 0.15)
+      ..lineTo(w * 0.78, h * 0.15)
+      ..lineTo(w * 0.70, h * 0.52)
+      ..quadraticBezierTo(w * 0.50, h * 0.68, w * 0.30, h * 0.52)
+      ..close();
+    canvas.drawPath(
+      cupPath,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [lighterColor, color],
+        ).createShader(Rect.fromLTWH(w * 0.22, h * 0.15, w * 0.56, h * 0.53)),
+    );
+
+    // --- 取っ手（左右） ---
+    final handlePaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = w * 0.06
+      ..strokeCap = StrokeCap.round
+      ..color = color;
+    // 左取っ手
+    final leftHandle = Path()
+      ..moveTo(w * 0.24, h * 0.22)
+      ..quadraticBezierTo(w * 0.08, h * 0.30, w * 0.18, h * 0.44);
+    canvas.drawPath(leftHandle, handlePaint);
+    // 右取っ手
+    final rightHandle = Path()
+      ..moveTo(w * 0.76, h * 0.22)
+      ..quadraticBezierTo(w * 0.92, h * 0.30, w * 0.82, h * 0.44);
+    canvas.drawPath(rightHandle, handlePaint);
+
+    // --- ハイライト ---
+    final hlPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = w * 0.04
+      ..strokeCap = StrokeCap.round
+      ..color = Colors.white.withValues(alpha: 0.45);
+    canvas.drawLine(
+      Offset(w * 0.34, h * 0.24),
+      Offset(w * 0.36, h * 0.42),
+      hlPaint,
+    );
+
+    // --- 台座の柱 ---
+    canvas.drawLine(
+      Offset(w * 0.50, h * 0.58),
+      Offset(w * 0.50, h * 0.72),
+      Paint()
+        ..color = color
+        ..strokeWidth = w * 0.08
+        ..strokeCap = StrokeCap.round,
+    );
+
+    // --- 台座 ---
+    final basePath = Path()
+      ..moveTo(w * 0.30, h * 0.72)
+      ..lineTo(w * 0.70, h * 0.72)
+      ..lineTo(w * 0.74, h * 0.82)
+      ..lineTo(w * 0.26, h * 0.82)
+      ..close();
+    canvas.drawPath(basePath, Paint()..color = color);
+  }
+
+  @override
+  bool shouldRepaint(covariant TrophyIconPainter oldDelegate) =>
+      color != oldDelegate.color;
+}
+
+/// パズルセクション見出しアイコン（小さなグリッド盤面）を描画する。
+class PuzzleSectionIconPainter extends CustomPainter {
+  const PuzzleSectionIconPainter({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+    final inset = math.min(w, h) * 0.12;
+    final cellW = (w - inset * 2) / 3;
+    final cellH = (h - inset * 2) / 3;
+
+    // 3x3 グリッドのセルを描く
+    for (var row = 0; row < 3; row++) {
+      for (var col = 0; col < 3; col++) {
+        final rect = Rect.fromLTWH(
+          inset + col * cellW + 1,
+          inset + row * cellH + 1,
+          cellW - 2,
+          cellH - 2,
+        );
+        final isHighlighted = (row == 1 && col == 1) || (row == 2 && col == 2);
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(rect, Radius.circular(cellW * 0.15)),
+          Paint()
+            ..color = isHighlighted
+                ? color.withValues(alpha: 0.8)
+                : color.withValues(alpha: 0.35),
+        );
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant PuzzleSectionIconPainter oldDelegate) =>
+      color != oldDelegate.color;
+}
+
+/// 操作セクション見出しアイコン（十字キーパッド）を描画する。
+class ControlSectionIconPainter extends CustomPainter {
+  const ControlSectionIconPainter({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+    final cx = w / 2;
+    final cy = h / 2;
+    final arm = math.min(w, h) * 0.20;
+    final thick = arm * 0.85;
+    final r = arm * 0.15;
+
+    // 十字の横棒
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(center: Offset(cx, cy), width: arm * 3, height: thick),
+        Radius.circular(r),
+      ),
+      Paint()..color = color.withValues(alpha: 0.55),
+    );
+
+    // 十字の縦棒
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(center: Offset(cx, cy), width: thick, height: arm * 3),
+        Radius.circular(r),
+      ),
+      Paint()..color = color.withValues(alpha: 0.55),
+    );
+
+    // 中央の丸ボタン
+    canvas.drawCircle(
+      Offset(cx, cy),
+      arm * 0.32,
+      Paint()..color = color.withValues(alpha: 0.8),
+    );
+
+    // 三角矢印（上）
+    final arrowSize = arm * 0.30;
+    final arrowColor = Colors.white.withValues(alpha: 0.7);
+    // 上
+    _drawTriangle(canvas, Offset(cx, cy - arm * 1.10), arrowSize, 0, arrowColor);
+    // 下
+    _drawTriangle(canvas, Offset(cx, cy + arm * 1.10), arrowSize, math.pi, arrowColor);
+    // 左
+    _drawTriangle(canvas, Offset(cx - arm * 1.10, cy), arrowSize, -math.pi / 2, arrowColor);
+    // 右
+    _drawTriangle(canvas, Offset(cx + arm * 1.10, cy), arrowSize, math.pi / 2, arrowColor);
+  }
+
+  void _drawTriangle(Canvas canvas, Offset center, double s, double angle, Color color) {
+    final path = Path()
+      ..moveTo(0, -s)
+      ..lineTo(s * 0.75, s * 0.5)
+      ..lineTo(-s * 0.75, s * 0.5)
+      ..close();
+    canvas.save();
+    canvas.translate(center.dx, center.dy);
+    canvas.rotate(angle);
+    canvas.drawPath(path, Paint()..color = color);
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant ControlSectionIconPainter oldDelegate) =>
+      color != oldDelegate.color;
+}

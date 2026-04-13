@@ -198,10 +198,14 @@ class _HomeScreenState extends State<HomeScreen> {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.grid_view_rounded,
-                    size: 20,
-                    color: Theme.of(context).colorScheme.primary,
+                  SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CustomPaint(
+                      painter: SokobanLogoPainter(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
                   ),
                   const SizedBox(width: 8),
                   const Text(
@@ -230,12 +234,40 @@ class _HomeScreenState extends State<HomeScreen> {
           toolbarHeight: 64,
           actions: [
             IconButton(
-              icon: const Icon(Icons.undo),
+              key: const ValueKey('appbar-undo'),
+              icon: SizedBox(
+                width: 22,
+                height: 22,
+                child: CustomPaint(
+                  painter: UndoIconPainter(
+                    color: _history.isNotEmpty
+                        ? Theme.of(context).colorScheme.onSurface
+                        : Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: 0.38),
+                  ),
+                ),
+              ),
               tooltip: '元に戻す',
               onPressed: _history.isNotEmpty ? _undo : null,
             ),
             IconButton(
-              icon: const Icon(Icons.refresh),
+              key: const ValueKey('appbar-restart'),
+              icon: SizedBox(
+                width: 22,
+                height: 22,
+                child: CustomPaint(
+                  painter: RestartIconPainter(
+                    color: _history.isNotEmpty
+                        ? Theme.of(context).colorScheme.onSurface
+                        : Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: 0.38),
+                  ),
+                ),
+              ),
               tooltip: 'リスタート',
               onPressed: _history.isNotEmpty ? _restart : null,
             ),
@@ -492,7 +524,14 @@ class _NarrowLayout extends StatelessWidget {
                 child: statusCard,
               ),
               _SectionHeading(
-                icon: Icons.grid_on,
+                iconWidget: CustomPaint(
+                  painter: PuzzleSectionIconPainter(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurfaceVariant
+                        .withValues(alpha: 0.6),
+                  ),
+                ),
                 label: 'パズル',
                 subtitle: '— 箱をゴールへ運ぼう',
               ),
@@ -500,7 +539,14 @@ class _NarrowLayout extends StatelessWidget {
               Expanded(child: boardSection),
               const SizedBox(height: 16),
               _SectionHeading(
-                icon: Icons.gamepad_outlined,
+                iconWidget: CustomPaint(
+                  painter: ControlSectionIconPainter(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurfaceVariant
+                        .withValues(alpha: 0.6),
+                  ),
+                ),
                 label: '操作',
                 subtitle: '— ボタンまたはキーで移動',
               ),
@@ -545,7 +591,14 @@ class _WideLayout extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     _SectionHeading(
-                      icon: Icons.grid_on,
+                      iconWidget: CustomPaint(
+                        painter: PuzzleSectionIconPainter(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurfaceVariant
+                              .withValues(alpha: 0.6),
+                        ),
+                      ),
                       label: 'パズル',
                       subtitle: '— 箱をゴールへ運ぼう',
                     ),
@@ -564,7 +617,14 @@ class _WideLayout extends StatelessWidget {
                     statusCard,
                     const SizedBox(height: 16),
                     _SectionHeading(
-                      icon: Icons.gamepad_outlined,
+                      iconWidget: CustomPaint(
+                        painter: ControlSectionIconPainter(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurfaceVariant
+                              .withValues(alpha: 0.6),
+                        ),
+                      ),
                       label: '操作',
                       subtitle: '— ボタンまたはキーで移動',
                     ),
@@ -584,12 +644,12 @@ class _WideLayout extends StatelessWidget {
 /// セクション見出し（アイコン + ラベル + 補足テキスト）。
 class _SectionHeading extends StatelessWidget {
   const _SectionHeading({
-    required this.icon,
+    required this.iconWidget,
     required this.label,
     this.subtitle,
   });
 
-  final IconData icon;
+  final Widget iconWidget;
   final String label;
   final String? subtitle;
 
@@ -601,7 +661,7 @@ class _SectionHeading extends StatelessWidget {
         Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4);
     return Row(
       children: [
-        Icon(icon, size: 14, color: color),
+        SizedBox(width: 14, height: 14, child: iconWidget),
         const SizedBox(width: 4),
         Text(
           label,
@@ -691,8 +751,15 @@ class _StatusCard extends StatelessWidget {
                             color: Colors.green.shade100,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Icon(Icons.emoji_events,
-                              color: Colors.green.shade600, size: 24),
+                          child: SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CustomPaint(
+                              painter: TrophyIconPainter(
+                                color: Colors.green.shade600,
+                              ),
+                            ),
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Column(
@@ -935,10 +1002,14 @@ class _ClearOverlay extends StatelessWidget {
                         color: Colors.amber.shade50,
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(
-                        Icons.emoji_events,
-                        size: 36,
-                        color: Colors.amber.shade600,
+                      child: SizedBox(
+                        width: 36,
+                        height: 36,
+                        child: CustomPaint(
+                          painter: TrophyIconPainter(
+                            color: Colors.amber.shade600,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -964,7 +1035,17 @@ class _ClearOverlay extends StatelessWidget {
                     FilledButton.icon(
                       key: const ValueKey('overlay-restart'),
                       onPressed: onRestart,
-                      icon: const Icon(Icons.refresh, size: 18),
+                      icon: SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CustomPaint(
+                          painter: RestartIconPainter(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimary,
+                          ),
+                        ),
+                      ),
                       label: const Text('もう一度'),
                       style: FilledButton.styleFrom(
                         minimumSize: const Size(130, 44),
