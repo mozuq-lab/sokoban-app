@@ -342,7 +342,10 @@ class _BoardSection extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             color: Colors.brown.shade50,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: const Color(0xFFD7CCC8),
+            ),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.08),
@@ -403,7 +406,7 @@ class _ControlSection extends StatelessWidget {
       padding: const EdgeInsets.only(top: 8, left: 12, right: 12, bottom: 12),
       decoration: BoxDecoration(
         color: const Color(0xFFFAF3E8),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: const Color(0xFFD7CCC8),
         ),
@@ -520,7 +523,7 @@ class _NarrowLayout extends StatelessWidget {
             children: [
               const SizedBox(height: 8),
               Padding(
-                padding: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.only(bottom: 12),
                 child: statusCard,
               ),
               _SectionHeading(
@@ -535,9 +538,9 @@ class _NarrowLayout extends StatelessWidget {
                 label: 'パズル',
                 subtitle: '— 箱をゴールへ運ぼう',
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               Expanded(child: boardSection),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               _SectionHeading(
                 iconWidget: CustomPaint(
                   painter: ControlSectionIconPainter(
@@ -550,9 +553,9 @@ class _NarrowLayout extends StatelessWidget {
                 label: '操作',
                 subtitle: '— ボタンまたはキーで移動',
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               controlSection,
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
             ],
           ),
         ),
@@ -979,7 +982,7 @@ class _ClearOverlay extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.black.withValues(alpha: 0.45),
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(10),
         ),
         child: Center(
           child: FittedBox(
@@ -1256,7 +1259,22 @@ class _DirectionPad extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               dirButton(Direction.left, '左'),
-              const SizedBox(width: btnSize + 8, height: btnSize),
+              SizedBox(
+                width: btnSize + 8,
+                height: btnSize,
+                child: Center(
+                  child: Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: enabled
+                          ? const Color(0xFFD7CCC8)
+                          : Colors.grey.shade300,
+                    ),
+                  ),
+                ),
+              ),
               dirButton(Direction.right, '右'),
             ],
           ),
