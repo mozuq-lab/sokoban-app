@@ -38,9 +38,9 @@ void main() {
       expect(find.byTooltip('左'), findsOneWidget);
       expect(find.byTooltip('右'), findsOneWidget);
 
-      // 手数が 0、残り箱が「あと2個」で始まる
+      // 手数が 0、残り箱が「0 / 2」で始まる
       expect(find.text('0'), findsOneWidget);
-      expect(find.text('あと2個'), findsOneWidget);
+      expect(find.text('0 / 2'), findsOneWidget);
 
       // クリア表示はまだ出ていない
       expect(find.textContaining('クリア'), findsNothing);
@@ -52,7 +52,7 @@ void main() {
 
       // 手数が 1 に増え、残り箱が 1 に減る
       expect(find.text('1'), findsOneWidget);
-      expect(find.text('あと1個'), findsOneWidget);
+      expect(find.text('1 / 2'), findsOneWidget);
       expect(find.textContaining('クリア'), findsNothing);
 
       // --- Phase 3: 解法の残りを実行してクリアに到達する ---
@@ -74,7 +74,7 @@ void main() {
       // クリア表示が消え、手数と残り箱が初期値に戻る
       expect(find.textContaining('クリア'), findsNothing);
       expect(find.text('0'), findsOneWidget);
-      expect(find.text('あと2個'), findsOneWidget);
+      expect(find.text('0 / 2'), findsOneWidget);
       expect(find.text('配置'), findsOneWidget);
     });
 
@@ -108,7 +108,7 @@ void main() {
       await tester.tap(find.byTooltip('下'));
       await tester.pump();
       expect(find.text('1'), findsOneWidget);
-      expect(find.text('あと1個'), findsOneWidget);
+      expect(find.text('1 / 2'), findsOneWidget);
 
       // Undo
       await tester.tap(find.byTooltip('元に戻す').first);
@@ -116,7 +116,7 @@ void main() {
 
       // 手数と残り箱が元に戻る
       expect(find.text('0'), findsOneWidget);
-      expect(find.text('あと2個'), findsOneWidget);
+      expect(find.text('0 / 2'), findsOneWidget);
     });
   });
 }
