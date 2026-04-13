@@ -528,7 +528,7 @@ void main() {
   testWidgets('初期状態で残り箱数が表示される', (tester) async {
     await tester.pumpWidget(buildApp());
     expect(find.text('配置'), findsOneWidget);
-    expect(find.text('あと2個'), findsOneWidget);
+    expect(find.text('0 / 2'), findsOneWidget);
   });
 
   testWidgets('箱をゴールに押すと残り数が減る', (tester) async {
@@ -537,7 +537,7 @@ void main() {
     // 下に移動: box(2,3)→(2,4) がゴールに乗る
     await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
     await tester.pump();
-    expect(find.text('あと1個'), findsOneWidget);
+    expect(find.text('1 / 2'), findsOneWidget);
   });
 
   testWidgets('Undo で箱がゴールから外れると残り数が戻る', (tester) async {
@@ -546,12 +546,12 @@ void main() {
     // 下に移動: box(2,3)→(2,4) がゴールに乗る
     await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
     await tester.pump();
-    expect(find.text('あと1個'), findsOneWidget);
+    expect(find.text('1 / 2'), findsOneWidget);
 
     // Undo: 箱がゴールから外れる
     await tester.tap(find.byIcon(Icons.undo).first);
     await tester.pump();
-    expect(find.text('あと2個'), findsOneWidget);
+    expect(find.text('0 / 2'), findsOneWidget);
   });
 
   testWidgets('リスタートで残り箱数が初期値に戻る', (tester) async {
@@ -559,11 +559,11 @@ void main() {
 
     await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
     await tester.pump();
-    expect(find.text('あと1個'), findsOneWidget);
+    expect(find.text('1 / 2'), findsOneWidget);
 
     await tester.tap(find.byIcon(Icons.refresh).first);
     await tester.pump();
-    expect(find.text('あと2個'), findsOneWidget);
+    expect(find.text('0 / 2'), findsOneWidget);
   });
 
   // --- 操作ヒント表示のテスト ---
@@ -746,6 +746,27 @@ void main() {
     expect(find.text('全配置！'), findsOneWidget);
   });
 
+  // --- 配置プログレスバーのテスト ---
+
+  testWidgets('配置プログレスバーが表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+  });
+
+  testWidgets('初期状態でプログレスバーの値が 0', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+    final indicator = tester.widget<LinearProgressIndicator>(
+      find.byType(LinearProgressIndicator),
+    );
+    expect(indicator.value, closeTo(0.0, 0.01));
+  });
+
+  testWidgets('初期状態で配置が分数形式で表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    expect(find.text('0 / 2'), findsOneWidget);
+  });
+
   // --- キーボード操作のテスト ---
 
   testWidgets('矢印キーでプレイヤーが移動する', (tester) async {
@@ -835,7 +856,7 @@ void main() {
 
     // 手数が 0 のまま変わらない
     expect(find.text('0'), findsOneWidget);
-    expect(find.text('あと2個'), findsOneWidget);
+    expect(find.text('0 / 2'), findsOneWidget);
   });
 
   testWidgets('R キーで Restart できる', (tester) async {
@@ -977,7 +998,7 @@ void main() {
     // クリア表示が消え、初期状態に戻る
     expect(find.text('もう一度'), findsNothing);
     expect(find.text('0'), findsOneWidget);
-    expect(find.text('あと2個'), findsOneWidget);
+    expect(find.text('0 / 2'), findsOneWidget);
   });
 
   testWidgets('Undo でクリア解除するとオーバーレイが消える', (tester) async {

@@ -252,9 +252,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 onRestart: _restart,
               );
 
+              final totalBoxes = gameState.boxes.length;
               final statusCard = _StatusCard(
                 moveCount: _moveCount,
                 remainingBoxes: gameState.remainingBoxes,
+                totalBoxes: totalBoxes,
                 isSolved: gameState.isSolved,
                 moveBlocked: _moveBlocked,
               );
@@ -588,12 +590,14 @@ class _StatusCard extends StatelessWidget {
   const _StatusCard({
     required this.moveCount,
     required this.remainingBoxes,
+    required this.totalBoxes,
     required this.isSolved,
     required this.moveBlocked,
   });
 
   final int moveCount;
   final int remainingBoxes;
+  final int totalBoxes;
   final bool isSolved;
   final bool moveBlocked;
 
@@ -677,7 +681,7 @@ class _StatusCard extends StatelessWidget {
                     key: ValueKey('no-banner'),
                   ),
           ),
-          // --- 進捗情報（手数・残り箱数） ---
+          // --- 進捗情報（手数・配置状況） ---
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             child: Row(
@@ -702,10 +706,41 @@ class _StatusCard extends StatelessWidget {
                     iconColor:
                         allPlaced ? Colors.green : Colors.orange.shade800,
                     label: '配置',
-                    value: allPlaced ? '全配置！' : 'あと$remainingBoxes個',
+                    value: allPlaced
+                        ? '全配置！'
+                        : '${totalBoxes - remainingBoxes} / $totalBoxes',
                   ),
                 ),
               ],
+            ),
+          ),
+          // --- 配置プログレスバー ---
+          Padding(
+            padding:
+                const EdgeInsets.only(left: 14, right: 14, bottom: 4, top: 0),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: TweenAnimationBuilder<double>(
+                tween: Tween<double>(
+                  begin: 0,
+                  end: totalBoxes > 0
+                      ? (totalBoxes - remainingBoxes) / totalBoxes
+                      : 0,
+                ),
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                builder: (context, animatedValue, _) {
+                  return LinearProgressIndicator(
+                    value: animatedValue,
+                    minHeight: 6,
+                    backgroundColor: theme.colorScheme.outlineVariant
+                        .withValues(alpha: 0.18),
+                    color: allPlaced
+                        ? Colors.green.shade400
+                        : Colors.orange.shade400,
+                  );
+                },
+              ),
             ),
           ),
           // --- ヒントテキスト ---
@@ -834,45 +869,54 @@ class _ClearOverlay extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
-              color: Colors.white,
+              color: const Color(0xFFFCFFF8),
               child: Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                    const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.emoji_events,
-                      size: 36,
-                      color: Colors.amber.shade600,
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.shade50,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.emoji_events,
+                        size: 36,
+                        color: Colors.amber.shade600,
+                      ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     Text(
                       'クリア！',
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
                         color: Colors.green.shade700,
+                        letterSpacing: 1,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     Text(
                       '$moveCount手でクリア',
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
                         color: Colors.grey.shade600,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
                     FilledButton.icon(
                       key: const ValueKey('overlay-restart'),
                       onPressed: onRestart,
                       icon: const Icon(Icons.refresh, size: 18),
                       label: const Text('もう一度'),
                       style: FilledButton.styleFrom(
-                        minimumSize: const Size(120, 40),
+                        minimumSize: const Size(130, 44),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                     ),
