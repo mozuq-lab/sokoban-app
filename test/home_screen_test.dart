@@ -1099,4 +1099,21 @@ void main() {
     await tester.pumpWidget(buildApp());
     expect(find.text('ステージ 1'), findsOneWidget);
   });
+
+  // --- 操作パッド中央インジケータのテスト ---
+
+  testWidgets('操作パッド中央に円形インジケータが表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // 方向ボタン 4 つの間にある中央の SizedBox を探す
+    // 中央インジケータは Container で BoxDecoration (circle) を持つ
+    final centerDot = find.byWidgetPredicate(
+      (w) =>
+          w is Container &&
+          w.decoration is BoxDecoration &&
+          (w.decoration as BoxDecoration).shape == BoxShape.circle &&
+          w.constraints?.maxWidth == 10,
+    );
+    expect(centerDot, findsOneWidget);
+  });
 }
