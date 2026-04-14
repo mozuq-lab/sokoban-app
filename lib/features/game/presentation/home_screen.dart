@@ -414,11 +414,32 @@ class _ControlSection extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          _ControlSubLabel(
+            key: const Key('control_sub_label_move'),
+            icon: Icons.control_camera,
+            text: '移動',
+          ),
           _DirectionPad(
             onMove: onMove,
             enabled: !gameState.isSolved,
           ),
-          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
+              children: [
+                const Expanded(child: Divider(color: Color(0xFFD7CCC8))),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: _ControlSubLabel(
+                    key: const Key('control_sub_label_assist'),
+                    icon: Icons.history,
+                    text: 'やり直し',
+                  ),
+                ),
+                const Expanded(child: Divider(color: Color(0xFFD7CCC8))),
+              ],
+            ),
+          ),
           Row(
             children: [
               Expanded(
@@ -496,6 +517,38 @@ class _ControlSection extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// 操作セクション内のサブラベル（「移動」「やり直し」など）。
+class _ControlSubLabel extends StatelessWidget {
+  const _ControlSubLabel({
+    super.key,
+    required this.icon,
+    required this.text,
+  });
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 13, color: const Color(0xFF8D6E63)),
+        const SizedBox(width: 4),
+        Text(
+          text,
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF8D6E63),
+            letterSpacing: 0.5,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -618,7 +671,7 @@ class _WideLayout extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     statusCard,
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     _SectionHeading(
                       iconWidget: CustomPaint(
                         painter: ControlSectionIconPainter(
@@ -1249,7 +1302,7 @@ class _DirectionPad extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.only(top: 2, bottom: 4),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
