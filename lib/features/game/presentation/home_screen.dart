@@ -667,7 +667,8 @@ class _WideLayout extends StatelessWidget {
               // --- 右カラム: ステータス + 操作 ---
               Expanded(
                 flex: 2,
-                child: Column(
+                child: SingleChildScrollView(
+                  child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     statusCard,
@@ -687,6 +688,7 @@ class _WideLayout extends StatelessWidget {
                     const SizedBox(height: 4),
                     controlSection,
                   ],
+                ),
                 ),
               ),
             ],
@@ -797,7 +799,7 @@ class _StatusCard extends StatelessWidget {
                     key: const ValueKey('clear-banner'),
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
-                        vertical: 12, horizontal: 16),
+                        vertical: 10, horizontal: 16),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -848,7 +850,7 @@ class _StatusCard extends StatelessWidget {
           ),
           // --- 進捗情報（手数・配置状況） ---
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             child: Row(
               children: [
                 Expanded(
@@ -918,35 +920,69 @@ class _StatusCard extends StatelessWidget {
               ),
             ),
           ),
+          // --- 区切り線 ---
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            child: Divider(
+              height: 1,
+              thickness: 1,
+              color:
+                  theme.colorScheme.outlineVariant.withValues(alpha: 0.18),
+            ),
+          ),
           // --- ヒントテキスト ---
-          Container(
-            width: double.infinity,
+          Padding(
             padding:
-                const EdgeInsets.only(left: 14, right: 14, bottom: 8, top: 2),
+                const EdgeInsets.only(left: 14, right: 14, bottom: 8, top: 6),
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
-              child: Text(
-                isSolved
-                    ? 'クリア済み — Ctrl+Z で戻す・R でやり直し'
-                    : moveBlocked
-                        ? 'その方向には進めません'
-                        : '移動: ボタン／矢印・WASD ｜ 戻す: Ctrl+Z ｜ やり直し: R',
-                key: ValueKey(
-                  isSolved
-                      ? 'hint-cleared'
-                      : moveBlocked
-                          ? 'hint-blocked'
-                          : 'hint-normal',
-                ),
-                style: TextStyle(
-                  fontSize: 11,
-                  color: moveBlocked && !isSolved
-                      ? Colors.red.shade400
-                      : theme.colorScheme.onSurfaceVariant
-                          .withValues(alpha: 0.6),
-                ),
-                textAlign: TextAlign.center,
-              ),
+              child: moveBlocked && !isSolved
+                  ? Text(
+                      'その方向には進めません',
+                      key: const ValueKey('hint-blocked'),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.red.shade400,
+                      ),
+                      textAlign: TextAlign.center,
+                    )
+                  : Wrap(
+                      key: ValueKey(
+                          isSolved ? 'hint-cleared' : 'hint-normal'),
+                      alignment: WrapAlignment.center,
+                      spacing: 6,
+                      runSpacing: 4,
+                      children: isSolved
+                          ? [
+                              _HintChip(
+                                label: 'クリア済み',
+                                color: Colors.green.shade600,
+                                bgColor: Colors.green.shade50,
+                              ),
+                              _HintChip(
+                                label: '戻す  Ctrl+Z',
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                              _HintChip(
+                                label: 'やり直し  R',
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ]
+                          : [
+                              _HintChip(
+                                label: '移動  ボタン／矢印・WASD',
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                              _HintChip(
+                                label: '戻す  Ctrl+Z',
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                              _HintChip(
+                                label: 'やり直し  R',
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ],
+                    ),
             ),
           ),
         ],
@@ -1015,6 +1051,41 @@ class _StatItem extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+/// ヒント行の個別チップ。
+class _HintChip extends StatelessWidget {
+  const _HintChip({
+    required this.label,
+    required this.color,
+    this.bgColor,
+  });
+
+  final String label;
+  final Color color;
+  final Color? bgColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      decoration: BoxDecoration(
+        color: bgColor ??
+            theme.colorScheme.outlineVariant.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 10.5,
+          color: color.withValues(alpha: 0.72),
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.1,
+        ),
+      ),
     );
   }
 }

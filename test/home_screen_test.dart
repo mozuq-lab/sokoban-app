@@ -578,7 +578,7 @@ void main() {
   testWidgets('通常時に操作ヒントが表示される', (tester) async {
     await tester.pumpWidget(buildApp());
     expect(
-      find.text('移動: ボタン／矢印・WASD ｜ 戻す: Ctrl+Z ｜ やり直し: R'),
+      find.text('移動  ボタン／矢印・WASD'),
       findsOneWidget,
     );
   });
@@ -589,11 +589,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.text('クリア済み — Ctrl+Z で戻す・R でやり直し'),
+      find.text('クリア済み'),
       findsOneWidget,
     );
     expect(
-      find.text('移動: ボタン／矢印・WASD ｜ 戻す: Ctrl+Z ｜ やり直し: R'),
+      find.text('移動  ボタン／矢印・WASD'),
       findsNothing,
     );
   });
@@ -606,11 +606,11 @@ void main() {
     await tester.pump();
 
     expect(
-      find.text('移動: ボタン／矢印・WASD ｜ 戻す: Ctrl+Z ｜ やり直し: R'),
+      find.text('移動  ボタン／矢印・WASD'),
       findsOneWidget,
     );
     expect(
-      find.text('クリア済み — Ctrl+Z で戻す・R でやり直し'),
+      find.text('クリア済み'),
       findsNothing,
     );
   });
@@ -631,7 +631,7 @@ void main() {
 
     expect(find.text('その方向には進めません'), findsOneWidget);
     expect(
-      find.text('移動: ボタン／矢印・WASD ｜ 戻す: Ctrl+Z ｜ やり直し: R'),
+      find.text('移動  ボタン／矢印・WASD'),
       findsNothing,
     );
   });
@@ -654,7 +654,7 @@ void main() {
 
     expect(find.text('その方向には進めません'), findsNothing);
     expect(
-      find.text('移動: ボタン／矢印・WASD ｜ 戻す: Ctrl+Z ｜ やり直し: R'),
+      find.text('移動  ボタン／矢印・WASD'),
       findsOneWidget,
     );
   });
@@ -676,7 +676,7 @@ void main() {
 
     expect(find.text('その方向には進めません'), findsNothing);
     expect(
-      find.text('移動: ボタン／矢印・WASD ｜ 戻す: Ctrl+Z ｜ やり直し: R'),
+      find.text('移動  ボタン／矢印・WASD'),
       findsOneWidget,
     );
   });
@@ -702,7 +702,7 @@ void main() {
 
     expect(find.text('その方向には進めません'), findsNothing);
     expect(
-      find.text('移動: ボタン／矢印・WASD ｜ 戻す: Ctrl+Z ｜ やり直し: R'),
+      find.text('移動  ボタン／矢印・WASD'),
       findsOneWidget,
     );
   });
@@ -730,7 +730,7 @@ void main() {
 
     expect(find.text('その方向には進めません'), findsNothing);
     expect(
-      find.text('移動: ボタン／矢印・WASD ｜ 戻す: Ctrl+Z ｜ やり直し: R'),
+      find.text('移動  ボタン／矢印・WASD'),
       findsOneWidget,
     );
   });
@@ -740,7 +740,7 @@ void main() {
     await solveStage(tester);
 
     expect(
-      find.text('クリア済み — Ctrl+Z で戻す・R でやり直し'),
+      find.text('クリア済み'),
       findsOneWidget,
     );
     expect(find.text('その方向には進めません'), findsNothing);
