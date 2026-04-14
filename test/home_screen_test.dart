@@ -1100,6 +1100,27 @@ void main() {
     expect(find.text('ステージ 1'), findsOneWidget);
   });
 
+  // --- 操作セクション内サブラベルのテスト ---
+
+  testWidgets('操作セクションに「移動」と「やり直し」のサブラベルが表示される',
+      (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    final moveLabel = find.byKey(const Key('control_sub_label_move'));
+    expect(moveLabel, findsOneWidget);
+    expect(
+      find.descendant(of: moveLabel, matching: find.text('移動')),
+      findsOneWidget,
+    );
+
+    final assistLabel = find.byKey(const Key('control_sub_label_assist'));
+    expect(assistLabel, findsOneWidget);
+    expect(
+      find.descendant(of: assistLabel, matching: find.text('やり直し')),
+      findsOneWidget,
+    );
+  });
+
   // --- 操作パッド中央インジケータのテスト ---
 
   testWidgets('操作パッド中央に円形インジケータが表示される', (tester) async {
