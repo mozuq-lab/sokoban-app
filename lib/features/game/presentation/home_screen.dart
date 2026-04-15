@@ -852,9 +852,18 @@ class _StatusCard extends StatelessWidget {
               : theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
         ),
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // --- 状態サマリー帯 ---
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 250),
+            transitionBuilder: (child, animation) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+            child: _buildSummaryStrip(theme),
+          ),
           // --- クリアバナー（クリア時のみ表示） ---
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
@@ -1010,17 +1019,7 @@ class _StatusCard extends StatelessWidget {
                 const EdgeInsets.only(left: 14, right: 14, bottom: 8, top: 6),
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
-              child: moveBlocked && !isSolved
-                  ? Text(
-                      'その方向には進めません',
-                      key: const ValueKey('hint-blocked'),
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.red.shade400,
-                      ),
-                      textAlign: TextAlign.center,
-                    )
-                  : Wrap(
+              child: Wrap(
                       key: ValueKey(
                           isSolved ? 'hint-cleared' : 'hint-normal'),
                       alignment: WrapAlignment.center,
@@ -1060,6 +1059,48 @@ class _StatusCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryStrip(ThemeData theme) {
+    final Color bgColor;
+    final Color textColor;
+    final String text;
+    final Key key;
+
+    if (isSolved) {
+      bgColor = Colors.green.shade100;
+      textColor = Colors.green.shade800;
+      text = 'すべて配置完了！';
+      key = const ValueKey('summary-cleared');
+    } else if (moveBlocked) {
+      bgColor = Colors.red.shade50;
+      textColor = Colors.red.shade700;
+      text = 'その方向には進めません';
+      key = const ValueKey('summary-blocked');
+    } else {
+      bgColor = Colors.orange.shade50;
+      textColor = Colors.brown.shade700;
+      text = remainingBoxes == 0
+          ? 'すべて配置完了！'
+          : 'あと $remainingBoxes 個で完了';
+      key = ValueKey('summary-progress-$remainingBoxes');
+    }
+
+    return Container(
+      key: key,
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 14),
+      color: bgColor,
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: textColor,
+        ),
       ),
     );
   }

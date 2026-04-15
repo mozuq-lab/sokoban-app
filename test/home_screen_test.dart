@@ -617,7 +617,7 @@ void main() {
 
   // --- 移動失敗フィードバックのテスト ---
 
-  testWidgets('壁に向かって移動するとブロック文言が表示される', (tester) async {
+  testWidgets('壁に向かって移動するとサマリー帯にブロック文言が表示される', (tester) async {
     await tester.pumpWidget(buildApp());
 
     // 左に移動（成功: (2,2) → (1,2)）
@@ -629,10 +629,12 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
 
+    // サマリー帯にブロック文言が表示される
     expect(find.text('その方向には進めません'), findsOneWidget);
+    // ヒント行は通常文言のまま表示される
     expect(
       find.text('移動  ボタン／矢印・WASD'),
-      findsNothing,
+      findsOneWidget,
     );
   });
 
@@ -652,14 +654,12 @@ void main() {
     // AnimatedSwitcher 遷移を完了させる
     await tester.pumpAndSettle();
 
+    // サマリー帯が進捗表示に戻る
     expect(find.text('その方向には進めません'), findsNothing);
-    expect(
-      find.text('移動  ボタン／矢印・WASD'),
-      findsOneWidget,
-    );
+    expect(find.text('あと 2 個で完了'), findsOneWidget);
   });
 
-  testWidgets('ブロック後に成功移動するとヒントが通常文言に戻る', (tester) async {
+  testWidgets('ブロック後に成功移動するとサマリー帯が進捗表示に戻る', (tester) async {
     await tester.pumpWidget(buildApp());
 
     // 左に移動（成功）
@@ -672,16 +672,13 @@ void main() {
 
     // 右に移動（成功）
     await tester.tap(find.byTooltip('右'));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.text('その方向には進めません'), findsNothing);
-    expect(
-      find.text('移動  ボタン／矢印・WASD'),
-      findsOneWidget,
-    );
+    expect(find.text('あと 2 個で完了'), findsOneWidget);
   });
 
-  testWidgets('ブロック後に Undo するとヒントが通常文言に戻る', (tester) async {
+  testWidgets('ブロック後に Undo するとサマリー帯が進捗表示に戻る', (tester) async {
     await tester.pumpWidget(buildApp());
 
     // 下に移動（成功）
@@ -698,25 +695,25 @@ void main() {
 
     // Undo
     await tester.tap(find.byKey(const ValueKey('appbar-undo')).first);
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.text('その方向には進めません'), findsNothing);
+    // Undo 後は箱 1 個がゴール上（下移動時に押した分）→ 残り 1 個
+    expect(find.text('あと 1 個で完了'), findsOneWidget);
     expect(
       find.text('移動  ボタン／矢印・WASD'),
       findsOneWidget,
     );
   });
 
-  testWidgets('ブロック後に Restart するとヒントが通常文言に戻る', (tester) async {
+  testWidgets('ブロック後に Restart するとサマリー帯が進捗表示に戻る', (tester) async {
     await tester.pumpWidget(buildApp());
 
     // 下に移動（成功）
     await tester.tap(find.byTooltip('下'));
     await tester.pump();
 
-    // 上に移動（箱を押せない — 壁で blocked）
-    // player(2,3) → 上(2,2) は空なので成功する。
-    // instead: 左に移動して壁にぶつける
+    // 左に移動して壁にぶつける
     await tester.tap(find.byTooltip('左'));
     await tester.pump();
     // player at (1,3), try left again → wall
@@ -726,9 +723,10 @@ void main() {
 
     // Restart
     await tester.tap(find.byKey(const ValueKey('appbar-restart')).first);
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.text('その方向には進めません'), findsNothing);
+    expect(find.text('あと 2 個で完了'), findsOneWidget);
     expect(
       find.text('移動  ボタン／矢印・WASD'),
       findsOneWidget,
@@ -751,6 +749,29 @@ void main() {
     await solveStage(tester);
 
     expect(find.text('全配置！'), findsOneWidget);
+  });
+
+  // --- 状態サマリー帯のテスト ---
+
+  testWidgets('初期状態でサマリー帯に残り箱数が表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    expect(find.text('あと 2 個で完了'), findsOneWidget);
+  });
+
+  testWidgets('箱をゴールに押すとサマリー帯の残り数が減る', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // 下に移動: box(2,3)→(2,4) がゴールに乗る
+    await tester.tap(find.byTooltip('下'));
+    await tester.pump();
+    expect(find.text('あと 1 個で完了'), findsOneWidget);
+  });
+
+  testWidgets('クリア時にサマリー帯が完了表示になる', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+
+    expect(find.text('すべて配置完了！'), findsOneWidget);
   });
 
   // --- 配置プログレスバーのテスト ---
