@@ -336,9 +336,12 @@ class _BoardSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final placed = gameState.boxes.length - gameState.remainingBoxes;
+    final total = gameState.boxes.length;
+
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 400, maxHeight: 400),
+        constraints: const BoxConstraints(maxWidth: 400, maxHeight: 440),
         child: Container(
           decoration: BoxDecoration(
             color: Colors.brown.shade50,
@@ -354,28 +357,99 @@ class _BoardSection extends StatelessWidget {
               ),
             ],
           ),
-          padding: const EdgeInsets.all(6),
-          child: AspectRatio(
-            aspectRatio: gameState.board.width / gameState.board.height,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final cellSize =
-                    constraints.maxWidth / gameState.board.width;
-                return Stack(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // --- ヘッダー行 ---
+              Padding(
+                padding:
+                    const EdgeInsets.only(left: 10, right: 10, top: 6, bottom: 2),
+                child: Row(
                   children: [
-                    _BoardView(
-                      gameState: gameState,
-                      cellSize: cellSize,
-                    ),
-                    if (gameState.isSolved)
-                      _ClearOverlay(
-                        moveCount: moveCount,
-                        onRestart: onRestart,
+                    SizedBox(
+                      width: 13,
+                      height: 13,
+                      child: CustomPaint(
+                        painter: PuzzleSectionIconPainter(
+                          color: const Color(0xFF8D6E63).withValues(alpha: 0.7),
+                        ),
                       ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'ステージ 1',
+                      key: const Key('board_header_stage'),
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF8D6E63),
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                    const Spacer(),
+                    Container(
+                      key: const Key('board_header_box_count'),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 1),
+                      decoration: BoxDecoration(
+                        color: gameState.isSolved
+                            ? Colors.green.shade50
+                            : const Color(0xFFEFEBE9),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        '📦 $placed / $total',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          color: gameState.isSolved
+                              ? Colors.green.shade700
+                              : const Color(0xFF8D6E63),
+                        ),
+                      ),
+                    ),
                   ],
-                );
-              },
-            ),
+                ),
+              ),
+              // --- 区切り線 ---
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: const Color(0xFFD7CCC8).withValues(alpha: 0.5),
+                ),
+              ),
+              // --- 盤面 ---
+              Flexible(
+                child: Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: AspectRatio(
+                    aspectRatio:
+                        gameState.board.width / gameState.board.height,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final cellSize =
+                            constraints.maxWidth / gameState.board.width;
+                        return Stack(
+                          children: [
+                            _BoardView(
+                              gameState: gameState,
+                              cellSize: cellSize,
+                            ),
+                            if (gameState.isSolved)
+                              _ClearOverlay(
+                                moveCount: moveCount,
+                                onRestart: onRestart,
+                              ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
