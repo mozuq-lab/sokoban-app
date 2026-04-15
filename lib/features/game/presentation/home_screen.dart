@@ -794,61 +794,61 @@ class _WideLayout extends StatelessWidget {
               const SizedBox(height: 10),
               Flexible(
                 child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // --- 左カラム: 盤面 ---
-              Expanded(
-                flex: 3,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    _SectionHeading(
-                      iconWidget: CustomPaint(
-                        painter: PuzzleSectionIconPainter(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurfaceVariant
-                              .withValues(alpha: 0.6),
+                    // --- 左カラム: 盤面 ---
+                    Expanded(
+                      flex: 3,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _SectionHeading(
+                            iconWidget: CustomPaint(
+                              painter: PuzzleSectionIconPainter(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant
+                                    .withValues(alpha: 0.6),
+                              ),
+                            ),
+                            label: 'パズル',
+                            subtitle: '— 箱をゴールへ運ぼう',
+                          ),
+                          const SizedBox(height: 4),
+                          Flexible(child: boardSection),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 24),
+                    // --- 右カラム: ステータス + 操作 ---
+                    Expanded(
+                      flex: 2,
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            statusCard,
+                            const SizedBox(height: 12),
+                            _SectionHeading(
+                              iconWidget: CustomPaint(
+                                painter: ControlSectionIconPainter(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant
+                                      .withValues(alpha: 0.6),
+                                ),
+                              ),
+                              label: '操作',
+                              subtitle: '— ボタンまたはキーで移動',
+                            ),
+                            const SizedBox(height: 4),
+                            controlSection,
+                          ],
                         ),
                       ),
-                      label: 'パズル',
-                      subtitle: '— 箱をゴールへ運ぼう',
                     ),
-                    const SizedBox(height: 4),
-                    Flexible(child: boardSection),
                   ],
                 ),
-              ),
-              const SizedBox(width: 24),
-              // --- 右カラム: ステータス + 操作 ---
-              Expanded(
-                flex: 2,
-                child: SingleChildScrollView(
-                  child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    statusCard,
-                    const SizedBox(height: 12),
-                    _SectionHeading(
-                      iconWidget: CustomPaint(
-                        painter: ControlSectionIconPainter(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurfaceVariant
-                              .withValues(alpha: 0.6),
-                        ),
-                      ),
-                      label: '操作',
-                      subtitle: '— ボタンまたはキーで移動',
-                    ),
-                    const SizedBox(height: 4),
-                    controlSection,
-                  ],
-                ),
-                ),
-              ),
-            ],
-          ),
               ),
             ],
           ),
