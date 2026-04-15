@@ -1097,7 +1097,16 @@ void main() {
 
   testWidgets('AppBar にステージ見出しが表示される', (tester) async {
     await tester.pumpWidget(buildApp());
-    expect(find.text('ステージ 1'), findsOneWidget);
+    // AppBar と盤面ヘッダーの両方に「ステージ 1」が表示される
+    expect(find.text('ステージ 1'), findsNWidgets(2));
+  });
+
+  // --- 盤面ヘッダーのテスト ---
+
+  testWidgets('盤面カードにステージラベルと箱カウントが表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    expect(find.byKey(const Key('board_header_stage')), findsOneWidget);
+    expect(find.byKey(const Key('board_header_box_count')), findsOneWidget);
   });
 
   // --- 操作セクション内サブラベルのテスト ---
