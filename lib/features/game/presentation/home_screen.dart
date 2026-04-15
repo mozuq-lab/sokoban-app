@@ -301,8 +301,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 onRestart: _restart,
               );
 
+              final playContextBanner = _PlayContextBanner(
+                isSolved: gameState.isSolved,
+              );
+
               if (useWideLayout) {
                 return _WideLayout(
+                  playContextBanner: playContextBanner,
                   boardSection: boardSection,
                   statusCard: statusCard,
                   controlSection: controlSection,
@@ -310,6 +315,7 @@ class _HomeScreenState extends State<HomeScreen> {
               }
 
               return _NarrowLayout(
+                playContextBanner: playContextBanner,
                 boardSection: boardSection,
                 statusCard: statusCard,
                 controlSection: controlSection,
@@ -627,14 +633,80 @@ class _ControlSubLabel extends StatelessWidget {
   }
 }
 
+/// プレイ画面上部のコンテキストバナー。
+///
+/// ステージ情報と目的を一行で示し、プレイ中の文脈を伝える。
+class _PlayContextBanner extends StatelessWidget {
+  const _PlayContextBanner({required this.isSolved});
+
+  final bool isSolved;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color bgColor;
+    final Color fgColor;
+    final String label;
+    final IconData icon;
+
+    if (isSolved) {
+      bgColor = const Color(0xFFE8F5E9);
+      fgColor = const Color(0xFF388E3C);
+      label = 'ステージ 1 — クリア済み';
+      icon = Icons.emoji_events_rounded;
+    } else {
+      bgColor = const Color(0xFFFFF8E1);
+      fgColor = const Color(0xFF8D6E63);
+      label = 'ステージ 1 — 箱をすべてゴールへ運ぼう';
+      icon = Icons.grid_on_rounded;
+    }
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      child: Container(
+        key: ValueKey<bool>(isSolved),
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: fgColor.withValues(alpha: 0.25)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 14, color: fgColor),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                label,
+                key: const Key('play_context_label'),
+                style: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w600,
+                  color: fgColor,
+                  letterSpacing: 0.3,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// 狭い画面向けの縦積みレイアウト（従来と同じ構成）。
 class _NarrowLayout extends StatelessWidget {
   const _NarrowLayout({
+    required this.playContextBanner,
     required this.boardSection,
     required this.statusCard,
     required this.controlSection,
   });
 
+  final Widget playContextBanner;
   final Widget boardSection;
   final Widget statusCard;
   final Widget controlSection;
@@ -648,6 +720,8 @@ class _NarrowLayout extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
             children: [
+              const SizedBox(height: 8),
+              playContextBanner,
               const SizedBox(height: 8),
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
@@ -695,11 +769,13 @@ class _NarrowLayout extends StatelessWidget {
 /// 左に盤面、右にステータスカードと操作セクションを配置する。
 class _WideLayout extends StatelessWidget {
   const _WideLayout({
+    required this.playContextBanner,
     required this.boardSection,
     required this.statusCard,
     required this.controlSection,
   });
 
+  final Widget playContextBanner;
   final Widget boardSection;
   final Widget statusCard;
   final Widget controlSection;
@@ -711,58 +787,67 @@ class _WideLayout extends StatelessWidget {
         constraints: const BoxConstraints(maxWidth: 960),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // --- 左カラム: 盤面 ---
-              Expanded(
-                flex: 3,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+              playContextBanner,
+              const SizedBox(height: 10),
+              Flexible(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    _SectionHeading(
-                      iconWidget: CustomPaint(
-                        painter: PuzzleSectionIconPainter(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurfaceVariant
-                              .withValues(alpha: 0.6),
+                    // --- 左カラム: 盤面 ---
+                    Expanded(
+                      flex: 3,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _SectionHeading(
+                            iconWidget: CustomPaint(
+                              painter: PuzzleSectionIconPainter(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant
+                                    .withValues(alpha: 0.6),
+                              ),
+                            ),
+                            label: 'パズル',
+                            subtitle: '— 箱をゴールへ運ぼう',
+                          ),
+                          const SizedBox(height: 4),
+                          Flexible(child: boardSection),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 24),
+                    // --- 右カラム: ステータス + 操作 ---
+                    Expanded(
+                      flex: 2,
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            statusCard,
+                            const SizedBox(height: 12),
+                            _SectionHeading(
+                              iconWidget: CustomPaint(
+                                painter: ControlSectionIconPainter(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant
+                                      .withValues(alpha: 0.6),
+                                ),
+                              ),
+                              label: '操作',
+                              subtitle: '— ボタンまたはキーで移動',
+                            ),
+                            const SizedBox(height: 4),
+                            controlSection,
+                          ],
                         ),
                       ),
-                      label: 'パズル',
-                      subtitle: '— 箱をゴールへ運ぼう',
                     ),
-                    const SizedBox(height: 4),
-                    Flexible(child: boardSection),
                   ],
-                ),
-              ),
-              const SizedBox(width: 24),
-              // --- 右カラム: ステータス + 操作 ---
-              Expanded(
-                flex: 2,
-                child: SingleChildScrollView(
-                  child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    statusCard,
-                    const SizedBox(height: 12),
-                    _SectionHeading(
-                      iconWidget: CustomPaint(
-                        painter: ControlSectionIconPainter(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurfaceVariant
-                              .withValues(alpha: 0.6),
-                        ),
-                      ),
-                      label: '操作',
-                      subtitle: '— ボタンまたはキーで移動',
-                    ),
-                    const SizedBox(height: 4),
-                    controlSection,
-                  ],
-                ),
                 ),
               ),
             ],

@@ -1167,4 +1167,23 @@ void main() {
     );
     expect(centerDot, findsOneWidget);
   });
+
+  // --- プレイコンテキストバナーのテスト ---
+
+  testWidgets('プレイコンテキストバナーにステージ情報と目的が表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    expect(
+      find.byKey(const Key('play_context_label')),
+      findsOneWidget,
+    );
+    expect(find.text('ステージ 1 — 箱をすべてゴールへ運ぼう'), findsOneWidget);
+  });
+
+  testWidgets('クリア後にバナーがクリア済み表示に変わる', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+    await tester.pumpAndSettle();
+
+    expect(find.text('ステージ 1 — クリア済み'), findsOneWidget);
+  });
 }
