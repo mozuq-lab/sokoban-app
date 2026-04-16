@@ -633,9 +633,10 @@ class _ControlSubLabel extends StatelessWidget {
   }
 }
 
-/// プレイ画面上部のコンテキストバナー。
+/// プレイ画面上部のヒーローバナー。
 ///
-/// ステージ情報と目的を一行で示し、プレイ中の文脈を伝える。
+/// ステージ情報と目的を視覚階層のある小さなカード風に表示し、
+/// プレイ中の文脈を伝える。クリア時は配色が切り替わる。
 class _PlayContextBanner extends StatelessWidget {
   const _PlayContextBanner({required this.isSolved});
 
@@ -643,20 +644,29 @@ class _PlayContextBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Color accentColor;
     final Color bgColor;
     final Color fgColor;
-    final String label;
+    final Color subtitleColor;
+    final String stageLabel;
+    final String description;
     final IconData icon;
 
     if (isSolved) {
+      accentColor = const Color(0xFF388E3C);
       bgColor = const Color(0xFFE8F5E9);
-      fgColor = const Color(0xFF388E3C);
-      label = 'ステージ 1 — クリア済み';
+      fgColor = const Color(0xFF2E7D32);
+      subtitleColor = const Color(0xFF388E3C);
+      stageLabel = 'ステージ 1';
+      description = 'クリア済み';
       icon = Icons.emoji_events_rounded;
     } else {
+      accentColor = const Color(0xFF8D6E63);
       bgColor = const Color(0xFFFFF8E1);
-      fgColor = const Color(0xFF8D6E63);
-      label = 'ステージ 1 — 箱をすべてゴールへ運ぼう';
+      fgColor = const Color(0xFF5D4037);
+      subtitleColor = const Color(0xFF8D6E63);
+      stageLabel = 'ステージ 1';
+      description = '箱をすべてゴールへ運ぼう';
       icon = Icons.grid_on_rounded;
     }
 
@@ -665,32 +675,92 @@ class _PlayContextBanner extends StatelessWidget {
       child: Container(
         key: ValueKey<bool>(isSolved),
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           color: bgColor,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: fgColor.withValues(alpha: 0.25)),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 14, color: fgColor),
-            const SizedBox(width: 6),
-            Flexible(
-              child: Text(
-                label,
-                key: const Key('play_context_label'),
-                style: TextStyle(
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w600,
-                  color: fgColor,
-                  letterSpacing: 0.3,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: accentColor.withValues(alpha: 0.2),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: accentColor.withValues(alpha: 0.08),
+              blurRadius: 4,
+              offset: const Offset(0, 1),
             ),
           ],
+        ),
+        child: IntrinsicHeight(
+          child: Row(
+            children: [
+              // 左アクセントバー
+              Container(
+                width: 4,
+                decoration: BoxDecoration(
+                  color: accentColor,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(10),
+                    bottomLeft: Radius.circular(10),
+                  ),
+                ),
+              ),
+              // コンテンツ部分
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 8),
+                  child: Row(
+                    children: [
+                      // アイコン背景
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: accentColor.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(icon, size: 17, color: accentColor),
+                      ),
+                      const SizedBox(width: 10),
+                      // テキスト 2 行
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              stageLabel,
+                              key: const Key('play_context_label'),
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: fgColor,
+                                letterSpacing: 0.3,
+                                height: 1.2,
+                              ),
+                            ),
+                            const SizedBox(height: 1),
+                            Text(
+                              description,
+                              key: const Key('play_context_description'),
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: subtitleColor,
+                                letterSpacing: 0.2,
+                                height: 1.2,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

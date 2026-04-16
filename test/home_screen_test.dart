@@ -588,9 +588,10 @@ void main() {
     await solveStage(tester);
     await tester.pumpAndSettle();
 
+    // ヒーローバナーとヒントチップの両方に「クリア済み」が表示される
     expect(
       find.text('クリア済み'),
-      findsOneWidget,
+      findsAtLeast(1),
     );
     expect(
       find.text('移動  ボタン／矢印・WASD'),
@@ -737,9 +738,10 @@ void main() {
     await tester.pumpWidget(buildApp());
     await solveStage(tester);
 
+    // ヒーローバナーとヒントチップの両方に「クリア済み」が表示される
     expect(
       find.text('クリア済み'),
-      findsOneWidget,
+      findsAtLeast(1),
     );
     expect(find.text('その方向には進めません'), findsNothing);
   });
@@ -1118,8 +1120,8 @@ void main() {
 
   testWidgets('AppBar にステージ見出しが表示される', (tester) async {
     await tester.pumpWidget(buildApp());
-    // AppBar と盤面ヘッダーの両方に「ステージ 1」が表示される
-    expect(find.text('ステージ 1'), findsNWidgets(2));
+    // AppBar、ヒーローバナー、盤面ヘッダーに「ステージ 1」が表示される
+    expect(find.text('ステージ 1'), findsAtLeast(2));
   });
 
   // --- 盤面ヘッダーのテスト ---
@@ -1176,7 +1178,9 @@ void main() {
       find.byKey(const Key('play_context_label')),
       findsOneWidget,
     );
-    expect(find.text('ステージ 1 — 箱をすべてゴールへ運ぼう'), findsOneWidget);
+    // ヒーローバナーはステージ名と説明を2行で表示する
+    expect(find.text('ステージ 1'), findsAtLeast(1));
+    expect(find.text('箱をすべてゴールへ運ぼう'), findsOneWidget);
   });
 
   testWidgets('クリア後にバナーがクリア済み表示に変わる', (tester) async {
@@ -1184,6 +1188,17 @@ void main() {
     await solveStage(tester);
     await tester.pumpAndSettle();
 
-    expect(find.text('ステージ 1 — クリア済み'), findsOneWidget);
+    // ヒーローバナーの説明テキストでクリア状態を確認
+    expect(find.byKey(const Key('play_context_description')), findsOneWidget);
+    final descWidget = tester.widget<Text>(
+      find.byKey(const Key('play_context_description')),
+    );
+    expect(descWidget.data, 'クリア済み');
+  });
+
+  testWidgets('ヒーローバナーにステージラベルと説明のキーが存在する', (tester) async {
+    await tester.pumpWidget(buildApp());
+    expect(find.byKey(const Key('play_context_label')), findsOneWidget);
+    expect(find.byKey(const Key('play_context_description')), findsOneWidget);
   });
 }
