@@ -776,6 +776,61 @@ void main() {
     expect(find.text('すべて配置完了！'), findsOneWidget);
   });
 
+  // --- 配置ドットのテスト ---
+
+  testWidgets('初期状態でサマリー帯に箱数ぶんのドットが表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    // totalBoxes == 2 なのでドットが 2 つ
+    expect(find.byKey(const ValueKey('progress-dot-0')), findsOneWidget);
+    expect(find.byKey(const ValueKey('progress-dot-1')), findsOneWidget);
+  });
+
+  testWidgets('箱をゴールに置くとドットの塗りが変わる', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // 初期状態: 両方アウトライン（color == null）
+    for (var i = 0; i < 2; i++) {
+      final dot = tester.widget<Container>(
+        find.byKey(ValueKey('progress-dot-$i')),
+      );
+      final deco = dot.decoration! as BoxDecoration;
+      expect(deco.color, isNull, reason: 'dot $i should be outline');
+      expect(deco.border, isNotNull, reason: 'dot $i should have border');
+    }
+
+    // 下に移動: box(2,3)→(2,4) がゴールに乗る → placedCount == 1
+    await tester.tap(find.byTooltip('下'));
+    await tester.pumpAndSettle();
+
+    final dot0 = tester.widget<Container>(
+      find.byKey(const ValueKey('progress-dot-0')),
+    );
+    final deco0 = dot0.decoration! as BoxDecoration;
+    expect(deco0.color, isNotNull, reason: 'dot 0 should be filled');
+    expect(deco0.border, isNull, reason: 'dot 0 should have no border');
+
+    final dot1 = tester.widget<Container>(
+      find.byKey(const ValueKey('progress-dot-1')),
+    );
+    final deco1 = dot1.decoration! as BoxDecoration;
+    expect(deco1.color, isNull, reason: 'dot 1 should be outline');
+    expect(deco1.border, isNotNull, reason: 'dot 1 should have border');
+  });
+
+  testWidgets('クリア時にすべてのドットが塗りつぶしになる', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+    await tester.pumpAndSettle();
+
+    for (var i = 0; i < 2; i++) {
+      final dot = tester.widget<Container>(
+        find.byKey(ValueKey('progress-dot-$i')),
+      );
+      final deco = dot.decoration! as BoxDecoration;
+      expect(deco.color, isNotNull, reason: 'dot $i should be filled');
+    }
+  });
+
   // --- 配置プログレスバーのテスト ---
 
   testWidgets('配置プログレスバーが表示される', (tester) async {
