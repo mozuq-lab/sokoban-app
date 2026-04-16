@@ -1246,19 +1246,55 @@ class _StatusCard extends StatelessWidget {
       key = ValueKey('summary-progress-$remainingBoxes');
     }
 
+    final int placedCount = totalBoxes - remainingBoxes;
+
     return Container(
       key: key,
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 14),
       color: bgColor,
-      child: Text(
-        text,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: textColor,
-        ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            text,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: textColor,
+            ),
+          ),
+          if (totalBoxes > 0) ...[
+            const SizedBox(height: 3),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(totalBoxes, (i) {
+                final bool placed = i < placedCount;
+                return Padding(
+                  padding: EdgeInsets.only(
+                    left: i == 0 ? 0 : 4,
+                  ),
+                  child: Container(
+                    key: ValueKey('progress-dot-$i'),
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: placed ? textColor.withValues(alpha: 0.8) : null,
+                      border: placed
+                          ? null
+                          : Border.all(
+                              color: textColor.withValues(alpha: 0.4),
+                              width: 1.5,
+                            ),
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ],
+        ],
       ),
     );
   }
