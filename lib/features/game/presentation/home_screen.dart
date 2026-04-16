@@ -708,20 +708,20 @@ class _PlayContextBanner extends StatelessWidget {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 8),
+                      horizontal: 12, vertical: 10),
                   child: Row(
                     children: [
                       // アイコン背景
                       Container(
-                        width: 32,
-                        height: 32,
+                        width: 36,
+                        height: 36,
                         decoration: BoxDecoration(
                           color: accentColor.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(9),
                         ),
-                        child: Icon(icon, size: 17, color: accentColor),
+                        child: Icon(icon, size: 19, color: accentColor),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 12),
                       // テキスト 2 行
                       Expanded(
                         child: Column(
@@ -732,23 +732,23 @@ class _PlayContextBanner extends StatelessWidget {
                               stageLabel,
                               key: const Key('play_context_label'),
                               style: TextStyle(
-                                fontSize: 13,
+                                fontSize: 14,
                                 fontWeight: FontWeight.w700,
                                 color: fgColor,
                                 letterSpacing: 0.3,
                                 height: 1.2,
                               ),
                             ),
-                            const SizedBox(height: 1),
+                            const SizedBox(height: 2),
                             Text(
                               description,
                               key: const Key('play_context_description'),
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w500,
                                 color: subtitleColor,
                                 letterSpacing: 0.2,
-                                height: 1.2,
+                                height: 1.3,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -790,11 +790,11 @@ class _NarrowLayout extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
             children: [
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               playContextBanner,
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               Padding(
-                padding: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.only(bottom: 14),
                 child: statusCard,
               ),
               _SectionHeading(
@@ -809,7 +809,7 @@ class _NarrowLayout extends StatelessWidget {
                 label: 'パズル',
                 subtitle: '— 箱をゴールへ運ぼう',
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
               Expanded(child: boardSection),
               const SizedBox(height: 12),
               _SectionHeading(
@@ -861,7 +861,7 @@ class _WideLayout extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               playContextBanner,
-              const SizedBox(height: 10),
+              const SizedBox(height: 14),
               Flexible(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -946,30 +946,33 @@ class _SectionHeading extends StatelessWidget {
         Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6);
     final subtitleColor =
         Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4);
-    return Row(
-      children: [
-        SizedBox(width: 14, height: 14, child: iconWidget),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-            color: color,
-            letterSpacing: 0.5,
-          ),
-        ),
-        if (subtitle != null) ...[
-          const SizedBox(width: 6),
+    return Padding(
+      padding: const EdgeInsets.only(left: 2),
+      child: Row(
+        children: [
+          SizedBox(width: 14, height: 14, child: iconWidget),
+          const SizedBox(width: 5),
           Text(
-            subtitle!,
+            label,
             style: TextStyle(
-              fontSize: 10,
-              color: subtitleColor,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w700,
+              color: color,
+              letterSpacing: 0.6,
             ),
           ),
+          if (subtitle != null) ...[
+            const SizedBox(width: 6),
+            Text(
+              subtitle!,
+              style: TextStyle(
+                fontSize: 10,
+                color: subtitleColor,
+              ),
+            ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }
