@@ -541,7 +541,6 @@ class _ControlSection extends StatelessWidget {
                 child: _AssistButton(
                   key: const ValueKey('bottom-undo'),
                   onPressed: hasHistory ? onUndo : null,
-                  enabled: hasHistory,
                   iconPainter: UndoIconPainter(
                     color: hasHistory
                         ? const Color(0xFF5D4037)
@@ -555,7 +554,6 @@ class _ControlSection extends StatelessWidget {
                 child: _AssistButton(
                   key: const ValueKey('bottom-restart'),
                   onPressed: hasHistory ? onRestart : null,
-                  enabled: hasHistory,
                   iconPainter: RestartIconPainter(
                     color: hasHistory
                         ? const Color(0xFF5D4037)
@@ -609,15 +607,15 @@ class _AssistButton extends StatelessWidget {
   const _AssistButton({
     super.key,
     required this.onPressed,
-    required this.enabled,
     required this.iconPainter,
     required this.label,
   });
 
   final VoidCallback? onPressed;
-  final bool enabled;
   final CustomPainter iconPainter;
   final String label;
+
+  bool get enabled => onPressed != null;
 
   @override
   Widget build(BuildContext context) {
