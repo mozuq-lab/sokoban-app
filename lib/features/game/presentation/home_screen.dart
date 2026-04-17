@@ -296,6 +296,8 @@ class _HomeScreenState extends State<HomeScreen> {
               final controlSection = _ControlSection(
                 gameState: gameState,
                 history: _history,
+                remainingBoxes: gameState.remainingBoxes,
+                totalBoxes: totalBoxes,
                 onMove: _move,
                 onUndo: _undo,
                 onRestart: _restart,
@@ -368,8 +370,8 @@ class _BoardSection extends StatelessWidget {
             children: [
               // --- ヘッダー行 ---
               Padding(
-                padding:
-                    const EdgeInsets.only(left: 10, right: 10, top: 6, bottom: 2),
+                padding: const EdgeInsets.only(
+                    left: 10, right: 10, top: 6, bottom: 2),
                 child: Row(
                   children: [
                     SizedBox(
@@ -431,8 +433,7 @@ class _BoardSection extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(6),
                   child: AspectRatio(
-                    aspectRatio:
-                        gameState.board.width / gameState.board.height,
+                    aspectRatio: gameState.board.width / gameState.board.height,
                     child: LayoutBuilder(
                       builder: (context, constraints) {
                         final cellSize =
@@ -468,6 +469,8 @@ class _ControlSection extends StatelessWidget {
   const _ControlSection({
     required this.gameState,
     required this.history,
+    required this.remainingBoxes,
+    required this.totalBoxes,
     required this.onMove,
     required this.onUndo,
     required this.onRestart,
@@ -475,6 +478,8 @@ class _ControlSection extends StatelessWidget {
 
   final GameState gameState;
   final List<GameState> history;
+  final int remainingBoxes;
+  final int totalBoxes;
   final void Function(Direction) onMove;
   final VoidCallback onUndo;
   final VoidCallback onRestart;
@@ -502,6 +507,9 @@ class _ControlSection extends StatelessWidget {
           _DirectionPad(
             onMove: onMove,
             enabled: !gameState.isSolved,
+            isSolved: gameState.isSolved,
+            remainingBoxes: remainingBoxes,
+            totalBoxes: totalBoxes,
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 4),
@@ -539,12 +547,10 @@ class _ControlSection extends StatelessWidget {
                   label: const Text('元に戻す'),
                   style: FilledButton.styleFrom(
                     minimumSize: const Size(0, 48),
-                    backgroundColor: hasHistory
-                        ? const Color(0xFFF5E6CC)
-                        : null,
-                    foregroundColor: hasHistory
-                        ? const Color(0xFF5D4037)
-                        : null,
+                    backgroundColor:
+                        hasHistory ? const Color(0xFFF5E6CC) : null,
+                    foregroundColor:
+                        hasHistory ? const Color(0xFF5D4037) : null,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                       side: BorderSide(
@@ -575,12 +581,10 @@ class _ControlSection extends StatelessWidget {
                   label: const Text('リスタート'),
                   style: FilledButton.styleFrom(
                     minimumSize: const Size(0, 48),
-                    backgroundColor: hasHistory
-                        ? const Color(0xFFF5E6CC)
-                        : null,
-                    foregroundColor: hasHistory
-                        ? const Color(0xFF5D4037)
-                        : null,
+                    backgroundColor:
+                        hasHistory ? const Color(0xFFF5E6CC) : null,
+                    foregroundColor:
+                        hasHistory ? const Color(0xFF5D4037) : null,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                       side: BorderSide(
@@ -707,8 +711,8 @@ class _PlayContextBanner extends StatelessWidget {
               // コンテンツ部分
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   child: Row(
                     children: [
                       // アイコン背景
@@ -1116,9 +1120,8 @@ class _StatusCard extends StatelessWidget {
                   child: _StatItem(
                     iconWidget: CustomPaint(
                       painter: PlacementIconPainter(
-                        color: allPlaced
-                            ? Colors.green
-                            : Colors.orange.shade800,
+                        color:
+                            allPlaced ? Colors.green : Colors.orange.shade800,
                       ),
                     ),
                     iconColor:
@@ -1167,8 +1170,7 @@ class _StatusCard extends StatelessWidget {
             child: Divider(
               height: 1,
               thickness: 1,
-              color:
-                  theme.colorScheme.outlineVariant.withValues(alpha: 0.18),
+              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.18),
             ),
           ),
           // --- ヒントテキスト ---
@@ -1178,42 +1180,41 @@ class _StatusCard extends StatelessWidget {
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
               child: Wrap(
-                      key: ValueKey(
-                          isSolved ? 'hint-cleared' : 'hint-normal'),
-                      alignment: WrapAlignment.center,
-                      spacing: 6,
-                      runSpacing: 4,
-                      children: isSolved
-                          ? [
-                              _HintChip(
-                                label: 'クリア済み',
-                                color: Colors.green.shade600,
-                                bgColor: Colors.green.shade50,
-                              ),
-                              _HintChip(
-                                label: '戻す  Ctrl+Z',
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                              _HintChip(
-                                label: 'やり直し  R',
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ]
-                          : [
-                              _HintChip(
-                                label: '移動  ボタン／矢印・WASD',
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                              _HintChip(
-                                label: '戻す  Ctrl+Z',
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                              _HintChip(
-                                label: 'やり直し  R',
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ],
-                    ),
+                key: ValueKey(isSolved ? 'hint-cleared' : 'hint-normal'),
+                alignment: WrapAlignment.center,
+                spacing: 6,
+                runSpacing: 4,
+                children: isSolved
+                    ? [
+                        _HintChip(
+                          label: 'クリア済み',
+                          color: Colors.green.shade600,
+                          bgColor: Colors.green.shade50,
+                        ),
+                        _HintChip(
+                          label: '戻す  Ctrl+Z',
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        _HintChip(
+                          label: 'やり直し  R',
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ]
+                    : [
+                        _HintChip(
+                          label: '移動  ボタン／矢印・WASD',
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        _HintChip(
+                          label: '戻す  Ctrl+Z',
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        _HintChip(
+                          label: 'やり直し  R',
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ],
+              ),
             ),
           ),
         ],
@@ -1240,9 +1241,7 @@ class _StatusCard extends StatelessWidget {
     } else {
       bgColor = Colors.orange.shade50;
       textColor = Colors.brown.shade700;
-      text = remainingBoxes == 0
-          ? 'すべて配置完了！'
-          : 'あと $remainingBoxes 個で完了';
+      text = remainingBoxes == 0 ? 'すべて配置完了！' : 'あと $remainingBoxes 個で完了';
       key = ValueKey('summary-progress-$remainingBoxes');
     }
 
@@ -1339,8 +1338,8 @@ class _StatItem extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 11,
-                color: theme.colorScheme.onSurfaceVariant
-                    .withValues(alpha: 0.8),
+                color:
+                    theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
                 fontWeight: FontWeight.w500,
                 letterSpacing: 0.3,
               ),
@@ -1382,8 +1381,8 @@ class _HintChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
       decoration: BoxDecoration(
-        color: bgColor ??
-            theme.colorScheme.outlineVariant.withValues(alpha: 0.12),
+        color:
+            bgColor ?? theme.colorScheme.outlineVariant.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
@@ -1476,9 +1475,7 @@ class _ClearOverlay extends StatelessWidget {
                         height: 18,
                         child: CustomPaint(
                           painter: RestartIconPainter(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onPrimary,
+                            color: Theme.of(context).colorScheme.onPrimary,
                           ),
                         ),
                       ),
@@ -1629,16 +1626,25 @@ class _CellWidget extends StatelessWidget {
 
 /// 方向パッド（上下左右ボタン）。
 class _DirectionPad extends StatelessWidget {
-  const _DirectionPad({required this.onMove, this.enabled = true});
+  const _DirectionPad({
+    required this.onMove,
+    this.enabled = true,
+    this.isSolved = false,
+    this.remainingBoxes = 0,
+    this.totalBoxes = 0,
+  });
 
   final void Function(Direction) onMove;
   final bool enabled;
+  final bool isSolved;
+  final int remainingBoxes;
+  final int totalBoxes;
 
   @override
   Widget build(BuildContext context) {
     const btnSize = 60.0;
 
-    final activeColor = const Color(0xFF5D4037);
+    const activeColor = Color(0xFF5D4037);
     final disabledColor = Colors.grey.shade400;
 
     Widget dirButton(Direction dir, String label) {
@@ -1649,15 +1655,15 @@ class _DirectionPad extends StatelessWidget {
         child: Tooltip(
           message: label,
           child: Material(
-            color: enabled
-                ? const Color(0xFFF5E6CC)
-                : Colors.grey.shade200,
+            color: enabled ? const Color(0xFFF5E6CC) : Colors.grey.shade200,
             borderRadius: BorderRadius.circular(14),
-            elevation: enabled ? 3 : 0,
+            elevation: enabled ? 3 : 1,
             shadowColor: const Color(0x40000000),
             child: InkWell(
               onTap: enabled ? () => onMove(dir) : null,
               borderRadius: BorderRadius.circular(14),
+              splashColor: const Color(0x308D6E63),
+              highlightColor: const Color(0x188D6E63),
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
@@ -1665,8 +1671,18 @@ class _DirectionPad extends StatelessWidget {
                     color: enabled
                         ? const Color(0xFF8D6E63)
                         : Colors.grey.shade300,
-                    width: 1.5,
+                    width: enabled ? 1.5 : 1.0,
                   ),
+                  gradient: enabled
+                      ? const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Color(0xFFF9EDDA),
+                            Color(0xFFF0DDBF),
+                          ],
+                        )
+                      : null,
                 ),
                 child: CustomPaint(
                   painter: ArrowPainter(
@@ -1675,6 +1691,56 @@ class _DirectionPad extends StatelessWidget {
                   ),
                 ),
               ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // --- 中央ステータスチップ ---
+    Widget centerChip() {
+      final String chipText;
+      final Color chipBg;
+      final Color chipFg;
+
+      if (isSolved) {
+        chipText = '完了';
+        chipBg = const Color(0xFFE8F5E9);
+        chipFg = const Color(0xFF388E3C);
+      } else if (remainingBoxes == 0 && totalBoxes > 0) {
+        chipText = '全配置';
+        chipBg = const Color(0xFFE8F5E9);
+        chipFg = const Color(0xFF388E3C);
+      } else if (totalBoxes > 0) {
+        chipText = '残 $remainingBoxes';
+        chipBg = const Color(0xFFFFF3E0);
+        chipFg = const Color(0xFFE65100);
+      } else {
+        chipText = '↑↓←→';
+        chipBg = const Color(0xFFEFEBE9);
+        chipFg = const Color(0xFF8D6E63);
+      }
+
+      return AnimatedSwitcher(
+        duration: const Duration(milliseconds: 200),
+        child: Container(
+          key: Key('dpad_center_status_$chipText'),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          decoration: BoxDecoration(
+            color: chipBg,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: chipFg.withValues(alpha: 0.3),
+              width: 1,
+            ),
+          ),
+          child: Text(
+            chipText,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: chipFg,
+              letterSpacing: 0.3,
             ),
           ),
         ),
@@ -1696,16 +1762,7 @@ class _DirectionPad extends StatelessWidget {
                 width: btnSize + 8,
                 height: btnSize,
                 child: Center(
-                  child: Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: enabled
-                          ? const Color(0xFFD7CCC8)
-                          : Colors.grey.shade300,
-                    ),
-                  ),
+                  child: centerChip(),
                 ),
               ),
               dirButton(Direction.right, '右'),

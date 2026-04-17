@@ -1189,8 +1189,7 @@ void main() {
 
   // --- 操作セクション内サブラベルのテスト ---
 
-  testWidgets('操作セクションに「移動」と「やり直し」のサブラベルが表示される',
-      (tester) async {
+  testWidgets('操作セクションに「移動」と「やり直し」のサブラベルが表示される', (tester) async {
     await tester.pumpWidget(buildApp());
 
     final moveLabel = find.byKey(const Key('control_sub_label_move'));
@@ -1208,21 +1207,49 @@ void main() {
     );
   });
 
-  // --- 操作パッド中央インジケータのテスト ---
+  // --- 操作パッド中央ステータスチップのテスト ---
 
-  testWidgets('操作パッド中央に円形インジケータが表示される', (tester) async {
+  /// ステータスチップを Key で探すヘルパー。
+  Finder findDpadChip(String text) =>
+      find.byKey(Key('dpad_center_status_$text'));
+
+  testWidgets('操作パッド中央にステータスチップが表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    expect(findDpadChip('残 2'), findsOneWidget);
+  });
+
+  testWidgets('初期状態でステータスチップに残り箱数が表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    expect(findDpadChip('残 2'), findsOneWidget);
+  });
+
+  testWidgets('箱をゴールに押すとステータスチップの残り数が減る', (tester) async {
     await tester.pumpWidget(buildApp());
 
-    // 方向ボタン 4 つの間にある中央の SizedBox を探す
-    // 中央インジケータは Container で BoxDecoration (circle) を持つ
-    final centerDot = find.byWidgetPredicate(
-      (w) =>
-          w is Container &&
-          w.decoration is BoxDecoration &&
-          (w.decoration as BoxDecoration).shape == BoxShape.circle &&
-          w.constraints?.maxWidth == 10,
-    );
-    expect(centerDot, findsOneWidget);
+    // 下に移動: box(2,3)→(2,4) がゴールに乗る
+    await tester.tap(find.byTooltip('下'));
+    await tester.pumpAndSettle();
+
+    expect(findDpadChip('残 1'), findsOneWidget);
+  });
+
+  testWidgets('クリア後にステータスチップが完了表示になる', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+    await tester.pumpAndSettle();
+
+    expect(findDpadChip('完了'), findsOneWidget);
+  });
+
+  testWidgets('Undo でクリア解除するとステータスチップが残り数に戻る', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('appbar-undo')).first);
+    await tester.pumpAndSettle();
+
+    expect(findDpadChip('残 1'), findsOneWidget);
   });
 
   // --- プレイコンテキストバナーのテスト ---
