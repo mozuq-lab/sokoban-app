@@ -495,6 +495,13 @@ class _ControlSection extends StatelessWidget {
         border: Border.all(
           color: const Color(0xFFD7CCC8),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -531,70 +538,28 @@ class _ControlSection extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: FilledButton.tonalIcon(
+                child: _AssistButton(
+                  key: const ValueKey('bottom-undo'),
                   onPressed: hasHistory ? onUndo : null,
-                  icon: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CustomPaint(
-                      painter: UndoIconPainter(
-                        color: hasHistory
-                            ? const Color(0xFF5D4037)
-                            : Colors.grey.shade400,
-                      ),
-                    ),
+                  iconPainter: UndoIconPainter(
+                    color: hasHistory
+                        ? const Color(0xFF5D4037)
+                        : Colors.grey.shade400,
                   ),
-                  label: const Text('元に戻す'),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size(0, 48),
-                    backgroundColor:
-                        hasHistory ? const Color(0xFFF5E6CC) : null,
-                    foregroundColor:
-                        hasHistory ? const Color(0xFF5D4037) : null,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(
-                        color: hasHistory
-                            ? const Color(0xFF8D6E63)
-                            : Colors.grey.shade300,
-                        width: 1,
-                      ),
-                    ),
-                  ),
+                  label: '元に戻す',
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: FilledButton.tonalIcon(
+                child: _AssistButton(
+                  key: const ValueKey('bottom-restart'),
                   onPressed: hasHistory ? onRestart : null,
-                  icon: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CustomPaint(
-                      painter: RestartIconPainter(
-                        color: hasHistory
-                            ? const Color(0xFF5D4037)
-                            : Colors.grey.shade400,
-                      ),
-                    ),
+                  iconPainter: RestartIconPainter(
+                    color: hasHistory
+                        ? const Color(0xFF5D4037)
+                        : Colors.grey.shade400,
                   ),
-                  label: const Text('リスタート'),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size(0, 48),
-                    backgroundColor:
-                        hasHistory ? const Color(0xFFF5E6CC) : null,
-                    foregroundColor:
-                        hasHistory ? const Color(0xFF5D4037) : null,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(
-                        color: hasHistory
-                            ? const Color(0xFF8D6E63)
-                            : Colors.grey.shade300,
-                        width: 1,
-                      ),
-                    ),
-                  ),
+                  label: 'リスタート',
                 ),
               ),
             ],
@@ -633,6 +598,81 @@ class _ControlSubLabel extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// 方向パッドと統一感のあるグラデーション付き補助ボタン。
+class _AssistButton extends StatelessWidget {
+  const _AssistButton({
+    super.key,
+    required this.onPressed,
+    required this.iconPainter,
+    required this.label,
+  });
+
+  final VoidCallback? onPressed;
+  final CustomPainter iconPainter;
+  final String label;
+
+  bool get enabled => onPressed != null;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: enabled ? const Color(0xFFF5E6CC) : Colors.grey.shade200,
+      borderRadius: BorderRadius.circular(12),
+      elevation: enabled ? 2 : 0,
+      shadowColor: const Color(0x40000000),
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(12),
+        splashColor: const Color(0x308D6E63),
+        highlightColor: const Color(0x188D6E63),
+        child: Container(
+          height: 48,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: enabled
+                  ? const Color(0xFF8D6E63)
+                  : Colors.grey.shade300,
+              width: enabled ? 1.5 : 1.0,
+            ),
+            gradient: enabled
+                ? const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xFFF9EDDA),
+                      Color(0xFFF0DDBF),
+                    ],
+                  )
+                : null,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 20,
+                height: 20,
+                child: CustomPaint(painter: iconPainter),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: enabled
+                      ? const Color(0xFF5D4037)
+                      : Colors.grey.shade400,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -990,6 +1030,13 @@ class _StatusCard extends StatelessWidget {
               ? Colors.green.shade200
               : theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
