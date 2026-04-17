@@ -40,7 +40,7 @@ void main() {
     await tester.pumpWidget(buildApp());
     // AppBar にリスタートアイコン、画面下部にテキスト「リスタート」
     expect(find.byKey(const ValueKey('appbar-restart')), findsOneWidget);
-    expect(find.widgetWithText(FilledButton, 'リスタート'), findsOneWidget);
+    expect(find.byKey(const ValueKey('bottom-restart')), findsOneWidget);
   });
 
   testWidgets('方向ボタンを押すとプレイヤーが移動する', (tester) async {
@@ -82,7 +82,7 @@ void main() {
     await tester.pumpWidget(buildApp());
     // AppBar に元に戻すアイコン、画面下部にテキスト「元に戻す」
     expect(find.byKey(const ValueKey('appbar-undo')), findsOneWidget);
-    expect(find.widgetWithText(FilledButton, '元に戻す'), findsOneWidget);
+    expect(find.byKey(const ValueKey('bottom-undo')), findsOneWidget);
   });
 
   testWidgets('初期状態では Undo ボタンが無効', (tester) async {
@@ -402,10 +402,13 @@ void main() {
 
   testWidgets('初期状態では画面下部のリスタートボタンが無効', (tester) async {
     await tester.pumpWidget(buildApp());
-    final bottomRestart = tester.widget<FilledButton>(
-      find.widgetWithText(FilledButton, 'リスタート'),
+    final inkWell = tester.widget<InkWell>(
+      find.descendant(
+        of: find.byKey(const ValueKey('bottom-restart')),
+        matching: find.byType(InkWell),
+      ),
     );
-    expect(bottomRestart.onPressed, isNull);
+    expect(inkWell.onTap, isNull);
   });
 
   testWidgets('移動後にリスタートボタンが有効になる', (tester) async {
@@ -419,10 +422,13 @@ void main() {
     );
     expect(restartButton.onPressed, isNotNull);
 
-    final bottomRestart = tester.widget<FilledButton>(
-      find.widgetWithText(FilledButton, 'リスタート'),
+    final bottomRestartInk = tester.widget<InkWell>(
+      find.descendant(
+        of: find.byKey(const ValueKey('bottom-restart')),
+        matching: find.byType(InkWell),
+      ),
     );
-    expect(bottomRestart.onPressed, isNotNull);
+    expect(bottomRestartInk.onTap, isNotNull);
   });
 
   testWidgets('リスタート実行後にリスタートボタンが再び無効になる', (tester) async {
@@ -440,10 +446,13 @@ void main() {
     );
     expect(restartButton.onPressed, isNull);
 
-    final bottomRestart = tester.widget<FilledButton>(
-      find.widgetWithText(FilledButton, 'リスタート'),
+    final bottomRestartInk2 = tester.widget<InkWell>(
+      find.descendant(
+        of: find.byKey(const ValueKey('bottom-restart')),
+        matching: find.byType(InkWell),
+      ),
     );
-    expect(bottomRestart.onPressed, isNull);
+    expect(bottomRestartInk2.onTap, isNull);
   });
 
   testWidgets('Undo で初期状態に戻るとリスタートボタンが無効になる', (tester) async {
@@ -464,10 +473,13 @@ void main() {
 
   testWidgets('画面下部の Undo ボタンが初期状態で無効', (tester) async {
     await tester.pumpWidget(buildApp());
-    final bottomUndo = tester.widget<FilledButton>(
-      find.widgetWithText(FilledButton, '元に戻す'),
+    final inkWell = tester.widget<InkWell>(
+      find.descendant(
+        of: find.byKey(const ValueKey('bottom-undo')),
+        matching: find.byType(InkWell),
+      ),
     );
-    expect(bottomUndo.onPressed, isNull);
+    expect(inkWell.onTap, isNull);
   });
 
   testWidgets('画面下部の Undo ボタンが移動後に有効になる', (tester) async {
@@ -476,10 +488,13 @@ void main() {
     await tester.tap(find.byTooltip('下'));
     await tester.pump();
 
-    final bottomUndo = tester.widget<FilledButton>(
-      find.widgetWithText(FilledButton, '元に戻す'),
+    final inkWell = tester.widget<InkWell>(
+      find.descendant(
+        of: find.byKey(const ValueKey('bottom-undo')),
+        matching: find.byType(InkWell),
+      ),
     );
-    expect(bottomUndo.onPressed, isNotNull);
+    expect(inkWell.onTap, isNotNull);
   });
 
   testWidgets('画面下部の Undo ボタンで手数が戻る', (tester) async {
@@ -489,7 +504,7 @@ void main() {
     await tester.pump();
     expect(find.text('1'), findsOneWidget);
 
-    await tester.tap(find.widgetWithText(FilledButton, '元に戻す'));
+    await tester.tap(find.byKey(const ValueKey('bottom-undo')));
     await tester.pump();
     expect(find.text('0'), findsOneWidget);
   });
@@ -501,7 +516,7 @@ void main() {
     await tester.pump();
     expect(find.text('1'), findsOneWidget);
 
-    await tester.tap(find.widgetWithText(FilledButton, 'リスタート'));
+    await tester.tap(find.byKey(const ValueKey('bottom-restart')));
     await tester.pump();
     expect(find.text('0'), findsOneWidget);
     expect(find.byType(PlayerWidget), findsOneWidget);
@@ -509,22 +524,26 @@ void main() {
 
   testWidgets('下部ボタンが Expanded で均等幅になっている', (tester) async {
     await tester.pumpWidget(buildApp());
-    // FilledButton が Expanded の子として存在する（広い画面ではカラム用の
-    // Expanded も含まれるため、最低 2 つあることを確認）
-    final expandedButtons = find.ancestor(
-      of: find.byType(FilledButton),
+    // 補助ボタンが Expanded の子として存在する
+    final expandedUndo = find.ancestor(
+      of: find.byKey(const ValueKey('bottom-undo')),
       matching: find.byType(Expanded),
     );
-    expect(expandedButtons, findsAtLeastNWidgets(2));
+    final expandedRestart = find.ancestor(
+      of: find.byKey(const ValueKey('bottom-restart')),
+      matching: find.byType(Expanded),
+    );
+    expect(expandedUndo, findsAtLeastNWidgets(1));
+    expect(expandedRestart, findsAtLeastNWidgets(1));
   });
 
   testWidgets('下部ボタンの最小高さが 48 以上である', (tester) async {
     await tester.pumpWidget(buildApp());
     final undoButton = tester.getSize(
-      find.widgetWithText(FilledButton, '元に戻す'),
+      find.byKey(const ValueKey('bottom-undo')),
     );
     final restartButton = tester.getSize(
-      find.widgetWithText(FilledButton, 'リスタート'),
+      find.byKey(const ValueKey('bottom-restart')),
     );
     expect(undoButton.height, greaterThanOrEqualTo(48));
     expect(restartButton.height, greaterThanOrEqualTo(48));
@@ -986,7 +1005,7 @@ void main() {
     expect(find.text('1'), findsOneWidget);
 
     // 画面下部の Undo ボタンをタップ
-    await tester.tap(find.widgetWithText(FilledButton, '元に戻す'));
+    await tester.tap(find.byKey(const ValueKey('bottom-undo')));
     await tester.pump();
     expect(find.text('0'), findsOneWidget);
 
@@ -1005,7 +1024,7 @@ void main() {
     expect(find.text('1'), findsOneWidget);
 
     // 画面下部のリスタートボタンをタップ
-    await tester.tap(find.widgetWithText(FilledButton, 'リスタート'));
+    await tester.tap(find.byKey(const ValueKey('bottom-restart')));
     await tester.pump();
     expect(find.text('0'), findsOneWidget);
 
