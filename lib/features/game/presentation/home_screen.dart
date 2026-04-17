@@ -349,7 +349,7 @@ class _BoardSection extends StatelessWidget {
 
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 400, maxHeight: 440),
+        constraints: const BoxConstraints(maxWidth: 400),
         child: Container(
           decoration: BoxDecoration(
             color: Colors.brown.shade50,
@@ -771,7 +771,10 @@ class _PlayContextBanner extends StatelessWidget {
   }
 }
 
-/// 狭い画面向けの縦積みレイアウト（従来と同じ構成）。
+/// 狭い画面向けの縦積みレイアウト。
+///
+/// モバイル端末で盤面をできるだけ大きく表示するため、
+/// バナーやセクション見出しを省略し、余白を詰めている。
 class _NarrowLayout extends StatelessWidget {
   const _NarrowLayout({
     required this.playContextBanner,
@@ -791,46 +794,18 @@ class _NarrowLayout extends StatelessWidget {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 480),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Column(
             children: [
-              const SizedBox(height: 10),
-              playContextBanner,
-              const SizedBox(height: 10),
+              const SizedBox(height: 6),
               Padding(
-                padding: const EdgeInsets.only(bottom: 14),
+                padding: const EdgeInsets.only(bottom: 6),
                 child: statusCard,
               ),
-              _SectionHeading(
-                iconWidget: CustomPaint(
-                  painter: PuzzleSectionIconPainter(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurfaceVariant
-                        .withValues(alpha: 0.6),
-                  ),
-                ),
-                label: 'パズル',
-                subtitle: '— 箱をゴールへ運ぼう',
-              ),
-              const SizedBox(height: 8),
               Expanded(child: boardSection),
-              const SizedBox(height: 12),
-              _SectionHeading(
-                iconWidget: CustomPaint(
-                  painter: ControlSectionIconPainter(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurfaceVariant
-                        .withValues(alpha: 0.6),
-                  ),
-                ),
-                label: '操作',
-                subtitle: '— ボタンまたはキーで移動',
-              ),
               const SizedBox(height: 6),
               controlSection,
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
             ],
           ),
         ),
