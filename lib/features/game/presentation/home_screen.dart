@@ -773,8 +773,8 @@ class _PlayContextBanner extends StatelessWidget {
 
 /// 狭い画面向けの縦積みレイアウト。
 ///
-/// モバイル端末で盤面をできるだけ大きく表示するため、
-/// バナーやセクション見出しを省略し、余白を詰めている。
+/// モバイル端末で盤面をできるだけ大きく表示しつつ、
+/// ヒーローバナーも表示して文脈を伝える。
 class _NarrowLayout extends StatelessWidget {
   const _NarrowLayout({
     required this.playContextBanner,
@@ -797,9 +797,11 @@ class _NarrowLayout extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Column(
             children: [
-              const SizedBox(height: 6),
+              const SizedBox(height: 4),
+              playContextBanner,
+              const SizedBox(height: 4),
               Padding(
-                padding: const EdgeInsets.only(bottom: 6),
+                padding: const EdgeInsets.only(bottom: 4),
                 child: statusCard,
               ),
               Expanded(child: boardSection),
