@@ -190,8 +190,6 @@ class _HomeScreenState extends State<HomeScreen> {
             Theme.of(context).colorScheme.surface, Colors.brown.shade50, 0.3),
         appBar: AppBar(
           titleSpacing: 16,
-          scrolledUnderElevation: 1,
-          surfaceTintColor: Colors.brown.shade100,
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -1511,11 +1509,6 @@ class _ClearOverlayState extends State<_ClearOverlay>
               child: FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Card(
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  color: const Color(0xFFFCFFF8),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 28, vertical: 24),
@@ -1572,12 +1565,6 @@ class _ClearOverlayState extends State<_ClearOverlay>
                             ),
                           ),
                           label: const Text('もう一度'),
-                          style: FilledButton.styleFrom(
-                            minimumSize: const Size(130, 44),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
                         ),
                       ],
                     ),
