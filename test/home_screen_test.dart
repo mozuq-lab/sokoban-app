@@ -1092,12 +1092,14 @@ void main() {
   testWidgets('オーバーレイの「もう一度」ボタンで初期状態に戻る', (tester) async {
     await tester.pumpWidget(buildApp());
     await solveStage(tester);
+    // クリアオーバーレイの入場アニメーション完了を待つ
+    await tester.pumpAndSettle();
 
     expect(find.text('もう一度'), findsOneWidget);
 
     // オーバーレイのリスタートボタンをタップ
     await tester.tap(find.byKey(const ValueKey('overlay-restart')));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     // クリア表示が消え、初期状態に戻る
     expect(find.text('もう一度'), findsNothing);
