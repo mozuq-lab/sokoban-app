@@ -1452,7 +1452,7 @@ class _HintChip extends StatelessWidget {
 }
 
 /// クリア時に盤面上へ表示する完了オーバーレイ。
-class _ClearOverlay extends StatelessWidget {
+class _ClearOverlay extends StatefulWidget {
   const _ClearOverlay({
     required this.moveCount,
     required this.onRestart,
@@ -1462,85 +1462,126 @@ class _ClearOverlay extends StatelessWidget {
   final VoidCallback onRestart;
 
   @override
+  State<_ClearOverlay> createState() => _ClearOverlayState();
+}
+
+class _ClearOverlayState extends State<_ClearOverlay>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _fadeAnimation;
+  late final Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOut,
+    );
+    _scaleAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.elasticOut,
+    );
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Positioned.fill(
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.45),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Center(
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              color: const Color(0xFFFCFFF8),
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.amber.shade50,
-                        shape: BoxShape.circle,
-                      ),
-                      child: SizedBox(
-                        width: 36,
-                        height: 36,
-                        child: CustomPaint(
-                          painter: TrophyIconPainter(
-                            color: Colors.amber.shade600,
+      child: FadeTransition(
+        opacity: _fadeAnimation,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.45),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Center(
+            child: ScaleTransition(
+              scale: _scaleAnimation,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  color: const Color(0xFFFCFFF8),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 28, vertical: 24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.amber.shade50,
+                            shape: BoxShape.circle,
+                          ),
+                          child: SizedBox(
+                            width: 36,
+                            height: 36,
+                            child: CustomPaint(
+                              painter: TrophyIconPainter(
+                                color: Colors.amber.shade600,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'クリア！',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green.shade700,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      '$moveCount手でクリア',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    FilledButton.icon(
-                      key: const ValueKey('overlay-restart'),
-                      onPressed: onRestart,
-                      icon: SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CustomPaint(
-                          painter: RestartIconPainter(
-                            color: Theme.of(context).colorScheme.onPrimary,
+                        const SizedBox(height: 12),
+                        Text(
+                          'クリア！',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green.shade700,
+                            letterSpacing: 1,
                           ),
                         ),
-                      ),
-                      label: const Text('もう一度'),
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size(130, 44),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                        const SizedBox(height: 6),
+                        Text(
+                          '${widget.moveCount}手でクリア',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey.shade600,
+                          ),
                         ),
-                      ),
+                        const SizedBox(height: 20),
+                        FilledButton.icon(
+                          key: const ValueKey('overlay-restart'),
+                          onPressed: widget.onRestart,
+                          icon: SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CustomPaint(
+                              painter: RestartIconPainter(
+                                color:
+                                    Theme.of(context).colorScheme.onPrimary,
+                              ),
+                            ),
+                          ),
+                          label: const Text('もう一度'),
+                          style: FilledButton.styleFrom(
+                            minimumSize: const Size(130, 44),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
