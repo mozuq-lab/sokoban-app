@@ -359,9 +359,14 @@ class _BoardSection extends StatelessWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
+                color: Colors.black.withValues(alpha: 0.10),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+              BoxShadow(
+                color: Colors.brown.withValues(alpha: 0.04),
+                blurRadius: 2,
+                offset: const Offset(0, 1),
               ),
             ],
           ),
@@ -371,26 +376,26 @@ class _BoardSection extends StatelessWidget {
               // --- ヘッダー行 ---
               Padding(
                 padding: const EdgeInsets.only(
-                    left: 10, right: 10, top: 6, bottom: 2),
+                    left: 12, right: 10, top: 8, bottom: 4),
                 child: Row(
                   children: [
                     SizedBox(
-                      width: 13,
-                      height: 13,
+                      width: 14,
+                      height: 14,
                       child: CustomPaint(
                         painter: PuzzleSectionIconPainter(
                           color: const Color(0xFF8D6E63).withValues(alpha: 0.7),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 6),
                     Text(
                       'ステージ 1',
                       key: const Key('board_header_stage'),
                       style: TextStyle(
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF8D6E63),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF6D4C41),
                         letterSpacing: 0.3,
                       ),
                     ),
@@ -398,18 +403,24 @@ class _BoardSection extends StatelessWidget {
                     Container(
                       key: const Key('board_header_box_count'),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 1),
+                          horizontal: 7, vertical: 2),
                       decoration: BoxDecoration(
                         color: gameState.isSolved
                             ? Colors.green.shade50
                             : const Color(0xFFEFEBE9),
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: gameState.isSolved
+                              ? Colors.green.shade200
+                              : const Color(0xFFD7CCC8),
+                          width: 0.5,
+                        ),
                       ),
                       child: Text(
                         '📦 $placed / $total',
                         style: TextStyle(
                           fontSize: 10,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w600,
                           color: gameState.isSolved
                               ? Colors.green.shade700
                               : const Color(0xFF8D6E63),
@@ -421,7 +432,7 @@ class _BoardSection extends StatelessWidget {
               ),
               // --- 区切り線 ---
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Divider(
                   height: 1,
                   thickness: 1,
@@ -431,27 +442,45 @@ class _BoardSection extends StatelessWidget {
               // --- 盤面 ---
               Flexible(
                 child: Padding(
-                  padding: const EdgeInsets.all(6),
-                  child: AspectRatio(
-                    aspectRatio: gameState.board.width / gameState.board.height,
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final cellSize =
-                            constraints.maxWidth / gameState.board.width;
-                        return Stack(
-                          children: [
-                            _BoardView(
-                              gameState: gameState,
-                              cellSize: cellSize,
-                            ),
-                            if (gameState.isSolved)
-                              _ClearOverlay(
-                                moveCount: moveCount,
-                                onRestart: onRestart,
-                              ),
-                          ],
-                        );
-                      },
+                  padding: const EdgeInsets.all(8),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        // インセット影風の外枠（盤面を沈み込ませる表現）
+                        BoxShadow(
+                          color: Colors.brown.withValues(alpha: 0.12),
+                          blurRadius: 3,
+                          spreadRadius: -1,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: AspectRatio(
+                        aspectRatio:
+                            gameState.board.width / gameState.board.height,
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final cellSize =
+                                constraints.maxWidth / gameState.board.width;
+                            return Stack(
+                              children: [
+                                _BoardView(
+                                  gameState: gameState,
+                                  cellSize: cellSize,
+                                ),
+                                if (gameState.isSolved)
+                                  _ClearOverlay(
+                                    moveCount: moveCount,
+                                    onRestart: onRestart,
+                                  ),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
                     ),
                   ),
                 ),
