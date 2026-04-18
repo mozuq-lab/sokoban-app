@@ -554,7 +554,8 @@ void main() {
   testWidgets('初期状態で残り箱数が表示される', (tester) async {
     await tester.pumpWidget(buildApp());
     expect(find.text('配置'), findsOneWidget);
-    expect(find.text('0 / 2'), findsOneWidget);
+    // ステータスカードとバナー進捗チップの両方に表示される
+    expect(find.text('0 / 2'), findsNWidgets(2));
   });
 
   testWidgets('箱をゴールに押すと残り数が減る', (tester) async {
@@ -563,7 +564,8 @@ void main() {
     // 下に移動: box(2,3)→(2,4) がゴールに乗る
     await tester.tap(find.byTooltip('下'));
     await tester.pump();
-    expect(find.text('1 / 2'), findsOneWidget);
+    // ステータスカードとバナー進捗チップの両方に表示される
+    expect(find.text('1 / 2'), findsNWidgets(2));
   });
 
   testWidgets('Undo で箱がゴールから外れると残り数が戻る', (tester) async {
@@ -572,12 +574,12 @@ void main() {
     // 下に移動: box(2,3)→(2,4) がゴールに乗る
     await tester.tap(find.byTooltip('下'));
     await tester.pump();
-    expect(find.text('1 / 2'), findsOneWidget);
+    expect(find.text('1 / 2'), findsNWidgets(2));
 
     // Undo: 箱がゴールから外れる
     await tester.tap(find.byKey(const ValueKey('appbar-undo')).first);
     await tester.pump();
-    expect(find.text('0 / 2'), findsOneWidget);
+    expect(find.text('0 / 2'), findsNWidgets(2));
   });
 
   testWidgets('リスタートで残り箱数が初期値に戻る', (tester) async {
@@ -585,11 +587,11 @@ void main() {
 
     await tester.tap(find.byTooltip('下'));
     await tester.pump();
-    expect(find.text('1 / 2'), findsOneWidget);
+    expect(find.text('1 / 2'), findsNWidgets(2));
 
     await tester.tap(find.byKey(const ValueKey('appbar-restart')).first);
     await tester.pump();
-    expect(find.text('0 / 2'), findsOneWidget);
+    expect(find.text('0 / 2'), findsNWidgets(2));
   });
 
   // --- 操作ヒント表示のテスト ---
@@ -868,7 +870,8 @@ void main() {
 
   testWidgets('初期状態で配置が分数形式で表示される', (tester) async {
     await tester.pumpWidget(buildApp());
-    expect(find.text('0 / 2'), findsOneWidget);
+    // ステータスカードとバナー進捗チップの両方に表示される
+    expect(find.text('0 / 2'), findsNWidgets(2));
   });
 
   // --- キーボード操作のテスト ---
@@ -960,7 +963,7 @@ void main() {
 
     // 手数が 0 のまま変わらない
     expect(find.text('0'), findsOneWidget);
-    expect(find.text('0 / 2'), findsOneWidget);
+    expect(find.text('0 / 2'), findsNWidgets(2));
   });
 
   testWidgets('R キーで Restart できる', (tester) async {
@@ -1104,7 +1107,7 @@ void main() {
     // クリア表示が消え、初期状態に戻る
     expect(find.text('もう一度'), findsNothing);
     expect(find.text('0'), findsOneWidget);
-    expect(find.text('0 / 2'), findsOneWidget);
+    expect(find.text('0 / 2'), findsNWidgets(2));
   });
 
   testWidgets('Undo でクリア解除するとオーバーレイが消える', (tester) async {
@@ -1194,9 +1197,9 @@ void main() {
     });
   });
 
-  testWidgets('AppBar にステージ見出しが表示される', (tester) async {
+  testWidgets('ヒーローバナーと盤面ヘッダーにステージ見出しが表示される', (tester) async {
     await tester.pumpWidget(buildApp());
-    // AppBar、ヒーローバナー、盤面ヘッダーに「ステージ 1」が表示される
+    // ヒーローバナーと盤面ヘッダーに「ステージ 1」が表示される
     expect(find.text('ステージ 1'), findsAtLeast(2));
   });
 
@@ -1303,5 +1306,29 @@ void main() {
     await tester.pumpWidget(buildApp());
     expect(find.byKey(const Key('play_context_label')), findsOneWidget);
     expect(find.byKey(const Key('play_context_description')), findsOneWidget);
+  });
+
+  // --- バナー進捗チップのテスト ---
+
+  testWidgets('バナーに初期状態の進捗チップが表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    expect(find.byKey(const Key('banner_progress_0 / 2')), findsOneWidget);
+  });
+
+  testWidgets('箱をゴールに押すとバナー進捗チップが更新される', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    await tester.tap(find.byTooltip('下'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('banner_progress_1 / 2')), findsOneWidget);
+  });
+
+  testWidgets('クリア後にバナー進捗チップが全配置表示になる', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('banner_progress_全配置')), findsOneWidget);
   });
 }

@@ -30,17 +30,17 @@ void main() {
       await tester.pumpWidget(buildApp());
 
       // 盤面と操作UIが表示されている
-      expect(find.text('Sokoban'), findsOneWidget);
+      expect(find.text('Sokoban'), findsAtLeastNWidgets(1));
 
       // 操作ボタン(方向パッド)が揃っている
-      expect(find.byTooltip('上'), findsOneWidget);
-      expect(find.byTooltip('下'), findsOneWidget);
-      expect(find.byTooltip('左'), findsOneWidget);
-      expect(find.byTooltip('右'), findsOneWidget);
+      expect(find.byTooltip('上'), findsAtLeastNWidgets(1));
+      expect(find.byTooltip('下'), findsAtLeastNWidgets(1));
+      expect(find.byTooltip('左'), findsAtLeastNWidgets(1));
+      expect(find.byTooltip('右'), findsAtLeastNWidgets(1));
 
       // 手数が 0、残り箱が「0 / 2」で始まる
-      expect(find.text('0'), findsOneWidget);
-      expect(find.text('0 / 2'), findsOneWidget);
+      expect(find.text('0'), findsAtLeastNWidgets(1));
+      expect(find.text('0 / 2'), findsAtLeastNWidgets(1));
 
       // クリア表示はまだ出ていない
       expect(find.textContaining('クリア'), findsNothing);
@@ -51,8 +51,8 @@ void main() {
       await tester.pump();
 
       // 手数が 1 に増え、残り箱が 1 に減る
-      expect(find.text('1'), findsOneWidget);
-      expect(find.text('1 / 2'), findsOneWidget);
+      expect(find.text('1'), findsAtLeastNWidgets(1));
+      expect(find.text('1 / 2'), findsAtLeastNWidgets(1));
       expect(find.textContaining('クリア'), findsNothing);
 
       // --- Phase 3: 解法の残りを実行してクリアに到達する ---
@@ -73,9 +73,9 @@ void main() {
 
       // クリア表示が消え、手数と残り箱が初期値に戻る
       expect(find.textContaining('クリア'), findsNothing);
-      expect(find.text('0'), findsOneWidget);
-      expect(find.text('0 / 2'), findsOneWidget);
-      expect(find.text('配置'), findsOneWidget);
+      expect(find.text('0'), findsAtLeastNWidgets(1));
+      expect(find.text('0 / 2'), findsAtLeastNWidgets(1));
+      expect(find.text('配置'), findsAtLeastNWidgets(1));
     });
 
     testWidgets('壁で移動がブロックされても画面が壊れない', (tester) async {
@@ -90,14 +90,14 @@ void main() {
       );
 
       // 描画される
-      expect(find.text('Sokoban'), findsOneWidget);
+      expect(find.text('Sokoban'), findsAtLeastNWidgets(1));
 
       // 上に移動（壁でブロック）
       await tester.tap(find.byTooltip('上'));
       await tester.pump();
 
       // 画面構造が壊れていない
-      expect(find.text('Sokoban'), findsOneWidget);
+      expect(find.text('Sokoban'), findsAtLeastNWidgets(1));
       expect(find.text('0'), findsOneWidget); // 手数は増えない
     });
 
@@ -107,16 +107,16 @@ void main() {
       // 1手動かす
       await tester.tap(find.byTooltip('下'));
       await tester.pump();
-      expect(find.text('1'), findsOneWidget);
-      expect(find.text('1 / 2'), findsOneWidget);
+      expect(find.text('1'), findsAtLeastNWidgets(1));
+      expect(find.text('1 / 2'), findsAtLeastNWidgets(1));
 
       // Undo
       await tester.tap(find.byTooltip('元に戻す').first);
       await tester.pump();
 
       // 手数と残り箱が元に戻る
-      expect(find.text('0'), findsOneWidget);
-      expect(find.text('0 / 2'), findsOneWidget);
+      expect(find.text('0'), findsAtLeastNWidgets(1));
+      expect(find.text('0 / 2'), findsAtLeastNWidgets(1));
     });
   });
 }

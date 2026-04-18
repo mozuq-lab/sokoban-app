@@ -190,46 +190,29 @@ class _HomeScreenState extends State<HomeScreen> {
             Theme.of(context).colorScheme.surface, Colors.brown.shade50, 0.3),
         appBar: AppBar(
           titleSpacing: 16,
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          title: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CustomPaint(
-                      painter: SokobanLogoPainter(
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
+              SizedBox(
+                width: 20,
+                height: 20,
+                child: CustomPaint(
+                  painter: SokobanLogoPainter(
+                    color: Theme.of(context).colorScheme.primary,
                   ),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'Sokoban',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
-                      fontSize: 18,
-                    ),
-                  ),
-                ],
+                ),
               ),
-              Text(
-                'ステージ 1',
+              const SizedBox(width: 8),
+              const Text(
+                'Sokoban',
                 style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSurfaceVariant
-                      .withValues(alpha: 0.7),
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
+                  fontSize: 18,
                 ),
               ),
             ],
           ),
-          toolbarHeight: 64,
           actions: [
             IconButton(
               key: const ValueKey('appbar-undo'),
@@ -303,6 +286,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
               final playContextBanner = _PlayContextBanner(
                 isSolved: gameState.isSolved,
+                remainingBoxes: gameState.remainingBoxes,
+                totalBoxes: totalBoxes,
               );
 
               if (useWideLayout) {
@@ -709,9 +694,15 @@ class _AssistButton extends StatelessWidget {
 /// ステージ情報と目的を視覚階層のある小さなカード風に表示し、
 /// プレイ中の文脈を伝える。クリア時は配色が切り替わる。
 class _PlayContextBanner extends StatelessWidget {
-  const _PlayContextBanner({required this.isSolved});
+  const _PlayContextBanner({
+    required this.isSolved,
+    required this.remainingBoxes,
+    required this.totalBoxes,
+  });
 
   final bool isSolved;
+  final int remainingBoxes;
+  final int totalBoxes;
 
   @override
   Widget build(BuildContext context) {
@@ -826,12 +817,87 @@ class _PlayContextBanner extends StatelessWidget {
                           ],
                         ),
                       ),
+                      // 進捗チップ
+                      if (totalBoxes > 0)
+                        _BannerProgressChip(
+                          placed: totalBoxes - remainingBoxes,
+                          total: totalBoxes,
+                          isSolved: isSolved,
+                          accentColor: accentColor,
+                        ),
                     ],
                   ),
                 ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// バナー内の配置進捗チップ。
+class _BannerProgressChip extends StatelessWidget {
+  const _BannerProgressChip({
+    required this.placed,
+    required this.total,
+    required this.isSolved,
+    required this.accentColor,
+  });
+
+  final int placed;
+  final int total;
+  final bool isSolved;
+  final Color accentColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final String label;
+    final Color chipBg;
+    final Color chipFg;
+
+    if (isSolved) {
+      label = '全配置';
+      chipBg = const Color(0xFFE8F5E9);
+      chipFg = const Color(0xFF388E3C);
+    } else {
+      label = '$placed / $total';
+      chipBg = accentColor.withValues(alpha: 0.10);
+      chipFg = accentColor;
+    }
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 200),
+      child: Container(
+        key: Key('banner_progress_$label'),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: chipBg,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: chipFg.withValues(alpha: 0.25),
+            width: 0.5,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '📦',
+              style: TextStyle(fontSize: 11, height: 1.2),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: chipFg,
+                letterSpacing: 0.3,
+              ),
+            ),
+          ],
         ),
       ),
     );
