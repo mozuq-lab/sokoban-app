@@ -1240,42 +1240,61 @@ class _StatusCard extends StatelessWidget {
           ),
           // --- 進捗情報（手数・配置状況） ---
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             child: Row(
               children: [
                 Expanded(
-                  child: _StatItem(
-                    iconWidget: CustomPaint(
-                      painter: MoveCountIconPainter(
-                        color: const Color(0xFF1565C0),
-                      ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 6,
                     ),
-                    iconColor: const Color(0xFF1565C0),
-                    label: '手数',
-                    value: '$moveCount',
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1565C0).withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: _StatItem(
+                      iconWidget: CustomPaint(
+                        painter: MoveCountIconPainter(
+                          color: const Color(0xFF1565C0),
+                        ),
+                      ),
+                      iconColor: const Color(0xFF1565C0),
+                      label: '手数',
+                      value: '$moveCount',
+                    ),
                   ),
                 ),
-                Container(
-                  width: 1,
-                  height: 32,
-                  color: const Color(0xFFD7CCC8).withValues(alpha: 0.5),
-                ),
+                const SizedBox(width: 8),
                 Expanded(
-                  child: _StatItem(
-                    iconWidget: CustomPaint(
-                      painter: PlacementIconPainter(
-                        color: allPlaced
-                            ? Colors.green
-                            : Colors.orange.shade800,
-                      ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 6,
                     ),
-                    iconColor: allPlaced
-                        ? Colors.green
-                        : Colors.orange.shade800,
-                    label: '配置',
-                    value: allPlaced
-                        ? '全配置！'
-                        : '${totalBoxes - remainingBoxes} / $totalBoxes',
+                    decoration: BoxDecoration(
+                      color: (allPlaced
+                              ? Colors.green
+                              : Colors.orange.shade800)
+                          .withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: _StatItem(
+                      iconWidget: CustomPaint(
+                        painter: PlacementIconPainter(
+                          color: allPlaced
+                              ? Colors.green
+                              : Colors.orange.shade800,
+                        ),
+                      ),
+                      iconColor: allPlaced
+                          ? Colors.green
+                          : Colors.orange.shade800,
+                      label: '配置',
+                      value: allPlaced
+                          ? '全配置！'
+                          : '${totalBoxes - remainingBoxes} / $totalBoxes',
+                    ),
                   ),
                 ),
               ],
@@ -1286,7 +1305,7 @@ class _StatusCard extends StatelessWidget {
             padding: const EdgeInsets.only(
               left: 14,
               right: 14,
-              bottom: 4,
+              bottom: 6,
               top: 0,
             ),
             child: ClipRRect(
@@ -1303,10 +1322,10 @@ class _StatusCard extends StatelessWidget {
                 builder: (context, animatedValue, _) {
                   return LinearProgressIndicator(
                     value: animatedValue,
-                    minHeight: 6,
+                    minHeight: 7,
                     backgroundColor: const Color(
                       0xFFD7CCC8,
-                    ).withValues(alpha: 0.3),
+                    ).withValues(alpha: 0.25),
                     color: allPlaced
                         ? Colors.green.shade400
                         : Colors.orange.shade400,
@@ -1320,8 +1339,8 @@ class _StatusCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 14),
             child: Divider(
               height: 1,
-              thickness: 1,
-              color: const Color(0xFFD7CCC8).withValues(alpha: 0.4),
+              thickness: 0.5,
+              color: const Color(0xFFD7CCC8).withValues(alpha: 0.5),
             ),
           ),
           // --- ヒントテキスト ---
@@ -1329,8 +1348,8 @@ class _StatusCard extends StatelessWidget {
             padding: const EdgeInsets.only(
               left: 14,
               right: 14,
-              bottom: 8,
-              top: 6,
+              bottom: 10,
+              top: 8,
             ),
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
