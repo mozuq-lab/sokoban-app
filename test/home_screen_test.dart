@@ -1209,6 +1209,14 @@ void main() {
     await tester.pumpWidget(buildApp());
     expect(find.byKey(const Key('board_header_stage')), findsOneWidget);
     expect(find.byKey(const Key('board_header_box_count')), findsOneWidget);
+    expect(find.byKey(const Key('board_header_status')), findsOneWidget);
+    expect(find.byKey(const Key('board_header_move_count')), findsOneWidget);
+  });
+
+  testWidgets('盤面ヘッダーにプレイ中ステータスと手数が表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    expect(find.text('プレイ中'), findsOneWidget);
+    expect(find.text('0 手'), findsOneWidget);
   });
 
   // --- 操作セクション内サブラベルのテスト ---

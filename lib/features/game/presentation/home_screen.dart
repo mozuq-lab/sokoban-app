@@ -359,34 +359,71 @@ class _BoardSection extends StatelessWidget {
               // --- ヘッダー行 ---
               Padding(
                 padding: const EdgeInsets.only(
-                    left: 12, right: 10, top: 8, bottom: 4),
+                    left: 12, right: 10, top: 10, bottom: 6),
                 child: Row(
                   children: [
                     SizedBox(
-                      width: 14,
-                      height: 14,
+                      width: 16,
+                      height: 16,
                       child: CustomPaint(
                         painter: PuzzleSectionIconPainter(
-                          color: const Color(0xFF8D6E63).withValues(alpha: 0.7),
+                          color: const Color(0xFF8D6E63).withValues(alpha: 0.8),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 7),
                     Text(
                       'ステージ 1',
                       key: const Key('board_header_stage'),
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: 12,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF6D4C41),
+                        color: const Color(0xFF5D4037),
                         letterSpacing: 0.3,
                       ),
                     ),
+                    const SizedBox(width: 8),
+                    Text(
+                      gameState.isSolved ? 'クリア' : 'プレイ中',
+                      key: const Key('board_header_status'),
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                        color: gameState.isSolved
+                            ? const Color(0xFF388E3C)
+                            : const Color(0xFFA1887F),
+                        letterSpacing: 0.2,
+                      ),
+                    ),
                     const Spacer(),
+                    // 手数チップ
+                    Container(
+                      key: const Key('board_header_move_count'),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
+                      margin: const EdgeInsets.only(right: 6),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEFEBE9),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: const Color(0xFFD7CCC8),
+                          width: 0.5,
+                        ),
+                      ),
+                      child: Text(
+                        '$moveCount 手',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF8D6E63),
+                        ),
+                      ),
+                    ),
+                    // 箱カウントチップ
                     Container(
                       key: const Key('board_header_box_count'),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 7, vertical: 2),
+                          horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: gameState.isSolved
                             ? Colors.green.shade50
@@ -400,7 +437,7 @@ class _BoardSection extends StatelessWidget {
                         ),
                       ),
                       child: Text(
-                        '📦 $placed / $total',
+                        '📦 $placed/$total',
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
