@@ -965,7 +965,7 @@ class _NarrowLayout extends StatelessWidget {
   /// 盤面に画面高さの何割を割り当てるか。
   ///
   /// 残りをバナー・ステータスカード・操作パッド等が占める。
-  static const double _boardRatio = 0.40;
+  static const double _boardRatio = 0.55;
 
   @override
   Widget build(BuildContext context) {
@@ -978,7 +978,7 @@ class _NarrowLayout extends StatelessWidget {
             builder: (context, constraints) {
               final available = constraints.maxHeight;
               final boardHeight =
-                  (available * _boardRatio).clamp(_minBoardHeight, 400.0);
+                  (available * _boardRatio).clamp(_minBoardHeight, available);
 
               return SingleChildScrollView(
                 child: ConstrainedBox(
