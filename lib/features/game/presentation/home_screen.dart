@@ -956,6 +956,17 @@ class _NarrowLayout extends StatelessWidget {
   final Widget statusCard;
   final Widget controlSection;
 
+  /// 盤面の最低限の表示高さ。
+  ///
+  /// これ以下になるとパズルが視認しづらくなるため、
+  /// スクロールで対処する。
+  static const double _minBoardHeight = 140;
+
+  /// 盤面に画面高さの何割を割り当てるか。
+  ///
+  /// 残りをバナー・ステータスカード・操作パッド等が占める。
+  static const double _boardRatio = 0.55;
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -963,18 +974,33 @@ class _NarrowLayout extends StatelessWidget {
         constraints: const BoxConstraints(maxWidth: 480),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Column(
-            children: [
-              const SizedBox(height: 4),
-              playContextBanner,
-              const SizedBox(height: 6),
-              Expanded(child: boardSection),
-              const SizedBox(height: 6),
-              statusCard,
-              const SizedBox(height: 6),
-              controlSection,
-              const SizedBox(height: 8),
-            ],
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final available = constraints.maxHeight;
+              final boardHeight =
+                  (available * _boardRatio).clamp(_minBoardHeight, available);
+
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  // 画面全体を使い切れるよう最低高さを設定。
+                  constraints: BoxConstraints(minHeight: available),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(height: 4),
+                      playContextBanner,
+                      const SizedBox(height: 6),
+                      SizedBox(height: boardHeight, child: boardSection),
+                      const SizedBox(height: 6),
+                      statusCard,
+                      const SizedBox(height: 6),
+                      controlSection,
+                      const SizedBox(height: 8),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
         ),
       ),
