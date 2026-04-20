@@ -227,16 +227,36 @@ class _HomeScreenState extends State<HomeScreen> {
           actions: [
             IconButton(
               key: const ValueKey('appbar-undo'),
-              icon: SizedBox(
-                width: 22,
-                height: 22,
-                child: CustomPaint(
-                  painter: UndoIconPainter(
-                    color: _history.isNotEmpty
-                        ? Theme.of(context).colorScheme.onSurface
-                        : Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withValues(alpha: 0.38),
+              icon: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: _history.isNotEmpty
+                      ? const Color(0xFFF5E6CC)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(9),
+                  border: _history.isNotEmpty
+                      ? Border.all(
+                          color: const Color(0xFFD7CCC8),
+                          width: 0.5,
+                        )
+                      : null,
+                ),
+                child: Center(
+                  child: SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CustomPaint(
+                      painter: UndoIconPainter(
+                        color: _history.isNotEmpty
+                            ? const Color(0xFF5D4037)
+                            : Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.30),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -245,16 +265,36 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             IconButton(
               key: const ValueKey('appbar-restart'),
-              icon: SizedBox(
-                width: 22,
-                height: 22,
-                child: CustomPaint(
-                  painter: RestartIconPainter(
-                    color: _history.isNotEmpty
-                        ? Theme.of(context).colorScheme.onSurface
-                        : Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withValues(alpha: 0.38),
+              icon: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: _history.isNotEmpty
+                      ? const Color(0xFFF5E6CC)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(9),
+                  border: _history.isNotEmpty
+                      ? Border.all(
+                          color: const Color(0xFFD7CCC8),
+                          width: 0.5,
+                        )
+                      : null,
+                ),
+                child: Center(
+                  child: SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CustomPaint(
+                      painter: RestartIconPainter(
+                        color: _history.isNotEmpty
+                            ? const Color(0xFF5D4037)
+                            : Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.30),
+                      ),
+                    ),
                   ),
                 ),
               ),
