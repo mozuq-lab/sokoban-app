@@ -592,7 +592,7 @@ class _ControlSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasHistory = history.isNotEmpty;
     return Container(
-      padding: const EdgeInsets.only(top: 8, left: 12, right: 12, bottom: 12),
+      padding: const EdgeInsets.only(top: 10, left: 14, right: 14, bottom: 14),
       decoration: BoxDecoration(
         color: const Color(0xFFFAF3E8),
         borderRadius: BorderRadius.circular(14),
@@ -613,30 +613,45 @@ class _ControlSection extends StatelessWidget {
             icon: Icons.control_camera,
             text: '移動',
           ),
-          _DirectionPad(
-            onMove: onMove,
-            enabled: !gameState.isSolved,
-            isSolved: gameState.isSolved,
-            remainingBoxes: remainingBoxes,
-            totalBoxes: totalBoxes,
+          const SizedBox(height: 4),
+          // 方向パッドを囲むインセット背景
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF5EDE0),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: const Color(0xFFE8DDD0),
+                width: 0.5,
+              ),
+            ),
+            child: _DirectionPad(
+              onMove: onMove,
+              enabled: !gameState.isSolved,
+              isSolved: gameState.isSolved,
+              remainingBoxes: remainingBoxes,
+              totalBoxes: totalBoxes,
+            ),
           ),
+          const SizedBox(height: 10),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
+            padding: const EdgeInsets.symmetric(vertical: 2),
             child: Row(
               children: [
-                const Expanded(child: Divider(color: Color(0xFFD7CCC8))),
+                const Expanded(child: Divider(color: Color(0xFFE0D6CC))),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: _ControlSubLabel(
                     key: const Key('control_sub_label_assist'),
                     icon: Icons.history,
                     text: 'やり直し',
                   ),
                 ),
-                const Expanded(child: Divider(color: Color(0xFFD7CCC8))),
+                const Expanded(child: Divider(color: Color(0xFFE0D6CC))),
               ],
             ),
           ),
+          const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
@@ -2003,16 +2018,23 @@ class _DirectionPad extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         child: Container(
           key: Key('dpad_center_status_$chipText'),
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           decoration: BoxDecoration(
             color: chipBg,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: chipFg.withValues(alpha: 0.3), width: 1),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: chipFg.withValues(alpha: 0.25), width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: chipFg.withValues(alpha: 0.08),
+                blurRadius: 3,
+                offset: const Offset(0, 1),
+              ),
+            ],
           ),
           child: Text(
             chipText,
             style: TextStyle(
-              fontSize: 11,
+              fontSize: 12,
               fontWeight: FontWeight.w700,
               color: chipFg,
               letterSpacing: 0.3,
@@ -2022,29 +2044,26 @@ class _DirectionPad extends StatelessWidget {
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 2, bottom: 4),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          dirButton(Direction.up, '上'),
-          const SizedBox(height: 4),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              dirButton(Direction.left, '左'),
-              SizedBox(
-                width: btnSize + 8,
-                height: btnSize,
-                child: Center(child: centerChip()),
-              ),
-              dirButton(Direction.right, '右'),
-            ],
-          ),
-          const SizedBox(height: 4),
-          dirButton(Direction.down, '下'),
-        ],
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        dirButton(Direction.up, '上'),
+        const SizedBox(height: 6),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            dirButton(Direction.left, '左'),
+            SizedBox(
+              width: btnSize + 12,
+              height: btnSize,
+              child: Center(child: centerChip()),
+            ),
+            dirButton(Direction.right, '右'),
+          ],
+        ),
+        const SizedBox(height: 6),
+        dirButton(Direction.down, '下'),
+      ],
     );
   }
 }
