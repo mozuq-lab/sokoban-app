@@ -1636,6 +1636,8 @@ class _ClearOverlayState extends State<_ClearOverlay>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Positioned.fill(
       child: FadeTransition(
         opacity: _fadeAnimation,
@@ -1650,63 +1652,94 @@ class _ClearOverlayState extends State<_ClearOverlay>
               child: FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Card(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 28,
-                      vertical: 24,
-                    ),
+                  elevation: 8,
+                  shadowColor: Colors.amber.withValues(alpha: 0.25),
+                  clipBehavior: Clip.antiAlias,
+                  child: IntrinsicWidth(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        // ゴールドのアクセントライン
                         Container(
-                          padding: const EdgeInsets.all(10),
+                          height: 4,
                           decoration: BoxDecoration(
-                            color: Colors.amber.shade50,
-                            shape: BoxShape.circle,
-                          ),
-                          child: SizedBox(
-                            width: 36,
-                            height: 36,
-                            child: CustomPaint(
-                              painter: TrophyIconPainter(
-                                color: Colors.amber.shade600,
-                              ),
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.amber.shade300,
+                                Colors.amber.shade600,
+                                Colors.amber.shade300,
+                              ],
                             ),
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'クリア！',
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green.shade700,
-                            letterSpacing: 1,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          '${widget.moveCount}手でクリア',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.grey.shade600,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        FilledButton.icon(
-                          key: const ValueKey('overlay-restart'),
-                          onPressed: widget.onRestart,
-                          icon: SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CustomPaint(
-                              painter: RestartIconPainter(
-                                color: Theme.of(context).colorScheme.onPrimary,
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(32, 24, 32, 24),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.amber.shade50,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: SizedBox(
+                                  width: 40,
+                                  height: 40,
+                                  child: CustomPaint(
+                                    painter: TrophyIconPainter(
+                                      color: Colors.amber.shade600,
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
+                              const SizedBox(height: 14),
+                              Text(
+                                'クリア！',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: colorScheme.primary,
+                                  letterSpacing: 1.5,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: colorScheme.surfaceContainerHighest,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  '${widget.moveCount}手でクリア',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 22),
+                              FilledButton.icon(
+                                key: const ValueKey('overlay-restart'),
+                                onPressed: widget.onRestart,
+                                icon: SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CustomPaint(
+                                    painter: RestartIconPainter(
+                                      color: colorScheme.onPrimary,
+                                    ),
+                                  ),
+                                ),
+                                label: const Text('もう一度'),
+                              ),
+                            ],
                           ),
-                          label: const Text('もう一度'),
                         ),
                       ],
                     ),
