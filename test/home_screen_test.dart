@@ -1123,6 +1123,41 @@ void main() {
     expect(find.text('もう一度'), findsNothing);
   });
 
+  testWidgets('クリアオーバーレイにアクセントラインとピル型手数表示がある',
+      (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+    await tester.pumpAndSettle();
+
+    // アクセントライン: LinearGradient を持つ DecoratedBox が存在する
+    final accentFinder = find.byWidgetPredicate((widget) {
+      if (widget is DecoratedBox) {
+        final decoration = widget.decoration;
+        if (decoration is BoxDecoration &&
+            decoration.gradient is LinearGradient) {
+          return true;
+        }
+      }
+      return false;
+    });
+    expect(accentFinder, findsWidgets);
+
+    // 手数表示がピル型背景（borderRadius 付き DecoratedBox）内に表示される
+    final pillFinder = find.ancestor(
+      of: find.textContaining('手でクリア'),
+      matching: find.byWidgetPredicate((widget) {
+        if (widget is DecoratedBox) {
+          final decoration = widget.decoration;
+          if (decoration is BoxDecoration && decoration.borderRadius != null) {
+            return true;
+          }
+        }
+        return false;
+      }),
+    );
+    expect(pillFinder, findsWidgets);
+  });
+
   // --- レスポンシブレイアウトのテスト ---
 
   group('レスポンシブレイアウト', () {
