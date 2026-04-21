@@ -880,7 +880,7 @@ class _PlayContextBanner extends StatelessWidget {
                         child: Icon(icon, size: 19, color: accentColor),
                       ),
                       const SizedBox(width: 12),
-                      // テキスト 2 行
+                      // テキスト 2 行 + 進捗バー
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -910,6 +910,15 @@ class _PlayContextBanner extends StatelessWidget {
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
+                            if (totalBoxes > 0) ...[
+                              const SizedBox(height: 6),
+                              _BannerProgressBar(
+                                placed: totalBoxes - remainingBoxes,
+                                total: totalBoxes,
+                                isSolved: isSolved,
+                                accentColor: accentColor,
+                              ),
+                            ],
                           ],
                         ),
                       ),
@@ -976,18 +985,98 @@ class _BannerProgressChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('📦', style: TextStyle(fontSize: 11, height: 1.2)),
+            Icon(Icons.inventory_2_rounded, size: 12, color: chipFg),
             const SizedBox(width: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: chipFg,
-                letterSpacing: 0.3,
+            if (isSolved)
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: chipFg,
+                  letterSpacing: 0.3,
+                ),
+              )
+            else
+              Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: '$placed',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        color: chipFg,
+                      ),
+                    ),
+                    TextSpan(
+                      text: ' / $total',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: chipFg.withValues(alpha: 0.7),
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// バナー内のコンパクトな進捗バー。
+///
+/// 配置済み箱数を直感的に把握できるよう、テキスト下にインライン表示する。
+class _BannerProgressBar extends StatelessWidget {
+  const _BannerProgressBar({
+    required this.placed,
+    required this.total,
+    required this.isSolved,
+    required this.accentColor,
+  });
+
+  final int placed;
+  final int total;
+  final bool isSolved;
+  final Color accentColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final double progress = total > 0 ? placed / total : 0;
+    final trackColor = accentColor.withValues(alpha: 0.12);
+    final fillColor = isSolved
+        ? const Color(0xFF388E3C)
+        : accentColor;
+
+    return ClipRRect(
+      key: Key('banner_bar_${placed}_$total'),
+      borderRadius: BorderRadius.circular(2),
+      child: SizedBox(
+        height: 4,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final fillWidth = constraints.maxWidth * progress;
+            return Stack(
+              children: [
+                // トラック
+                Container(color: trackColor),
+                // フィル
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  width: fillWidth,
+                  decoration: BoxDecoration(
+                    color: fillColor,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
