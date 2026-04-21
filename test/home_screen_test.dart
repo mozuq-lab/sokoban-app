@@ -36,6 +36,13 @@ void main() {
     }
   });
 
+  testWidgets('方向ボタンにキーヒント (WASD) が表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    for (final hint in ['W', 'A', 'S', 'D']) {
+      expect(find.text(hint), findsOneWidget);
+    }
+  });
+
   testWidgets('リスタートボタンが AppBar と画面下部に表示される', (tester) async {
     await tester.pumpWidget(buildApp());
     // AppBar にリスタートアイコン、画面下部にテキスト「リスタート」
