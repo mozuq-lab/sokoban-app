@@ -1527,34 +1527,46 @@ class _StatusCard extends StatelessWidget {
                 key: ValueKey(isSolved ? 'hint-cleared' : 'hint-normal'),
                 alignment: WrapAlignment.center,
                 spacing: 6,
-                runSpacing: 4,
+                runSpacing: 5,
                 children: isSolved
                     ? [
                         _HintChip(
-                          label: 'クリア済み',
+                          key: const Key('hint_cleared'),
+                          action: 'クリア済み',
                           color: Colors.green.shade600,
                           bgColor: Colors.green.shade50,
+                          icon: Icons.check_circle_outline,
                         ),
                         _HintChip(
-                          label: '戻す  Ctrl+Z',
+                          key: const Key('hint_undo'),
+                          action: '戻す',
+                          keyHint: 'Ctrl+Z',
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
                         _HintChip(
-                          label: 'やり直し  R',
+                          key: const Key('hint_restart'),
+                          action: 'やり直し',
+                          keyHint: 'R',
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ]
                     : [
                         _HintChip(
-                          label: '移動  ボタン／矢印・WASD',
+                          key: const Key('hint_move'),
+                          action: '移動',
+                          keyHint: 'ボタン／矢印・WASD',
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
                         _HintChip(
-                          label: '戻す  Ctrl+Z',
+                          key: const Key('hint_undo'),
+                          action: '戻す',
+                          keyHint: 'Ctrl+Z',
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
                         _HintChip(
-                          label: 'やり直し  R',
+                          key: const Key('hint_restart'),
+                          action: 'やり直し',
+                          keyHint: 'R',
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ],
@@ -1707,31 +1719,84 @@ class _StatItem extends StatelessWidget {
 }
 
 /// ヒント行の個別チップ。
+///
+/// [action] は操作名、[keyHint] はキーボードショートカットの表記。
+/// 両者を視覚的に区別して表示し、情報の優先度を伝える。
 class _HintChip extends StatelessWidget {
-  const _HintChip({required this.label, required this.color, this.bgColor});
+  const _HintChip({
+    super.key,
+    required this.action,
+    this.keyHint,
+    required this.color,
+    this.bgColor,
+    this.icon,
+  });
 
-  final String label;
+  final String action;
+  final String? keyHint;
   final Color color;
   final Color? bgColor;
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final effectiveBg =
+        bgColor ?? theme.colorScheme.outlineVariant.withValues(alpha: 0.10);
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color:
-            bgColor ?? theme.colorScheme.outlineVariant.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 10.5,
-          color: color.withValues(alpha: 0.72),
-          fontWeight: FontWeight.w500,
-          letterSpacing: 0.1,
+        color: effectiveBg,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: color.withValues(alpha: 0.12),
+          width: 0.5,
         ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 12, color: color.withValues(alpha: 0.85)),
+            const SizedBox(width: 4),
+          ],
+          if (keyHint != null)
+            Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: action,
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      color: color.withValues(alpha: 0.80),
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.1,
+                    ),
+                  ),
+                  TextSpan(
+                    text: '  $keyHint',
+                    style: TextStyle(
+                      fontSize: 9.5,
+                      color: color.withValues(alpha: 0.48),
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else
+            Text(
+              action,
+              style: TextStyle(
+                fontSize: 10.5,
+                color: color.withValues(alpha: 0.85),
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.1,
+              ),
+            ),
+        ],
       ),
     );
   }

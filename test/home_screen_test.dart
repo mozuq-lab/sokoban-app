@@ -610,7 +610,7 @@ void main() {
   testWidgets('通常時に操作ヒントが表示される', (tester) async {
     await tester.pumpWidget(buildApp());
     expect(
-      find.text('移動  ボタン／矢印・WASD'),
+      find.byKey(const Key('hint_move')),
       findsOneWidget,
     );
   });
@@ -620,13 +620,14 @@ void main() {
     await solveStage(tester);
     await tester.pumpAndSettle();
 
-    // ヒーローバナーとヒントチップの両方に「クリア済み」が表示される
+    // ヒントチップに「クリア済み」が表示される
     expect(
-      find.text('クリア済み'),
-      findsAtLeast(1),
+      find.byKey(const Key('hint_cleared')),
+      findsOneWidget,
     );
+    // 移動ヒントが消える
     expect(
-      find.text('移動  ボタン／矢印・WASD'),
+      find.byKey(const Key('hint_move')),
       findsNothing,
     );
   });
@@ -639,13 +640,46 @@ void main() {
     await tester.pump();
 
     expect(
-      find.text('移動  ボタン／矢印・WASD'),
+      find.byKey(const Key('hint_move')),
       findsOneWidget,
     );
     expect(
-      find.text('クリア済み'),
+      find.byKey(const Key('hint_cleared')),
       findsNothing,
     );
+  });
+
+  testWidgets('ヒントチップの操作名とキーヒントが分離して表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // 移動ヒントチップ内に Text.rich が使われ、操作名とキーヒントが含まれる
+    final moveChip = find.byKey(const Key('hint_move'));
+    expect(moveChip, findsOneWidget);
+    final richText = find.descendant(
+      of: moveChip,
+      matching: find.byType(RichText),
+    );
+    expect(richText, findsOneWidget);
+
+    // Undo・リスタートのヒントチップも存在する
+    expect(find.byKey(const Key('hint_undo')), findsOneWidget);
+    expect(find.byKey(const Key('hint_restart')), findsOneWidget);
+  });
+
+  testWidgets('クリア済みヒントチップにアイコンが表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+    await tester.pumpAndSettle();
+
+    final clearedChip = find.byKey(const Key('hint_cleared'));
+    expect(clearedChip, findsOneWidget);
+
+    // チップ内にチェックアイコンがある
+    final iconFinder = find.descendant(
+      of: clearedChip,
+      matching: find.byIcon(Icons.check_circle_outline),
+    );
+    expect(iconFinder, findsOneWidget);
   });
 
   // --- 移動失敗フィードバックのテスト ---
@@ -666,7 +700,7 @@ void main() {
     expect(find.text('その方向には進めません'), findsOneWidget);
     // ヒント行は通常文言のまま表示される
     expect(
-      find.text('移動  ボタン／矢印・WASD'),
+      find.byKey(const Key('hint_move')),
       findsOneWidget,
     );
   });
@@ -734,7 +768,7 @@ void main() {
     // Undo 後は箱 1 個がゴール上（下移動時に押した分）→ 残り 1 個
     expect(find.text('あと 1 個で完了'), findsOneWidget);
     expect(
-      find.text('移動  ボタン／矢印・WASD'),
+      find.byKey(const Key('hint_move')),
       findsOneWidget,
     );
   });
@@ -761,7 +795,7 @@ void main() {
     expect(find.text('その方向には進めません'), findsNothing);
     expect(find.text('あと 2 個で完了'), findsOneWidget);
     expect(
-      find.text('移動  ボタン／矢印・WASD'),
+      find.byKey(const Key('hint_move')),
       findsOneWidget,
     );
   });
