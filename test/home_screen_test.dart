@@ -511,6 +511,8 @@ void main() {
     await tester.pump();
     expect(find.text('1'), findsOneWidget);
 
+    await tester.ensureVisible(find.byKey(const ValueKey('bottom-undo')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('bottom-undo')));
     await tester.pump();
     expect(find.text('0'), findsOneWidget);
@@ -523,6 +525,8 @@ void main() {
     await tester.pump();
     expect(find.text('1'), findsOneWidget);
 
+    await tester.ensureVisible(find.byKey(const ValueKey('bottom-restart')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('bottom-restart')));
     await tester.pump();
     expect(find.text('0'), findsOneWidget);
@@ -1015,6 +1019,8 @@ void main() {
     expect(find.text('1'), findsOneWidget);
 
     // 画面下部の Undo ボタンをタップ
+    await tester.ensureVisible(find.byKey(const ValueKey('bottom-undo')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('bottom-undo')));
     await tester.pump();
     expect(find.text('0'), findsOneWidget);
@@ -1034,6 +1040,8 @@ void main() {
     expect(find.text('1'), findsOneWidget);
 
     // 画面下部のリスタートボタンをタップ
+    await tester.ensureVisible(find.byKey(const ValueKey('bottom-restart')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('bottom-restart')));
     await tester.pump();
     expect(find.text('0'), findsOneWidget);
@@ -1380,5 +1388,29 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('banner_progress_全配置')), findsOneWidget);
+  });
+
+  // --- バナー進捗バーのテスト ---
+
+  testWidgets('バナーに初期状態の進捗バーが表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    expect(find.byKey(const Key('banner_bar_0_2')), findsOneWidget);
+  });
+
+  testWidgets('箱をゴールに押すとバナー進捗バーが更新される', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    await tester.tap(find.byTooltip('下'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('banner_bar_1_2')), findsOneWidget);
+  });
+
+  testWidgets('クリア後にバナー進捗バーが満タンになる', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('banner_bar_2_2')), findsOneWidget);
   });
 }
