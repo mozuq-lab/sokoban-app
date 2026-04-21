@@ -516,7 +516,10 @@ class FloorPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-/// 方向パッドの矢印ボタン内に三角形を描画する。
+/// 方向パッドの矢印ボタン内にシェブロン（くの字）を描画する。
+///
+/// 塗りつぶし三角形ではなく、丸いストロークキャップのシェブロン線を使い、
+/// 軽く洗練された印象にする。
 class ArrowPainter extends CustomPainter {
   const ArrowPainter({required this.direction, required this.color});
 
@@ -529,30 +532,36 @@ class ArrowPainter extends CustomPainter {
     final h = size.height;
     final cx = w / 2;
     final cy = h / 2;
-    final s = math.min(w, h) * 0.32;
+    final s = math.min(w, h) * 0.28;
+
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = math.min(w, h) * 0.065
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
 
     final path = Path();
     switch (direction) {
       case Direction.up:
-        path.moveTo(cx, cy - s);
-        path.lineTo(cx + s * 0.85, cy + s * 0.6);
-        path.lineTo(cx - s * 0.85, cy + s * 0.6);
+        path.moveTo(cx - s * 0.8, cy + s * 0.45);
+        path.lineTo(cx, cy - s * 0.45);
+        path.lineTo(cx + s * 0.8, cy + s * 0.45);
       case Direction.down:
-        path.moveTo(cx, cy + s);
-        path.lineTo(cx + s * 0.85, cy - s * 0.6);
-        path.lineTo(cx - s * 0.85, cy - s * 0.6);
+        path.moveTo(cx - s * 0.8, cy - s * 0.45);
+        path.lineTo(cx, cy + s * 0.45);
+        path.lineTo(cx + s * 0.8, cy - s * 0.45);
       case Direction.left:
-        path.moveTo(cx - s, cy);
-        path.lineTo(cx + s * 0.6, cy - s * 0.85);
-        path.lineTo(cx + s * 0.6, cy + s * 0.85);
+        path.moveTo(cx + s * 0.45, cy - s * 0.8);
+        path.lineTo(cx - s * 0.45, cy);
+        path.lineTo(cx + s * 0.45, cy + s * 0.8);
       case Direction.right:
-        path.moveTo(cx + s, cy);
-        path.lineTo(cx - s * 0.6, cy - s * 0.85);
-        path.lineTo(cx - s * 0.6, cy + s * 0.85);
+        path.moveTo(cx - s * 0.45, cy - s * 0.8);
+        path.lineTo(cx + s * 0.45, cy);
+        path.lineTo(cx - s * 0.45, cy + s * 0.8);
     }
-    path.close();
 
-    canvas.drawPath(path, Paint()..color = color);
+    canvas.drawPath(path, paint);
   }
 
   @override
