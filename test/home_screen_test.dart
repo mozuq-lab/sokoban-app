@@ -511,6 +511,8 @@ void main() {
     await tester.pump();
     expect(find.text('1'), findsOneWidget);
 
+    await tester.ensureVisible(find.byKey(const ValueKey('bottom-undo')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('bottom-undo')));
     await tester.pump();
     expect(find.text('0'), findsOneWidget);
@@ -523,6 +525,8 @@ void main() {
     await tester.pump();
     expect(find.text('1'), findsOneWidget);
 
+    await tester.ensureVisible(find.byKey(const ValueKey('bottom-restart')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('bottom-restart')));
     await tester.pump();
     expect(find.text('0'), findsOneWidget);
@@ -1015,6 +1019,8 @@ void main() {
     expect(find.text('1'), findsOneWidget);
 
     // 画面下部の Undo ボタンをタップ
+    await tester.ensureVisible(find.byKey(const ValueKey('bottom-undo')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('bottom-undo')));
     await tester.pump();
     expect(find.text('0'), findsOneWidget);
@@ -1034,6 +1040,8 @@ void main() {
     expect(find.text('1'), findsOneWidget);
 
     // 画面下部のリスタートボタンをタップ
+    await tester.ensureVisible(find.byKey(const ValueKey('bottom-restart')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('bottom-restart')));
     await tester.pump();
     expect(find.text('0'), findsOneWidget);
