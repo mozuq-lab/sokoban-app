@@ -1946,8 +1946,25 @@ class _DirectionPad extends StatelessWidget {
     const activeColor = Color(0xFF5D4037);
     final disabledColor = Colors.grey.shade400;
 
+    // キーヒント: 方向ボタンに対応するキーボードショートカットを小さく表示
+    String keyHint(Direction dir) {
+      switch (dir) {
+        case Direction.up:
+          return 'W';
+        case Direction.down:
+          return 'S';
+        case Direction.left:
+          return 'A';
+        case Direction.right:
+          return 'D';
+      }
+    }
+
     Widget dirButton(Direction dir, String label) {
       final arrowColor = enabled ? activeColor : disabledColor;
+      final hintColor = enabled
+          ? const Color(0xFF8D6E63).withValues(alpha: 0.55)
+          : Colors.grey.shade400.withValues(alpha: 0.5);
       return SizedBox(
         width: btnSize,
         height: btnSize,
@@ -1980,8 +1997,28 @@ class _DirectionPad extends StatelessWidget {
                         )
                       : null,
                 ),
-                child: CustomPaint(
-                  painter: ArrowPainter(direction: dir, color: arrowColor),
+                child: Stack(
+                  children: [
+                    CustomPaint(
+                      size: Size.infinite,
+                      painter:
+                          ArrowPainter(direction: dir, color: arrowColor),
+                    ),
+                    Positioned(
+                      right: 5,
+                      bottom: 3,
+                      child: Text(
+                        keyHint(dir),
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w600,
+                          color: hintColor,
+                          letterSpacing: 0.2,
+                          height: 1,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
