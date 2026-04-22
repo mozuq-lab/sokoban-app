@@ -804,6 +804,12 @@ class _PlayContextBanner extends StatelessWidget {
   final int remainingBoxes;
   final int totalBoxes;
 
+  /// チップを横に並べるか下に落とすかの幅しきい値。
+  ///
+  /// バナー内のアクセントバー (4) + パディング (8×2) + アイコン (28–36) +
+  /// ギャップ + テキスト列 + チップ (~70) が無理なく並ぶ最低幅。
+  static const double _compactThreshold = 300;
+
   @override
   Widget build(BuildContext context) {
     final Color accentColor;
@@ -834,113 +840,138 @@ class _PlayContextBanner extends StatelessWidget {
 
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),
-      child: Container(
+      child: LayoutBuilder(
         key: ValueKey<bool>(isSolved),
-        width: double.infinity,
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: accentColor.withValues(alpha: 0.2)),
-          boxShadow: [
-            BoxShadow(
-              color: accentColor.withValues(alpha: 0.08),
-              blurRadius: 4,
-              offset: const Offset(0, 1),
+        builder: (context, constraints) {
+          final isCompact = constraints.maxWidth < _compactThreshold;
+          final double iconSize = isCompact ? 28 : 36;
+          final double iconInner = isCompact ? 16 : 19;
+          final double hPad = isCompact ? 8 : 12;
+          final double vPad = isCompact ? 8 : 10;
+          final double gap = isCompact ? 8 : 12;
+
+          final progressChip = totalBoxes > 0
+              ? _BannerProgressChip(
+                  placed: totalBoxes - remainingBoxes,
+                  total: totalBoxes,
+                  isSolved: isSolved,
+                  accentColor: accentColor,
+                )
+              : null;
+
+          return Container(
+            width: double.infinity,
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              color: bgColor,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: accentColor.withValues(alpha: 0.2)),
+              boxShadow: [
+                BoxShadow(
+                  color: accentColor.withValues(alpha: 0.08),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: IntrinsicHeight(
-          child: Row(
-            children: [
-              // 左アクセントバー
-              Container(
-                width: 4,
-                decoration: BoxDecoration(
-                  color: accentColor,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    bottomLeft: Radius.circular(10),
-                  ),
-                ),
-              ),
-              // コンテンツ部分
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 10,
-                  ),
-                  child: Row(
-                    children: [
-                      // アイコン背景
-                      Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: accentColor.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(9),
-                        ),
-                        child: Icon(icon, size: 19, color: accentColor),
+            child: IntrinsicHeight(
+              child: Row(
+                children: [
+                  // 左アクセントバー
+                  Container(
+                    width: 4,
+                    decoration: BoxDecoration(
+                      color: accentColor,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(10),
+                        bottomLeft: Radius.circular(10),
                       ),
-                      const SizedBox(width: 12),
-                      // テキスト 2 行 + 進捗バー
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              stageLabel,
-                              key: const Key('play_context_label'),
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                color: fgColor,
-                                letterSpacing: 0.3,
-                                height: 1.2,
-                              ),
+                    ),
+                  ),
+                  // コンテンツ部分
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: hPad,
+                        vertical: vPad,
+                      ),
+                      child: Row(
+                        children: [
+                          // アイコン背景
+                          Container(
+                            width: iconSize,
+                            height: iconSize,
+                            decoration: BoxDecoration(
+                              color: accentColor.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(9),
                             ),
-                            const SizedBox(height: 2),
-                            Text(
-                              description,
-                              key: const Key('play_context_description'),
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                color: subtitleColor,
-                                letterSpacing: 0.2,
-                                height: 1.3,
-                              ),
-                              overflow: TextOverflow.ellipsis,
+                            child: Icon(icon, size: iconInner, color: accentColor),
+                          ),
+                          SizedBox(width: gap),
+                          // テキスト 2 行 + 進捗バー (+ compact 時はチップも)
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  stageLabel,
+                                  key: const Key('play_context_label'),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: fgColor,
+                                    letterSpacing: 0.3,
+                                    height: 1.2,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  description,
+                                  key: const Key('play_context_description'),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: subtitleColor,
+                                    letterSpacing: 0.2,
+                                    height: 1.3,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                if (totalBoxes > 0) ...[
+                                  const SizedBox(height: 6),
+                                  _BannerProgressBar(
+                                    placed: totalBoxes - remainingBoxes,
+                                    total: totalBoxes,
+                                    isSolved: isSolved,
+                                    accentColor: accentColor,
+                                  ),
+                                ],
+                                // compact: チップをバーの下に配置
+                                if (isCompact && progressChip != null) ...[
+                                  const SizedBox(height: 6),
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: progressChip,
+                                  ),
+                                ],
+                              ],
                             ),
-                            if (totalBoxes > 0) ...[
-                              const SizedBox(height: 6),
-                              _BannerProgressBar(
-                                placed: totalBoxes - remainingBoxes,
-                                total: totalBoxes,
-                                isSolved: isSolved,
-                                accentColor: accentColor,
-                              ),
-                            ],
+                          ),
+                          // wide: チップを横に並べる
+                          if (!isCompact && progressChip != null) ...[
+                            SizedBox(width: gap),
+                            progressChip,
                           ],
-                        ),
+                        ],
                       ),
-                      // 進捗チップ
-                      if (totalBoxes > 0)
-                        _BannerProgressChip(
-                          placed: totalBoxes - remainingBoxes,
-                          total: totalBoxes,
-                          isSolved: isSolved,
-                          accentColor: accentColor,
-                        ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }

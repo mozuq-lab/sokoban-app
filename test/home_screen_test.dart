@@ -1511,4 +1511,51 @@ void main() {
 
     expect(find.byKey(const Key('banner_bar_2_2')), findsOneWidget);
   });
+
+  // --- バナーレスポンシブのテスト ---
+
+  testWidgets('狭い幅でバナーの進捗チップが進捗バーの下に配置される', (tester) async {
+    // 幅 320px → バナー実効幅 296px < _compactThreshold (300)
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(size: Size(320, 700)),
+          child: const HomeScreen(initialLevel: testLevel),
+        ),
+      ),
+    );
+
+    // バナーのラベルと進捗チップが共存している
+    expect(find.byKey(const Key('play_context_label')), findsOneWidget);
+    expect(find.byKey(const Key('banner_progress_0 / 2')), findsOneWidget);
+
+    // compact 時はチップが Align で右寄せされている
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is Align && w.alignment == Alignment.centerRight,
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('広い幅でバナーの進捗チップが横に並ぶ', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // デフォルトテストサイズ (800x600) では compact ではない
+    expect(find.byKey(const Key('play_context_label')), findsOneWidget);
+    expect(find.byKey(const Key('banner_progress_0 / 2')), findsOneWidget);
+
+    // compact 用の Align は存在しない
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is Align && w.alignment == Alignment.centerRight,
+      ),
+      findsNothing,
+    );
+  });
 }
