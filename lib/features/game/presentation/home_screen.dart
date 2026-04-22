@@ -1414,7 +1414,7 @@ class _StatusCard extends StatelessWidget {
           ),
           // --- 進捗情報（手数・配置状況） ---
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             child: Row(
               children: [
                 Expanded(
@@ -1479,7 +1479,7 @@ class _StatusCard extends StatelessWidget {
             padding: const EdgeInsets.only(
               left: 14,
               right: 14,
-              bottom: 6,
+              bottom: 10,
               top: 0,
             ),
             child: ClipRRect(
@@ -1508,22 +1508,13 @@ class _StatusCard extends StatelessWidget {
               ),
             ),
           ),
-          // --- 区切り線 ---
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            child: Divider(
-              height: 1,
-              thickness: 0.5,
-              color: const Color(0xFFD7CCC8).withValues(alpha: 0.5),
-            ),
-          ),
           // --- ヒントテキスト ---
           Padding(
             padding: const EdgeInsets.only(
               left: 14,
               right: 14,
               bottom: 10,
-              top: 8,
+              top: 0,
             ),
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
@@ -1610,7 +1601,7 @@ class _StatusCard extends StatelessWidget {
     return Container(
       key: key,
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 14),
+      padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 14),
       color: bgColor,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1625,7 +1616,7 @@ class _StatusCard extends StatelessWidget {
             ),
           ),
           if (totalBoxes > 0) ...[
-            const SizedBox(height: 3),
+            const SizedBox(height: 4),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(totalBoxes, (i) {

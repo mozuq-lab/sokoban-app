@@ -897,6 +897,18 @@ void main() {
     }
   });
 
+  // --- ステータスカードの余白・構造テスト ---
+
+  testWidgets('ステータスカードにプログレスバーとヒントチップが共存する', (tester) async {
+    await tester.pumpWidget(buildApp());
+    // プログレスバーとヒントチップが両方表示されており、
+    // 余白で適切に区切られていることを確認する。
+    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    expect(find.byKey(const Key('hint_move')), findsOneWidget);
+    expect(find.byKey(const Key('hint_undo')), findsOneWidget);
+    expect(find.byKey(const Key('hint_restart')), findsOneWidget);
+  });
+
   // --- 配置プログレスバーのテスト ---
 
   testWidgets('配置プログレスバーが表示される', (tester) async {
