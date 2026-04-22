@@ -328,6 +328,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 history: _history,
                 remainingBoxes: gameState.remainingBoxes,
                 totalBoxes: totalBoxes,
+                moveBlocked: _moveBlocked,
                 onMove: _move,
                 onUndo: _undo,
                 onRestart: _restart,
@@ -575,6 +576,7 @@ class _ControlSection extends StatelessWidget {
     required this.history,
     required this.remainingBoxes,
     required this.totalBoxes,
+    this.moveBlocked = false,
     required this.onMove,
     required this.onUndo,
     required this.onRestart,
@@ -584,6 +586,7 @@ class _ControlSection extends StatelessWidget {
   final List<GameState> history;
   final int remainingBoxes;
   final int totalBoxes;
+  final bool moveBlocked;
   final void Function(Direction) onMove;
   final VoidCallback onUndo;
   final VoidCallback onRestart;
@@ -629,6 +632,7 @@ class _ControlSection extends StatelessWidget {
               onMove: onMove,
               enabled: !gameState.isSolved,
               isSolved: gameState.isSolved,
+              moveBlocked: moveBlocked,
               remainingBoxes: remainingBoxes,
               totalBoxes: totalBoxes,
             ),
@@ -2083,6 +2087,7 @@ class _DirectionPad extends StatelessWidget {
     required this.onMove,
     this.enabled = true,
     this.isSolved = false,
+    this.moveBlocked = false,
     this.remainingBoxes = 0,
     this.totalBoxes = 0,
   });
@@ -2090,6 +2095,7 @@ class _DirectionPad extends StatelessWidget {
   final void Function(Direction) onMove;
   final bool enabled;
   final bool isSolved;
+  final bool moveBlocked;
   final int remainingBoxes;
   final int totalBoxes;
 
@@ -2191,6 +2197,10 @@ class _DirectionPad extends StatelessWidget {
         chipText = '完了';
         chipBg = const Color(0xFFE8F5E9);
         chipFg = const Color(0xFF388E3C);
+      } else if (moveBlocked) {
+        chipText = '進めません';
+        chipBg = const Color(0xFFFFEBEE);
+        chipFg = const Color(0xFFC62828);
       } else if (remainingBoxes == 0 && totalBoxes > 0) {
         chipText = '全配置';
         chipBg = const Color(0xFFE8F5E9);

@@ -1368,6 +1368,58 @@ void main() {
     expect(findDpadChip('残 1'), findsOneWidget);
   });
 
+  testWidgets('壁に向かって移動すると方向パッド中央にブロック表示が出る', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // 左に移動（成功: (2,2) → (1,2)）
+    await tester.tap(find.byTooltip('左'));
+    await tester.pump();
+    // さらに左（壁 (0,2) で blocked）
+    await tester.tap(find.byTooltip('左'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    expect(findDpadChip('進めません'), findsOneWidget);
+  });
+
+  testWidgets('ブロック表示が約 1 秒後に方向パッド中央から消える', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // 左に移動（成功）
+    await tester.tap(find.byTooltip('左'));
+    await tester.pump();
+    // さらに左（壁で blocked）
+    await tester.tap(find.byTooltip('左'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(findDpadChip('進めません'), findsOneWidget);
+
+    // 1 秒経過させてタイマー発火
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+
+    expect(findDpadChip('進めません'), findsNothing);
+    expect(findDpadChip('残 2'), findsOneWidget);
+  });
+
+  testWidgets('ブロック後に成功移動すると方向パッド中央が残り数に戻る', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // 左に移動（成功）
+    await tester.tap(find.byTooltip('左'));
+    await tester.pump();
+    // さらに左（壁で blocked）
+    await tester.tap(find.byTooltip('左'));
+    await tester.pump();
+    expect(findDpadChip('進めません'), findsOneWidget);
+
+    // 右に移動（成功）
+    await tester.tap(find.byTooltip('右'));
+    await tester.pumpAndSettle();
+
+    expect(findDpadChip('進めません'), findsNothing);
+    expect(findDpadChip('残 2'), findsOneWidget);
+  });
+
   // --- プレイコンテキストバナーのテスト ---
 
   testWidgets('プレイコンテキストバナーにステージ情報と目的が表示される', (tester) async {
