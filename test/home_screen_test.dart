@@ -1303,6 +1303,42 @@ void main() {
     expect(pillFinder, findsWidgets);
   });
 
+  testWidgets('クリアオーバーレイにステージ完了サブタイトルが表示される',
+      (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('overlay-stage-complete')), findsOneWidget);
+    expect(find.text('ステージ 1 完了'), findsOneWidget);
+  });
+
+  testWidgets('クリアオーバーレイに配置数チップが表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('overlay-box-count')), findsOneWidget);
+    expect(find.text('2/2 配置'), findsOneWidget);
+  });
+
+  testWidgets('Undo でクリア解除するとオーバーレイのサブタイトルとチップが消える',
+      (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+    await tester.pumpAndSettle();
+
+    expect(find.text('ステージ 1 完了'), findsOneWidget);
+    expect(find.byKey(const Key('overlay-box-count')), findsOneWidget);
+
+    // Undo
+    await tester.tap(find.byKey(const ValueKey('appbar-undo')).first);
+    await tester.pump();
+
+    expect(find.text('ステージ 1 完了'), findsNothing);
+    expect(find.byKey(const Key('overlay-box-count')), findsNothing);
+  });
+
   // --- レスポンシブレイアウトのテスト ---
 
   group('レスポンシブレイアウト', () {
