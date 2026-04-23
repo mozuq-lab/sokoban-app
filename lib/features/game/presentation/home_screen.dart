@@ -1731,7 +1731,6 @@ class _StatItem extends StatelessWidget {
 /// 各セグメントはゴールに配置済みかどうかで塗り分ける。
 class _SegmentedProgressBar extends StatelessWidget {
   const _SegmentedProgressBar({
-    super.key,
     required this.placedCount,
     required this.totalCount,
     required this.isSolved,
