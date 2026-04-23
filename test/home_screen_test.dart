@@ -856,7 +856,7 @@ void main() {
 
     // 初期状態: 両方アウトライン（color == null）
     for (var i = 0; i < 2; i++) {
-      final dot = tester.widget<Container>(
+      final dot = tester.widget<AnimatedContainer>(
         find.byKey(ValueKey('progress-dot-$i')),
       );
       final deco = dot.decoration! as BoxDecoration;
@@ -868,14 +868,14 @@ void main() {
     await tester.tap(find.byTooltip('下'));
     await tester.pumpAndSettle();
 
-    final dot0 = tester.widget<Container>(
+    final dot0 = tester.widget<AnimatedContainer>(
       find.byKey(const ValueKey('progress-dot-0')),
     );
     final deco0 = dot0.decoration! as BoxDecoration;
     expect(deco0.color, isNotNull, reason: 'dot 0 should be filled');
     expect(deco0.border, isNull, reason: 'dot 0 should have no border');
 
-    final dot1 = tester.widget<Container>(
+    final dot1 = tester.widget<AnimatedContainer>(
       find.byKey(const ValueKey('progress-dot-1')),
     );
     final deco1 = dot1.decoration! as BoxDecoration;
@@ -889,7 +889,7 @@ void main() {
     await tester.pumpAndSettle();
 
     for (var i = 0; i < 2; i++) {
-      final dot = tester.widget<Container>(
+      final dot = tester.widget<AnimatedContainer>(
         find.byKey(ValueKey('progress-dot-$i')),
       );
       final deco = dot.decoration! as BoxDecoration;
@@ -899,30 +899,63 @@ void main() {
 
   // --- ステータスカードの余白・構造テスト ---
 
-  testWidgets('ステータスカードにプログレスバーとヒントチップが共存する', (tester) async {
+  testWidgets('ステータスカードにセグメントバーとヒントチップが共存する', (tester) async {
     await tester.pumpWidget(buildApp());
-    // プログレスバーとヒントチップが両方表示されており、
+    // セグメントバーとヒントチップが両方表示されており、
     // 余白で適切に区切られていることを確認する。
-    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    expect(find.byKey(const ValueKey('segment_0')), findsOneWidget);
     expect(find.byKey(const Key('hint_move')), findsOneWidget);
     expect(find.byKey(const Key('hint_undo')), findsOneWidget);
     expect(find.byKey(const Key('hint_restart')), findsOneWidget);
   });
 
-  // --- 配置プログレスバーのテスト ---
+  // --- 配置セグメントバーのテスト ---
 
-  testWidgets('配置プログレスバーが表示される', (tester) async {
+  testWidgets('配置セグメントバーが箱数ぶんのセグメントを持つ', (tester) async {
     await tester.pumpWidget(buildApp());
-    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    // totalBoxes == 2 なのでセグメントが 2 つ
+    expect(find.byKey(const ValueKey('segment_0')), findsOneWidget);
+    expect(find.byKey(const ValueKey('segment_1')), findsOneWidget);
   });
 
-  testWidgets('初期状態でプログレスバーの値が 0', (tester) async {
+  testWidgets('初期状態でセグメントバーの全セグメントが未配置色', (tester) async {
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
-    final indicator = tester.widget<LinearProgressIndicator>(
-      find.byType(LinearProgressIndicator),
+    // 両セグメントとも未配置色（薄いグレー系）
+    for (var i = 0; i < 2; i++) {
+      final container = tester.widget<AnimatedContainer>(
+        find.byKey(ValueKey('segment_$i')),
+      );
+      final deco = container.decoration! as BoxDecoration;
+      // 未配置色は alpha が低い薄い色
+      expect(deco.color, isNotNull, reason: 'segment $i should have a color');
+      expect(deco.color!.a, lessThan(0.5),
+          reason: 'segment $i should be faded (empty)');
+    }
+  });
+
+  testWidgets('箱をゴールに置くとセグメントが配置色に変わる', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // 下に移動: box(2,3)→(2,4) がゴールに乗る → placedCount == 1
+    await tester.tap(find.byTooltip('下'));
+    await tester.pumpAndSettle();
+
+    // セグメント 0 が配置色（alpha が高い）
+    final seg0 = tester.widget<AnimatedContainer>(
+      find.byKey(const ValueKey('segment_0')),
     );
-    expect(indicator.value, closeTo(0.0, 0.01));
+    final deco0 = seg0.decoration! as BoxDecoration;
+    expect(deco0.color!.a, greaterThan(0.5),
+        reason: 'segment 0 should be filled');
+
+    // セグメント 1 はまだ未配置色
+    final seg1 = tester.widget<AnimatedContainer>(
+      find.byKey(const ValueKey('segment_1')),
+    );
+    final deco1 = seg1.decoration! as BoxDecoration;
+    expect(deco1.color!.a, lessThan(0.5),
+        reason: 'segment 1 should be empty');
   });
 
   testWidgets('初期状態で配置が分数形式で表示される', (tester) async {

@@ -1505,7 +1505,7 @@ class _StatusCard extends StatelessWidget {
               ],
             ),
           ),
-          // --- 配置プログレスバー ---
+          // --- 配置セグメントバー ---
           Padding(
             padding: const EdgeInsets.only(
               left: 14,
@@ -1513,30 +1513,11 @@ class _StatusCard extends StatelessWidget {
               bottom: 10,
               top: 0,
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: TweenAnimationBuilder<double>(
-                tween: Tween<double>(
-                  begin: 0,
-                  end: totalBoxes > 0
-                      ? (totalBoxes - remainingBoxes) / totalBoxes
-                      : 0,
-                ),
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                builder: (context, animatedValue, _) {
-                  return LinearProgressIndicator(
-                    value: animatedValue,
-                    minHeight: 7,
-                    backgroundColor: const Color(
-                      0xFFD7CCC8,
-                    ).withValues(alpha: 0.25),
-                    color: allPlaced
-                        ? Colors.green.shade400
-                        : Colors.orange.shade400,
-                  );
-                },
-              ),
+            child: _SegmentedProgressBar(
+              key: ValueKey('segmented_bar_${totalBoxes - remainingBoxes}_$totalBoxes'),
+              placedCount: totalBoxes - remainingBoxes,
+              totalCount: totalBoxes,
+              isSolved: isSolved,
             ),
           ),
           // --- ヒントテキスト ---
@@ -1654,10 +1635,12 @@ class _StatusCard extends StatelessWidget {
                 final bool placed = i < placedCount;
                 return Padding(
                   padding: EdgeInsets.only(left: i == 0 ? 0 : 4),
-                  child: Container(
+                  child: AnimatedContainer(
                     key: ValueKey('progress-dot-$i'),
-                    width: 8,
-                    height: 8,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    width: placed ? 10 : 8,
+                    height: placed ? 10 : 8,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: placed ? textColor.withValues(alpha: 0.8) : null,
@@ -1740,6 +1723,53 @@ class _StatItem extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+/// 箱ごとに 1 セグメントを持つ進捗バー。
+///
+/// 各セグメントはゴールに配置済みかどうかで塗り分ける。
+class _SegmentedProgressBar extends StatelessWidget {
+  const _SegmentedProgressBar({
+    super.key,
+    required this.placedCount,
+    required this.totalCount,
+    required this.isSolved,
+  });
+
+  final int placedCount;
+  final int totalCount;
+  final bool isSolved;
+
+  @override
+  Widget build(BuildContext context) {
+    if (totalCount <= 0) return const SizedBox.shrink();
+
+    final Color filledColor =
+        isSolved ? Colors.green.shade400 : Colors.orange.shade400;
+    final Color emptyColor =
+        const Color(0xFFD7CCC8).withValues(alpha: 0.35);
+
+    return Row(
+      children: List.generate(totalCount, (i) {
+        final bool placed = i < placedCount;
+        return Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(left: i == 0 ? 0 : 3),
+            child: AnimatedContainer(
+              key: ValueKey('segment_$i'),
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              height: 8,
+              decoration: BoxDecoration(
+                color: placed ? filledColor : emptyColor,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ),
+        );
+      }),
     );
   }
 }
