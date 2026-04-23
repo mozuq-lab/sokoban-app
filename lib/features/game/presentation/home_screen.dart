@@ -722,14 +722,11 @@ class _ControlSubLabel extends StatelessWidget {
 /// 押下時に軽い縮小アニメーションで触感を伝える共通ラッパー。
 class _PressableControl extends StatefulWidget {
   const _PressableControl({
-    super.key,
     required this.enabled,
-    required this.onTap,
     required this.child,
   });
 
   final bool enabled;
-  final VoidCallback? onTap;
   final Widget child;
 
   @override
@@ -760,24 +757,24 @@ class _PressableControlState extends State<_PressableControl>
     super.dispose();
   }
 
-  void _onTapDown(TapDownDetails _) {
+  void _onPointerDown(PointerDownEvent _) {
     if (widget.enabled) _controller.forward();
   }
 
-  void _onTapUp(TapUpDetails _) {
+  void _onPointerUp(PointerUpEvent _) {
     _controller.reverse();
   }
 
-  void _onTapCancel() {
+  void _onPointerCancel(PointerCancelEvent _) {
     _controller.reverse();
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: _onTapDown,
-      onTapUp: _onTapUp,
-      onTapCancel: _onTapCancel,
+    return Listener(
+      onPointerDown: _onPointerDown,
+      onPointerUp: _onPointerUp,
+      onPointerCancel: _onPointerCancel,
       behavior: HitTestBehavior.translucent,
       child: AnimatedBuilder(
         animation: _scaleAnimation,
@@ -810,7 +807,6 @@ class _AssistButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return _PressableControl(
       enabled: enabled,
-      onTap: onPressed,
       child: Opacity(
         opacity: enabled ? 1.0 : 0.45,
         child: Material(
@@ -2262,7 +2258,6 @@ class _DirectionPad extends StatelessWidget {
           message: label,
           child: _PressableControl(
             enabled: enabled,
-            onTap: enabled ? () => onMove(dir) : null,
             child: Opacity(
               opacity: enabled ? 1.0 : 0.45,
               child: Material(
