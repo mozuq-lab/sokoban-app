@@ -1514,7 +1514,6 @@ class _StatusCard extends StatelessWidget {
               top: 0,
             ),
             child: _SegmentedProgressBar(
-              key: ValueKey('segmented_bar_${totalBoxes - remainingBoxes}_$totalBoxes'),
               placedCount: totalBoxes - remainingBoxes,
               totalCount: totalBoxes,
               isSolved: isSolved,
