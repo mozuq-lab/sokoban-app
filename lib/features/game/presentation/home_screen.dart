@@ -719,6 +719,78 @@ class _ControlSubLabel extends StatelessWidget {
   }
 }
 
+/// 押下時に軽い縮小アニメーションで触感を伝える共通ラッパー。
+class _PressableControl extends StatefulWidget {
+  const _PressableControl({
+    super.key,
+    required this.enabled,
+    required this.onTap,
+    required this.child,
+  });
+
+  final bool enabled;
+  final VoidCallback? onTap;
+  final Widget child;
+
+  @override
+  State<_PressableControl> createState() => _PressableControlState();
+}
+
+class _PressableControlState extends State<_PressableControl>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 80),
+      reverseDuration: const Duration(milliseconds: 100),
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.93).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onTapDown(TapDownDetails _) {
+    if (widget.enabled) _controller.forward();
+  }
+
+  void _onTapUp(TapUpDetails _) {
+    _controller.reverse();
+  }
+
+  void _onTapCancel() {
+    _controller.reverse();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: _onTapDown,
+      onTapUp: _onTapUp,
+      onTapCancel: _onTapCancel,
+      behavior: HitTestBehavior.translucent,
+      child: AnimatedBuilder(
+        animation: _scaleAnimation,
+        builder: (context, child) => Transform.scale(
+          scale: _scaleAnimation.value,
+          child: child,
+        ),
+        child: widget.child,
+      ),
+    );
+  }
+}
+
 /// 方向パッドと統一感のあるグラデーション付き補助ボタン。
 class _AssistButton extends StatelessWidget {
   const _AssistButton({
@@ -736,52 +808,60 @@ class _AssistButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: enabled ? const Color(0xFFF5E6CC) : Colors.grey.shade200,
-      borderRadius: BorderRadius.circular(12),
-      elevation: enabled ? 2 : 0,
-      shadowColor: const Color(0x40000000),
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(12),
-        splashColor: const Color(0x308D6E63),
-        highlightColor: const Color(0x188D6E63),
-        child: Container(
-          height: 48,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: enabled ? const Color(0xFF8D6E63) : Colors.grey.shade300,
-              width: enabled ? 1.5 : 1.0,
-            ),
-            gradient: enabled
-                ? const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Color(0xFFF9EDDA), Color(0xFFF0DDBF)],
-                  )
-                : null,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: 20,
-                height: 20,
-                child: CustomPaint(painter: iconPainter),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: enabled
-                      ? const Color(0xFF5D4037)
-                      : Colors.grey.shade400,
+    return _PressableControl(
+      enabled: enabled,
+      onTap: onPressed,
+      child: Opacity(
+        opacity: enabled ? 1.0 : 0.45,
+        child: Material(
+          color: enabled ? const Color(0xFFF5E6CC) : const Color(0xFFEDE7E0),
+          borderRadius: BorderRadius.circular(14),
+          elevation: enabled ? 2 : 0,
+          shadowColor: const Color(0x40000000),
+          child: InkWell(
+            onTap: onPressed,
+            borderRadius: BorderRadius.circular(14),
+            splashColor: const Color(0x308D6E63),
+            highlightColor: const Color(0x188D6E63),
+            child: Container(
+              height: 48,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color:
+                      enabled ? const Color(0xFF8D6E63) : const Color(0xFFCCC3BA),
+                  width: enabled ? 1.5 : 1.0,
                 ),
+                gradient: enabled
+                    ? const LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Color(0xFFF9EDDA), Color(0xFFF0DDBF)],
+                      )
+                    : null,
               ),
-            ],
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CustomPaint(painter: iconPainter),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: enabled
+                          ? const Color(0xFF5D4037)
+                          : const Color(0xFF9E9E9E),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -2174,61 +2254,70 @@ class _DirectionPad extends StatelessWidget {
       final arrowColor = enabled ? activeColor : disabledColor;
       final hintColor = enabled
           ? const Color(0xFF8D6E63).withValues(alpha: 0.55)
-          : Colors.grey.shade400.withValues(alpha: 0.5);
+          : const Color(0xFF9E9E9E).withValues(alpha: 0.5);
       return SizedBox(
         width: btnSize,
         height: btnSize,
         child: Tooltip(
           message: label,
-          child: Material(
-            color: enabled ? const Color(0xFFF5E6CC) : Colors.grey.shade200,
-            borderRadius: BorderRadius.circular(14),
-            elevation: enabled ? 3 : 1,
-            shadowColor: const Color(0x40000000),
-            child: InkWell(
-              onTap: enabled ? () => onMove(dir) : null,
-              borderRadius: BorderRadius.circular(14),
-              splashColor: const Color(0x308D6E63),
-              highlightColor: const Color(0x188D6E63),
-              child: Container(
-                decoration: BoxDecoration(
+          child: _PressableControl(
+            enabled: enabled,
+            onTap: enabled ? () => onMove(dir) : null,
+            child: Opacity(
+              opacity: enabled ? 1.0 : 0.45,
+              child: Material(
+                color: enabled
+                    ? const Color(0xFFF5E6CC)
+                    : const Color(0xFFEDE7E0),
+                borderRadius: BorderRadius.circular(14),
+                elevation: enabled ? 3 : 0,
+                shadowColor: const Color(0x40000000),
+                child: InkWell(
+                  onTap: enabled ? () => onMove(dir) : null,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: enabled
-                        ? const Color(0xFF8D6E63)
-                        : Colors.grey.shade300,
-                    width: enabled ? 1.5 : 1.0,
-                  ),
-                  gradient: enabled
-                      ? const LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [Color(0xFFF9EDDA), Color(0xFFF0DDBF)],
-                        )
-                      : null,
-                ),
-                child: Stack(
-                  children: [
-                    CustomPaint(
-                      size: Size.infinite,
-                      painter:
-                          ArrowPainter(direction: dir, color: arrowColor),
-                    ),
-                    Positioned(
-                      right: 5,
-                      bottom: 3,
-                      child: Text(
-                        keyHint(dir),
-                        style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w600,
-                          color: hintColor,
-                          letterSpacing: 0.2,
-                          height: 1,
-                        ),
+                  splashColor: const Color(0x308D6E63),
+                  highlightColor: const Color(0x188D6E63),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: enabled
+                            ? const Color(0xFF8D6E63)
+                            : const Color(0xFFCCC3BA),
+                        width: enabled ? 1.5 : 1.0,
                       ),
+                      gradient: enabled
+                          ? const LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [Color(0xFFF9EDDA), Color(0xFFF0DDBF)],
+                            )
+                          : null,
                     ),
-                  ],
+                    child: Stack(
+                      children: [
+                        CustomPaint(
+                          size: Size.infinite,
+                          painter:
+                              ArrowPainter(direction: dir, color: arrowColor),
+                        ),
+                        Positioned(
+                          right: 5,
+                          bottom: 3,
+                          child: Text(
+                            keyHint(dir),
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w600,
+                              color: hintColor,
+                              letterSpacing: 0.2,
+                              height: 1,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
