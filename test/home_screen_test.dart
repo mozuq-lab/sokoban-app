@@ -560,6 +560,57 @@ void main() {
     expect(restartButton.height, greaterThanOrEqualTo(48));
   });
 
+  // --- 操作ボタンの disabled 状態の視覚表示テスト ---
+
+  testWidgets('初期状態の補助ボタンが Opacity で薄く表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    // 初期状態では履歴がないので Undo / Restart は disabled
+    final undoOpacity = tester.widget<Opacity>(
+      find.descendant(
+        of: find.byKey(const ValueKey('bottom-undo')),
+        matching: find.byType(Opacity),
+      ),
+    );
+    expect(undoOpacity.opacity, lessThan(1.0));
+
+    final restartOpacity = tester.widget<Opacity>(
+      find.descendant(
+        of: find.byKey(const ValueKey('bottom-restart')),
+        matching: find.byType(Opacity),
+      ),
+    );
+    expect(restartOpacity.opacity, lessThan(1.0));
+  });
+
+  testWidgets('移動後の補助ボタンが不透明になる', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    await tester.tap(find.byTooltip('下'));
+    await tester.pump();
+
+    final undoOpacity = tester.widget<Opacity>(
+      find.descendant(
+        of: find.byKey(const ValueKey('bottom-undo')),
+        matching: find.byType(Opacity),
+      ),
+    );
+    expect(undoOpacity.opacity, equals(1.0));
+  });
+
+  testWidgets('クリア後に方向ボタンが Opacity で薄く表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+
+    // 方向ボタンの Opacity を確認
+    final upOpacity = tester.widget<Opacity>(
+      find.descendant(
+        of: find.byTooltip('上'),
+        matching: find.byType(Opacity),
+      ),
+    );
+    expect(upOpacity.opacity, lessThan(1.0));
+  });
+
   // --- 残り箱数表示のテスト ---
 
   testWidgets('初期状態で残り箱数が表示される', (tester) async {
