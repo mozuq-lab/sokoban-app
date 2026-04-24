@@ -1435,6 +1435,71 @@ void main() {
     expect(find.text('0 手'), findsOneWidget);
   });
 
+  testWidgets('盤面ヘッダーでステージ情報と統計チップが左右に分離される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    // ステージラベルが統計チップより左にある
+    final stagePos = tester.getTopLeft(
+      find.byKey(const Key('board_header_stage')),
+    );
+    final movePos = tester.getTopLeft(
+      find.byKey(const Key('board_header_move_count')),
+    );
+    final boxPos = tester.getTopLeft(
+      find.byKey(const Key('board_header_box_count')),
+    );
+    expect(stagePos.dx, lessThan(movePos.dx));
+    expect(movePos.dx, lessThan(boxPos.dx));
+  });
+
+  testWidgets('盤面ヘッダーのステータスバッジが背景色を持つ', (tester) async {
+    await tester.pumpWidget(buildApp());
+    final badge = tester.widget<Container>(
+      find.byKey(const Key('board_header_status')),
+    );
+    final deco = badge.decoration! as BoxDecoration;
+    expect(deco.borderRadius, isNotNull);
+    expect(deco.color, isNotNull);
+  });
+
+  testWidgets('盤面ヘッダーのチップにアイコンが含まれる', (tester) async {
+    await tester.pumpWidget(buildApp());
+    // 手数チップ内に MoveCountIconPainter がある
+    final moveChip = find.byKey(const Key('board_header_move_count'));
+    expect(moveChip, findsOneWidget);
+    expect(
+      find.descendant(of: moveChip, matching: find.byType(CustomPaint)),
+      findsOneWidget,
+    );
+    // 箱カウントチップ内に PlacementIconPainter がある
+    final boxChip = find.byKey(const Key('board_header_box_count'));
+    expect(boxChip, findsOneWidget);
+    expect(
+      find.descendant(of: boxChip, matching: find.byType(CustomPaint)),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('クリア後に盤面ヘッダーのステータスバッジがクリア表示になる',
+      (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+
+    final badge = tester.widget<Container>(
+      find.byKey(const Key('board_header_status')),
+    );
+    final deco = badge.decoration! as BoxDecoration;
+    // クリア時は緑系の背景色
+    expect(deco.color, equals(const Color(0xFFE8F5E9)));
+    // テキストが「クリア」に変わっている
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('board_header_status')),
+        matching: find.text('クリア'),
+      ),
+      findsOneWidget,
+    );
+  });
+
   // --- 操作セクション内サブラベルのテスト ---
 
   testWidgets('操作セクションに「移動」と「やり直し」のサブラベルが表示される', (tester) async {
