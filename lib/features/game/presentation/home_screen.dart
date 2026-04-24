@@ -31,15 +31,25 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _moveBlocked = false;
   Timer? _blockedHintTimer;
   final FocusNode _focusNode = FocusNode();
+  bool _hasFocus = false;
 
   @override
   void initState() {
     super.initState();
+    _focusNode.addListener(_onFocusChange);
     if (widget.initialLevel != null) {
       _levelLines = widget.initialLevel!;
       _gameState = GameState.parse(_levelLines);
     } else {
       _loadLevelFromAsset();
+    }
+  }
+
+  void _onFocusChange() {
+    if (mounted) {
+      setState(() {
+        _hasFocus = _focusNode.hasFocus;
+      });
     }
   }
 
@@ -61,6 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _blockedHintTimer?.cancel();
+    _focusNode.removeListener(_onFocusChange);
     _focusNode.dispose();
     super.dispose();
   }
@@ -332,6 +343,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 onMove: _move,
                 onUndo: _undo,
                 onRestart: _restart,
+                hasFocus: _hasFocus,
+                onRequestFocus: () => _focusNode.requestFocus(),
               );
 
               final playContextBanner = _PlayContextBanner(
@@ -637,6 +650,8 @@ class _ControlSection extends StatelessWidget {
     required this.onMove,
     required this.onUndo,
     required this.onRestart,
+    this.hasFocus = false,
+    this.onRequestFocus,
   });
 
   final GameState gameState;
@@ -647,6 +662,8 @@ class _ControlSection extends StatelessWidget {
   final void Function(Direction) onMove;
   final VoidCallback onUndo;
   final VoidCallback onRestart;
+  final bool hasFocus;
+  final VoidCallback? onRequestFocus;
 
   @override
   Widget build(BuildContext context) {
@@ -742,6 +759,11 @@ class _ControlSection extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 10),
+          _KeyboardFocusIndicator(
+            hasFocus: hasFocus,
+            onRequestFocus: onRequestFocus,
+          ),
         ],
       ),
     );
@@ -772,6 +794,87 @@ class _ControlSubLabel extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// キーボードフォーカス状態を伝える小さなインジケーター。
+///
+/// フォーカスがあるときは「キーボード有効」、
+/// ないときは「タップしてキーボードを有効化」と表示する。
+class _KeyboardFocusIndicator extends StatelessWidget {
+  const _KeyboardFocusIndicator({
+    required this.hasFocus,
+    this.onRequestFocus,
+  });
+
+  final bool hasFocus;
+  final VoidCallback? onRequestFocus;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color bgColor;
+    final Color fgColor;
+    final Color borderColor;
+    final String label;
+    final IconData icon;
+
+    if (hasFocus) {
+      bgColor = const Color(0xFFE8F5E9);
+      fgColor = const Color(0xFF388E3C);
+      borderColor = const Color(0xFF388E3C).withValues(alpha: 0.2);
+      label = 'キーボード有効';
+      icon = Icons.keyboard_rounded;
+    } else {
+      bgColor = const Color(0xFFFFF8E1);
+      fgColor = const Color(0xFF8D6E63);
+      borderColor = const Color(0xFF8D6E63).withValues(alpha: 0.2);
+      label = 'タップしてキーボードを有効化';
+      icon = Icons.keyboard_hide_rounded;
+    }
+
+    return GestureDetector(
+      onTap: hasFocus ? null : onRequestFocus,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        key: const Key('keyboard_focus_indicator'),
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: borderColor, width: 0.5),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: Icon(
+                icon,
+                key: ValueKey(hasFocus),
+                size: 14,
+                color: fgColor,
+              ),
+            ),
+            const SizedBox(width: 5),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: Text(
+                label,
+                key: ValueKey(label),
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w500,
+                  color: fgColor.withValues(alpha: 0.8),
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
