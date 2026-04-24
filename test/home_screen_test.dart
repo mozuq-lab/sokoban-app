@@ -1728,6 +1728,58 @@ void main() {
     );
   });
 
+  // --- キーボードフォーカスインジケーターのテスト ---
+
+  testWidgets('操作セクションにキーボードフォーカスインジケーターが表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    expect(
+      find.byKey(const Key('keyboard_focus_indicator')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('フォーカス時にインジケーターが「キーボード有効」と表示する', (tester) async {
+    await tester.pumpWidget(buildApp());
+    // autofocus で初期フォーカスが当たる
+    await tester.pump();
+    expect(find.text('キーボード有効'), findsOneWidget);
+    expect(find.byIcon(Icons.keyboard_rounded), findsOneWidget);
+  });
+
+  testWidgets('フォーカス喪失時にインジケーターが非フォーカス表示になる', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    expect(find.text('キーボード有効'), findsOneWidget);
+
+    // フォーカスを外す（別の FocusNode を作ってフォーカスを奪う）
+    final otherFocus = FocusNode();
+    addTearDown(otherFocus.dispose);
+    FocusScope.of(tester.element(find.byType(HomeScreen))).requestFocus(otherFocus);
+    await tester.pump();
+
+    expect(find.text('タップしてキーボードを有効化'), findsOneWidget);
+    expect(find.byIcon(Icons.keyboard_hide_rounded), findsOneWidget);
+  });
+
+  testWidgets('インジケーターをタップするとフォーカスが復帰する', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+
+    // フォーカスを外す
+    final otherFocus = FocusNode();
+    addTearDown(otherFocus.dispose);
+    FocusScope.of(tester.element(find.byType(HomeScreen))).requestFocus(otherFocus);
+    await tester.pump();
+    expect(find.text('タップしてキーボードを有効化'), findsOneWidget);
+
+    // インジケーターをスクロールして表示し、タップしてフォーカスを復帰
+    await tester.ensureVisible(find.byKey(const Key('keyboard_focus_indicator')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('keyboard_focus_indicator')));
+    await tester.pump();
+    expect(find.text('キーボード有効'), findsOneWidget);
+  });
+
   testWidgets('広い幅でバナーの進捗チップが横に並ぶ', (tester) async {
     await tester.pumpWidget(buildApp());
 
