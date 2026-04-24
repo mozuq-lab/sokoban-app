@@ -1813,7 +1813,7 @@ void main() {
         tester.widget<Container>(frameFinder).decoration! as BoxDecoration;
     final outerRadius =
         (outerDeco.borderRadius! as BorderRadius).topLeft.x;
-    final innerRadius = (clip.borderRadius! as BorderRadius).topLeft.x;
+    final innerRadius = (clip.borderRadius as BorderRadius).topLeft.x;
     // 内側の角丸は外側よりボーダー幅ぶん小さい
     expect(innerRadius, lessThan(outerRadius));
   });
