@@ -1780,6 +1780,44 @@ void main() {
     expect(find.text('キーボード有効'), findsOneWidget);
   });
 
+  // --- 盤面タイルフレームのテスト ---
+
+  testWidgets('盤面タイル領域にボーダーフレームが表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    final frameFinder = find.byKey(const Key('board_tile_frame'));
+    expect(frameFinder, findsOneWidget);
+
+    final container = tester.widget<Container>(frameFinder);
+    final deco = container.decoration! as BoxDecoration;
+    // ボーダーが設定されている
+    expect(deco.border, isNotNull);
+    // 角丸が設定されている
+    expect(deco.borderRadius, isNotNull);
+  });
+
+  testWidgets('盤面タイルフレームの内側 ClipRRect がフレーム内に収まる角丸を持つ',
+      (tester) async {
+    await tester.pumpWidget(buildApp());
+    final frameFinder = find.byKey(const Key('board_tile_frame'));
+    expect(frameFinder, findsOneWidget);
+
+    // フレーム内の ClipRRect を取得
+    final clipFinder = find.descendant(
+      of: frameFinder,
+      matching: find.byType(ClipRRect),
+    );
+    expect(clipFinder, findsOneWidget);
+
+    final clip = tester.widget<ClipRRect>(clipFinder);
+    final outerDeco =
+        tester.widget<Container>(frameFinder).decoration! as BoxDecoration;
+    final outerRadius =
+        (outerDeco.borderRadius! as BorderRadius).topLeft.x;
+    final innerRadius = (clip.borderRadius as BorderRadius).topLeft.x;
+    // 内側の角丸は外側よりボーダー幅ぶん小さい
+    expect(innerRadius, lessThan(outerRadius));
+  });
+
   testWidgets('広い幅でバナーの進捗チップが横に並ぶ', (tester) async {
     await tester.pumpWidget(buildApp());
 

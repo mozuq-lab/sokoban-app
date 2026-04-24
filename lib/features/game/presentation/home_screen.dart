@@ -589,20 +589,24 @@ class _BoardSection extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(8),
                   child: Container(
+                    key: const Key('board_tile_frame'),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.brown.withValues(alpha: 0.22),
+                        width: 1.5,
+                      ),
                       boxShadow: [
-                        // インセット影風の外枠（盤面を沈み込ませる表現）
+                        // 内側に沈み込んだ印象を作る上辺の薄い影
                         BoxShadow(
-                          color: Colors.brown.withValues(alpha: 0.12),
-                          blurRadius: 3,
-                          spreadRadius: -1,
+                          color: Colors.brown.withValues(alpha: 0.10),
+                          blurRadius: 2,
                           offset: const Offset(0, 1),
                         ),
                       ],
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(6.5),
                       child: AspectRatio(
                         aspectRatio:
                             gameState.board.width / gameState.board.height,
