@@ -1652,13 +1652,29 @@ class _StatusCard extends StatelessWidget {
               isSolved: isSolved,
             ),
           ),
-          // --- ヒントテキスト ---
-          Padding(
+          // --- ヒントテキスト（背景色で副次情報として区別） ---
+          Container(
+            key: const Key('status_hint_section'),
+            width: double.infinity,
             padding: const EdgeInsets.only(
               left: 14,
               right: 14,
               bottom: 10,
               top: 0,
+            ),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest
+                  .withValues(alpha: 0.25),
+              border: Border(
+                top: BorderSide(
+                  color: const Color(0xFFE8E0D8).withValues(alpha: 0.6),
+                  width: 1,
+                ),
+              ),
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(14),
+                bottomRight: Radius.circular(14),
+              ),
             ),
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
