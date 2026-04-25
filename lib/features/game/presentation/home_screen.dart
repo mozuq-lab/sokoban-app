@@ -418,162 +418,201 @@ class _BoardSection extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               // --- ヘッダー行 ---
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                child: Row(
-                  children: [
-                    // --- 左: ステージ名 + ステータス ---
-                    SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CustomPaint(
-                        painter: PuzzleSectionIconPainter(
-                          color: const Color(0xFF8D6E63).withValues(alpha: 0.8),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  // 幅 300px 未満では 2 行に分割して窮屈さを緩和する。
+                  final isCompactHeader = constraints.maxWidth < 300;
+
+                  // --- 左: ステージ名 + ステータス ---
+                  final stageRow = Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CustomPaint(
+                          painter: PuzzleSectionIconPainter(
+                            color: const Color(0xFF8D6E63)
+                                .withValues(alpha: 0.8),
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 7),
-                    Flexible(
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              'ステージ 1',
-                              key: const Key('board_header_stage'),
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFF5D4037),
-                                letterSpacing: 0.3,
+                      const SizedBox(width: 7),
+                      Flexible(
+                        child: Text(
+                          'ステージ 1',
+                          key: const Key('board_header_stage'),
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF5D4037),
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      // ステータスバッジ
+                      Container(
+                        key: const Key('board_header_status'),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: gameState.isSolved
+                              ? const Color(0xFFE8F5E9)
+                              : const Color(0xFF8D6E63)
+                                  .withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          gameState.isSolved ? 'クリア' : 'プレイ中',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: gameState.isSolved
+                                ? const Color(0xFF388E3C)
+                                : const Color(0xFF8D6E63),
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+
+                  // --- 右: 統計チップ ---
+                  final statChips = Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // 手数チップ
+                      Container(
+                        key: const Key('board_header_move_count'),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEFEBE9),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: const Color(0xFFD7CCC8),
+                            width: 0.5,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              width: 10,
+                              height: 10,
+                              child: CustomPaint(
+                                painter: MoveCountIconPainter(
+                                  color: const Color(0xFF8D6E63),
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 6),
-                          // ステータスバッジ
-                          Container(
-                            key: const Key('board_header_status'),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: gameState.isSolved
-                                  ? const Color(0xFFE8F5E9)
-                                  : const Color(0xFF8D6E63)
-                                      .withValues(alpha: 0.08),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              gameState.isSolved ? 'クリア' : 'プレイ中',
+                            const SizedBox(width: 3),
+                            Text(
+                              '$moveCount 手',
                               style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w600,
-                                color: gameState.isSolved
-                                    ? const Color(0xFF388E3C)
-                                    : const Color(0xFF8D6E63),
-                                letterSpacing: 0.2,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // --- 右: 統計チップ ---
-                    const Spacer(),
-                    // 手数チップ
-                    Container(
-                      key: const Key('board_header_move_count'),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFEFEBE9),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: const Color(0xFFD7CCC8),
-                          width: 0.5,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SizedBox(
-                            width: 10,
-                            height: 10,
-                            child: CustomPaint(
-                              painter: MoveCountIconPainter(
                                 color: const Color(0xFF8D6E63),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 3),
-                          Text(
-                            '$moveCount 手',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: const Color(0xFF8D6E63),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    // 箱カウントチップ
-                    Container(
-                      key: const Key('board_header_box_count'),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: gameState.isSolved
-                            ? Colors.green.shade50
-                            : const Color(0xFFEFEBE9),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: gameState.isSolved
-                              ? Colors.green.shade200
-                              : const Color(0xFFD7CCC8),
-                          width: 0.5,
+                          ],
                         ),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SizedBox(
-                            width: 10,
-                            height: 10,
-                            child: CustomPaint(
-                              painter: PlacementIconPainter(
+                      const SizedBox(width: 6),
+                      // 箱カウントチップ
+                      Container(
+                        key: const Key('board_header_box_count'),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: gameState.isSolved
+                              ? Colors.green.shade50
+                              : const Color(0xFFEFEBE9),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: gameState.isSolved
+                                ? Colors.green.shade200
+                                : const Color(0xFFD7CCC8),
+                            width: 0.5,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              width: 10,
+                              height: 10,
+                              child: CustomPaint(
+                                painter: PlacementIconPainter(
+                                  color: gameState.isSolved
+                                      ? Colors.green.shade700
+                                      : const Color(0xFF8D6E63),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 3),
+                            Text(
+                              '$placed/$total',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
                                 color: gameState.isSolved
                                     ? Colors.green.shade700
                                     : const Color(0xFF8D6E63),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 3),
-                          Text(
-                            '$placed/$total',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: gameState.isSolved
-                                  ? Colors.green.shade700
-                                  : const Color(0xFF8D6E63),
-                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+
+                  if (isCompactHeader) {
+                    // 狭い幅: 2 行に分けて表示する
+                    return Padding(
+                      key: const Key('board_header_compact'),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          stageRow,
+                          const SizedBox(height: 4),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: statChips,
                           ),
                         ],
                       ),
+                    );
+                  }
+
+                  // 広い幅: 1 行に横並び（従来と同等）
+                  return Padding(
+                    key: const Key('board_header_wide'),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
                     ),
-                  ],
-                ),
+                    child: Row(
+                      children: [
+                        Flexible(child: stageRow),
+                        const Spacer(),
+                        statChips,
+                      ],
+                    ),
+                  );
+                },
               ),
               // --- 区切り線 ---
               Padding(

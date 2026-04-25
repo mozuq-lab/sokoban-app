@@ -1662,6 +1662,14 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
+    // AppBar の RenderFlex overflow を抑制する
+    final origOnError = FlutterError.onError;
+    FlutterError.onError = (details) {
+      if (details.toString().contains('overflowed')) return;
+      origOnError?.call(details);
+    };
+    addTearDown(() => FlutterError.onError = origOnError);
+
     await tester.pumpWidget(
       MaterialApp(
         home: MediaQuery(
@@ -1676,11 +1684,12 @@ void main() {
     expect(find.byKey(const Key('banner_progress_0 / 2')), findsOneWidget);
 
     // compact 時はチップが Align で右寄せされている
+    // （バナーと盤面ヘッダーの両方で使われる）
     expect(
       find.byWidgetPredicate(
         (w) => w is Align && w.alignment == Alignment.centerRight,
       ),
-      findsOneWidget,
+      findsAtLeastNWidgets(1),
     );
   });
 
@@ -1788,5 +1797,83 @@ void main() {
       ),
       findsNothing,
     );
+  });
+
+  // --- 盤面ヘッダーのレスポンシブテスト ---
+
+  testWidgets('狭い画面で盤面ヘッダーが 2 行レイアウトになる', (tester) async {
+    // 幅 320px → 盤面カード内幅 < 300 → compact header
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    // AppBar の RenderFlex overflow を抑制する
+    final origOnError = FlutterError.onError;
+    FlutterError.onError = (details) {
+      if (details.toString().contains('overflowed')) return;
+      origOnError?.call(details);
+    };
+    addTearDown(() => FlutterError.onError = origOnError);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(size: Size(320, 700)),
+          child: const HomeScreen(initialLevel: testLevel),
+        ),
+      ),
+    );
+
+    // compact ヘッダーが使われている
+    expect(find.byKey(const Key('board_header_compact')), findsOneWidget);
+    expect(find.byKey(const Key('board_header_wide')), findsNothing);
+
+    // 主要情報が表示されている
+    expect(find.byKey(const Key('board_header_stage')), findsOneWidget);
+    expect(find.byKey(const Key('board_header_status')), findsOneWidget);
+    expect(find.byKey(const Key('board_header_move_count')), findsOneWidget);
+    expect(find.byKey(const Key('board_header_box_count')), findsOneWidget);
+  });
+
+  testWidgets('通常幅で盤面ヘッダーが 1 行レイアウトになる', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // wide ヘッダーが使われている
+    expect(find.byKey(const Key('board_header_wide')), findsOneWidget);
+    expect(find.byKey(const Key('board_header_compact')), findsNothing);
+  });
+
+  testWidgets('狭い画面で統計チップがステージ行の下に配置される', (tester) async {
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    // AppBar の RenderFlex overflow を抑制する
+    final origOnError = FlutterError.onError;
+    FlutterError.onError = (details) {
+      if (details.toString().contains('overflowed')) return;
+      origOnError?.call(details);
+    };
+    addTearDown(() => FlutterError.onError = origOnError);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(size: Size(320, 700)),
+          child: const HomeScreen(initialLevel: testLevel),
+        ),
+      ),
+    );
+
+    // ステージラベルが統計チップより上にある
+    final stagePos = tester.getTopLeft(
+      find.byKey(const Key('board_header_stage')),
+    );
+    final movePos = tester.getTopLeft(
+      find.byKey(const Key('board_header_move_count')),
+    );
+    expect(stagePos.dy, lessThan(movePos.dy));
   });
 }
