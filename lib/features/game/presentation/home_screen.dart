@@ -1865,22 +1865,40 @@ class _StatusCard extends StatelessWidget {
 
     final int placedCount = totalBoxes - remainingBoxes;
 
+    final IconData summaryIcon;
+    if (isSolved) {
+      summaryIcon = Icons.check_circle_outline;
+    } else if (moveBlocked) {
+      summaryIcon = Icons.block;
+    } else {
+      summaryIcon = Icons.trending_up;
+    }
+
     return Container(
       key: key,
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 14),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
       color: bgColor,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            text,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: textColor,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(summaryIcon, size: 14, color: textColor),
+              const SizedBox(width: 5),
+              Text(
+                text,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: textColor,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ],
           ),
           if (totalBoxes > 0) ...[
             const SizedBox(height: 4),
@@ -1943,39 +1961,44 @@ class _StatItem extends StatelessWidget {
           height: 30,
           decoration: BoxDecoration(
             color: iconColor.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(7),
+            borderRadius: BorderRadius.circular(8),
           ),
           child: iconWidget,
         ),
         const SizedBox(width: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                color: theme.colorScheme.onSurfaceVariant.withValues(
-                  alpha: 0.8,
-                ),
-                fontWeight: FontWeight.w500,
-                letterSpacing: 0.3,
-              ),
-            ),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              child: Text(
-                value,
-                key: ValueKey(value),
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
                 style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onSurface,
+                  fontSize: 10,
+                  color: theme.colorScheme.onSurfaceVariant.withValues(
+                    alpha: 0.55,
+                  ),
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 1),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: Text(
+                  value,
+                  key: ValueKey(value),
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    color: iconColor,
+                    height: 1.2,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
