@@ -1685,64 +1685,86 @@ class _StatusCard extends StatelessWidget {
           ),
           // --- 進捗情報（手数・配置状況） ---
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 8,
-                      horizontal: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1565C0).withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: _StatItem(
-                      iconWidget: CustomPaint(
-                        painter: MoveCountIconPainter(
-                          color: const Color(0xFF1565C0),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: const Color(0xFFE0D6CC).withValues(alpha: 0.6),
+                  width: 0.5,
+                ),
+              ),
+              child: IntrinsicHeight(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 6,
+                          horizontal: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1565C0)
+                              .withValues(alpha: 0.05),
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(9.5),
+                            bottomLeft: Radius.circular(9.5),
+                          ),
+                        ),
+                        child: _StatItem(
+                          iconWidget: CustomPaint(
+                            painter: MoveCountIconPainter(
+                              color: const Color(0xFF1565C0),
+                            ),
+                          ),
+                          iconColor: const Color(0xFF1565C0),
+                          label: '手数',
+                          value: '$moveCount',
                         ),
                       ),
-                      iconColor: const Color(0xFF1565C0),
-                      label: '手数',
-                      value: '$moveCount',
                     ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 8,
-                      horizontal: 6,
+                    Container(
+                      key: const Key('stat_divider'),
+                      width: 1,
+                      color: const Color(0xFFE0D6CC).withValues(alpha: 0.6),
                     ),
-                    decoration: BoxDecoration(
-                      color: (allPlaced
-                              ? Colors.green
-                              : Colors.orange.shade800)
-                          .withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: _StatItem(
-                      iconWidget: CustomPaint(
-                        painter: PlacementIconPainter(
-                          color: allPlaced
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 6,
+                          horizontal: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: (allPlaced
+                                  ? Colors.green
+                                  : Colors.orange.shade800)
+                              .withValues(alpha: 0.05),
+                          borderRadius: const BorderRadius.only(
+                            topRight: Radius.circular(9.5),
+                            bottomRight: Radius.circular(9.5),
+                          ),
+                        ),
+                        child: _StatItem(
+                          iconWidget: CustomPaint(
+                            painter: PlacementIconPainter(
+                              color: allPlaced
+                                  ? Colors.green
+                                  : Colors.orange.shade800,
+                            ),
+                          ),
+                          iconColor: allPlaced
                               ? Colors.green
                               : Colors.orange.shade800,
+                          label: '配置',
+                          value: allPlaced
+                              ? '全配置！'
+                              : '${totalBoxes - remainingBoxes} / $totalBoxes',
                         ),
                       ),
-                      iconColor: allPlaced
-                          ? Colors.green
-                          : Colors.orange.shade800,
-                      label: '配置',
-                      value: allPlaced
-                          ? '全配置！'
-                          : '${totalBoxes - remainingBoxes} / $totalBoxes',
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
           // --- 配置セグメントバー ---
@@ -1863,8 +1885,6 @@ class _StatusCard extends StatelessWidget {
       key = ValueKey('summary-progress-$remainingBoxes');
     }
 
-    final int placedCount = totalBoxes - remainingBoxes;
-
     final IconData summaryIcon;
     if (isSolved) {
       summaryIcon = Icons.check_circle_outline;
@@ -1900,35 +1920,6 @@ class _StatusCard extends StatelessWidget {
               ),
             ],
           ),
-          if (totalBoxes > 0) ...[
-            const SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(totalBoxes, (i) {
-                final bool placed = i < placedCount;
-                return Padding(
-                  padding: EdgeInsets.only(left: i == 0 ? 0 : 4),
-                  child: AnimatedContainer(
-                    key: ValueKey('progress-dot-$i'),
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                    width: placed ? 10 : 8,
-                    height: placed ? 10 : 8,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: placed ? textColor.withValues(alpha: 0.8) : null,
-                      border: placed
-                          ? null
-                          : Border.all(
-                              color: textColor.withValues(alpha: 0.4),
-                              width: 1.5,
-                            ),
-                    ),
-                  ),
-                );
-              }),
-            ),
-          ],
         ],
       ),
     );
@@ -1957,15 +1948,15 @@ class _StatItem extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 30,
-          height: 30,
+          width: 26,
+          height: 26,
           decoration: BoxDecoration(
             color: iconColor.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(7),
           ),
           child: iconWidget,
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 7),
         Flexible(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
