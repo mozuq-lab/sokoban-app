@@ -421,7 +421,7 @@ class _BoardSection extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
-                  vertical: 8,
+                  vertical: 6,
                 ),
                 child: Row(
                   children: [
@@ -587,7 +587,7 @@ class _BoardSection extends StatelessWidget {
               // --- 盤面 ---
               Flexible(
                 child: Padding(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(6),
                   child: Container(
                     key: const Key('board_tile_frame'),
                     decoration: BoxDecoration(
@@ -673,7 +673,7 @@ class _ControlSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasHistory = history.isNotEmpty;
     return Container(
-      padding: const EdgeInsets.only(top: 10, left: 14, right: 14, bottom: 14),
+      padding: const EdgeInsets.only(top: 8, left: 12, right: 12, bottom: 12),
       decoration: BoxDecoration(
         color: const Color(0xFFFAF3E8),
         borderRadius: BorderRadius.circular(14),
@@ -697,7 +697,7 @@ class _ControlSection extends StatelessWidget {
           const SizedBox(height: 4),
           // 方向パッドを囲むインセット背景
           Container(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
             decoration: BoxDecoration(
               color: const Color(0xFFF5EDE0),
               borderRadius: BorderRadius.circular(12),
@@ -715,9 +715,9 @@ class _ControlSection extends StatelessWidget {
               totalBoxes: totalBoxes,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2),
+            padding: const EdgeInsets.symmetric(vertical: 1),
             child: Row(
               children: [
                 const Expanded(child: Divider(color: Color(0xFFE0D6CC))),
@@ -733,7 +733,7 @@ class _ControlSection extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Row(
             children: [
               Expanded(
@@ -763,7 +763,7 @@ class _ControlSection extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           _KeyboardFocusIndicator(
             hasFocus: hasFocus,
             onRequestFocus: onRequestFocus,
@@ -1381,6 +1381,9 @@ class _NarrowLayout extends StatelessWidget {
   /// スクロールで対処する。
   static const double _minBoardHeight = 140;
 
+  /// 高さが十分でないときに周辺 UI を圧縮するしきい値。
+  static const double _compactHeightThreshold = 600;
+
   /// 盤面に画面高さの何割を割り当てるか。
   ///
   /// 残りをバナー・ステータスカード・操作パッド等が占める。
@@ -1396,8 +1399,10 @@ class _NarrowLayout extends StatelessWidget {
           child: LayoutBuilder(
             builder: (context, constraints) {
               final available = constraints.maxHeight;
+              final isCompact = available < _compactHeightThreshold;
               final boardHeight =
                   (available * _boardRatio).clamp(_minBoardHeight, available);
+              final sectionGap = isCompact ? 4.0 : 6.0;
 
               return SingleChildScrollView(
                 child: ConstrainedBox(
@@ -1406,15 +1411,15 @@ class _NarrowLayout extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const SizedBox(height: 4),
+                      SizedBox(height: isCompact ? 2 : 4),
                       playContextBanner,
-                      const SizedBox(height: 6),
+                      SizedBox(height: sectionGap),
                       SizedBox(height: boardHeight, child: boardSection),
-                      const SizedBox(height: 6),
+                      SizedBox(height: sectionGap),
                       statusCard,
-                      const SizedBox(height: 6),
+                      SizedBox(height: sectionGap),
                       controlSection,
-                      const SizedBox(height: 8),
+                      SizedBox(height: isCompact ? 4 : 8),
                     ],
                   ),
                 ),
@@ -1685,7 +1690,7 @@ class _StatusCard extends StatelessWidget {
           ),
           // --- 進捗情報（手数・配置状況） ---
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
@@ -1772,7 +1777,7 @@ class _StatusCard extends StatelessWidget {
             padding: const EdgeInsets.only(
               left: 14,
               right: 14,
-              bottom: 10,
+              bottom: 8,
               top: 0,
             ),
             child: _SegmentedProgressBar(
@@ -1786,9 +1791,9 @@ class _StatusCard extends StatelessWidget {
             key: const Key('status_hint_section'),
             width: double.infinity,
             padding: const EdgeInsets.only(
-              left: 14,
-              right: 14,
-              bottom: 10,
+              left: 12,
+              right: 12,
+              bottom: 8,
               top: 0,
             ),
             decoration: BoxDecoration(
@@ -1897,7 +1902,7 @@ class _StatusCard extends StatelessWidget {
     return Container(
       key: key,
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 14),
       color: bgColor,
       child: Column(
         mainAxisSize: MainAxisSize.min,
