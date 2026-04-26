@@ -2272,6 +2272,9 @@ class _ClearOverlayState extends State<_ClearOverlay>
     super.dispose();
   }
 
+  /// サマリーチップを Wrap に切り替える幅しきい値。
+  static const double _compactOverlayThreshold = 280;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -2287,164 +2290,206 @@ class _ClearOverlayState extends State<_ClearOverlay>
           child: Center(
             child: ScaleTransition(
               scale: _scaleAnimation,
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Card(
-                  elevation: 8,
-                  shadowColor: Colors.amber.withValues(alpha: 0.25),
-                  clipBehavior: Clip.antiAlias,
-                  child: IntrinsicWidth(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // ゴールドのアクセントライン
-                        Container(
-                          height: 4,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.amber.shade300,
-                                Colors.amber.shade600,
-                                Colors.amber.shade300,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final availableWidth = constraints.maxWidth;
+                  final isCompact =
+                      availableWidth < _compactOverlayThreshold;
+                  final double hPad = isCompact ? 16 : 32;
+                  final double vPadTop = isCompact ? 14 : 22;
+                  final double trophyOuter = isCompact ? 8 : 12;
+                  final double trophySize = isCompact ? 28 : 40;
+                  final double titleSize = isCompact ? 18 : 24;
+                  final double chipFontSize = isCompact ? 11 : 13;
+                  final double boxChipFontSize = isCompact ? 10 : 12;
+                  final double btnHPad = isCompact ? 16 : 32;
+                  final double dividerHPad = isCompact ? 16 : 24;
+
+                  // サマリーチップ
+                  final moveChip = Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isCompact ? 8 : 12,
+                      vertical: isCompact ? 4 : 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '${widget.moveCount}手でクリア',
+                      style: TextStyle(
+                        fontSize: chipFontSize,
+                        fontWeight: FontWeight.w600,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  );
+
+                  final boxChip = Container(
+                    key: const Key('overlay-box-count'),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isCompact ? 7 : 10,
+                      vertical: isCompact ? 4 : 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Colors.green.shade200,
+                        width: 0.5,
+                      ),
+                    ),
+                    child: Text(
+                      '${widget.totalBoxes}/${widget.totalBoxes} 配置',
+                      key: const Key('overlay-box-count-text'),
+                      style: TextStyle(
+                        fontSize: boxChipFontSize,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.green.shade700,
+                      ),
+                    ),
+                  );
+
+                  return ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: (availableWidth * 0.92).clamp(0, 360),
+                    ),
+                    child: Card(
+                      key: Key(isCompact
+                          ? 'overlay-card-compact'
+                          : 'overlay-card-wide'),
+                      elevation: 8,
+                      shadowColor: Colors.amber.withValues(alpha: 0.25),
+                      clipBehavior: Clip.antiAlias,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // ゴールドのアクセントライン
+                          Container(
+                            height: 4,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.amber.shade300,
+                                  Colors.amber.shade600,
+                                  Colors.amber.shade300,
+                                ],
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.fromLTRB(
+                              hPad, vPadTop, hPad, 10,
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // トロフィーアイコン
+                                Container(
+                                  padding: EdgeInsets.all(trophyOuter),
+                                  decoration: BoxDecoration(
+                                    color: Colors.amber.shade50,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: SizedBox(
+                                    width: trophySize,
+                                    height: trophySize,
+                                    child: CustomPaint(
+                                      painter: TrophyIconPainter(
+                                        color: Colors.amber.shade600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: isCompact ? 8 : 12),
+                                // メインタイトル
+                                Text(
+                                  'クリア！',
+                                  style: TextStyle(
+                                    fontSize: titleSize,
+                                    fontWeight: FontWeight.bold,
+                                    color: colorScheme.primary,
+                                    letterSpacing: 1.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                // ステージ完了サブタイトル
+                                Text(
+                                  'ステージ 1 完了',
+                                  key: const Key('overlay-stage-complete'),
+                                  style: TextStyle(
+                                    fontSize: isCompact ? 11 : 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: colorScheme.onSurfaceVariant
+                                        .withValues(alpha: 0.7),
+                                    letterSpacing: 0.3,
+                                  ),
+                                ),
+                                SizedBox(height: isCompact ? 10 : 14),
+                                // サマリーチップ — 狭い幅では Wrap で折り返し
+                                isCompact
+                                    ? Wrap(
+                                        key: const Key(
+                                          'overlay-chips-wrap',
+                                        ),
+                                        alignment: WrapAlignment.center,
+                                        spacing: 6,
+                                        runSpacing: 6,
+                                        children: [moveChip, boxChip],
+                                      )
+                                    : Row(
+                                        key: const Key(
+                                          'overlay-chips-row',
+                                        ),
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          moveChip,
+                                          const SizedBox(width: 8),
+                                          boxChip,
+                                        ],
+                                      ),
                               ],
                             ),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(32, 22, 32, 10),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // トロフィーアイコン
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: Colors.amber.shade50,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: SizedBox(
-                                  width: 40,
-                                  height: 40,
-                                  child: CustomPaint(
-                                    painter: TrophyIconPainter(
-                                      color: Colors.amber.shade600,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              // メインタイトル
-                              Text(
-                                'クリア！',
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: colorScheme.primary,
-                                  letterSpacing: 1.5,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              // ステージ完了サブタイトル
-                              Text(
-                                'ステージ 1 完了',
-                                key: const Key('overlay-stage-complete'),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  color: colorScheme.onSurfaceVariant
-                                      .withValues(alpha: 0.7),
-                                  letterSpacing: 0.3,
-                                ),
-                              ),
-                              const SizedBox(height: 14),
-                              // サマリーチップ行
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  // 手数チップ
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 5,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: colorScheme
-                                          .surfaceContainerHighest,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Text(
-                                      '${widget.moveCount}手でクリア',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
-                                        color: colorScheme.onSurfaceVariant,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  // 配置数チップ
-                                  Container(
-                                    key: const Key('overlay-box-count'),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 5,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.green.shade50,
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                        color: Colors.green.shade200,
-                                        width: 0.5,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      '${widget.totalBoxes}/${widget.totalBoxes} 配置',
-                                      key: const Key('overlay-box-count-text'),
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.green.shade700,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        // ディバイダー
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                          child: Divider(
-                            height: 1,
-                            thickness: 1,
-                            color: colorScheme.outlineVariant
-                                .withValues(alpha: 0.3),
-                          ),
-                        ),
-                        // ボタンエリア
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(32, 14, 32, 18),
-                          child: FilledButton.icon(
-                            key: const ValueKey('overlay-restart'),
-                            onPressed: widget.onRestart,
-                            icon: SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CustomPaint(
-                                painter: RestartIconPainter(
-                                  color: colorScheme.onPrimary,
-                                ),
-                              ),
+                          // ディバイダー
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: dividerHPad,
                             ),
-                            label: const Text('もう一度'),
+                            child: Divider(
+                              height: 1,
+                              thickness: 1,
+                              color: colorScheme.outlineVariant
+                                  .withValues(alpha: 0.3),
+                            ),
                           ),
-                        ),
-                      ],
+                          // ボタンエリア
+                          Padding(
+                            padding: EdgeInsets.fromLTRB(
+                              btnHPad, isCompact ? 10 : 14,
+                              btnHPad, isCompact ? 12 : 18,
+                            ),
+                            child: FilledButton.icon(
+                              key: const ValueKey('overlay-restart'),
+                              onPressed: widget.onRestart,
+                              icon: SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CustomPaint(
+                                  painter: RestartIconPainter(
+                                    color: colorScheme.onPrimary,
+                                  ),
+                                ),
+                              ),
+                              label: const Text('もう一度'),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
             ),
           ),

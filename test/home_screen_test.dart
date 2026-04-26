@@ -1775,6 +1775,86 @@ void main() {
     expect(innerRadius, lessThan(outerRadius));
   });
 
+  // --- クリアオーバーレイのレスポンシブテスト ---
+
+  /// キーボード操作でステージをクリアする（狭い画面テスト用）。
+  Future<void> solveStageWithKeys(WidgetTester tester) async {
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+  }
+
+  testWidgets('狭い画面でクリアオーバーレイのチップが Wrap で折り返す', (tester) async {
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(size: Size(320, 700)),
+          child: const HomeScreen(initialLevel: testLevel),
+        ),
+      ),
+    );
+    await solveStageWithKeys(tester);
+    await tester.pumpAndSettle();
+
+    // compact 時は Wrap レイアウトが使われる
+    expect(find.byKey(const Key('overlay-chips-wrap')), findsOneWidget);
+    expect(find.byKey(const Key('overlay-chips-row')), findsNothing);
+    // コンテンツが表示されている
+    expect(find.text('クリア！'), findsNWidgets(2));
+    expect(find.text('もう一度'), findsOneWidget);
+    expect(find.byKey(const Key('overlay-box-count')), findsOneWidget);
+  });
+
+  testWidgets('通常幅でクリアオーバーレイのチップが横並びになる', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+    await tester.pumpAndSettle();
+
+    // 通常幅では Row レイアウトが使われる
+    expect(find.byKey(const Key('overlay-chips-row')), findsOneWidget);
+    expect(find.byKey(const Key('overlay-chips-wrap')), findsNothing);
+  });
+
+  testWidgets('狭い画面でクリアオーバーレイのカードが compact キーを持つ', (tester) async {
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(size: Size(320, 700)),
+          child: const HomeScreen(initialLevel: testLevel),
+        ),
+      ),
+    );
+    await solveStageWithKeys(tester);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('overlay-card-compact')), findsOneWidget);
+    expect(find.byKey(const Key('overlay-card-wide')), findsNothing);
+  });
+
+  testWidgets('通常幅でクリアオーバーレイのカードが wide キーを持つ', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('overlay-card-wide')), findsOneWidget);
+    expect(find.byKey(const Key('overlay-card-compact')), findsNothing);
+  });
+
   testWidgets('広い幅でバナーの進捗チップが横に並ぶ', (tester) async {
     await tester.pumpWidget(buildApp());
 
