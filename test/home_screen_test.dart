@@ -1900,21 +1900,26 @@ void main() {
         matching: find.byType(AnimatedContainer),
       ),
     );
-    final undoConstraints = undoContainer.constraints;
-    expect(undoConstraints?.maxWidth ?? 28, equals(28));
+    expect(undoContainer.decoration, isA<BoxDecoration>());
+    final undoSize = tester.getSize(
+      find.descendant(
+        of: find.byKey(const ValueKey('appbar-undo')),
+        matching: find.byType(AnimatedContainer),
+      ),
+    );
+    expect(undoSize.width, equals(28));
   });
 
   testWidgets('通常幅で AppBar のアクションボタンが通常サイズになる', (tester) async {
     await tester.pumpWidget(buildApp());
 
     // 通常時の Undo ボタン内 AnimatedContainer が 34x34
-    final undoContainer = tester.widget<AnimatedContainer>(
+    final undoSize = tester.getSize(
       find.descendant(
         of: find.byKey(const ValueKey('appbar-undo')),
         matching: find.byType(AnimatedContainer),
       ),
     );
-    final undoConstraints = undoContainer.constraints;
-    expect(undoConstraints?.maxWidth ?? 34, equals(34));
+    expect(undoSize.width, equals(34));
   });
 }
