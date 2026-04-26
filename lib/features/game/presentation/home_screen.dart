@@ -1958,33 +1958,69 @@ class _StatusCard extends StatelessWidget {
       summaryIcon = Icons.trending_up;
     }
 
+    // 状態に応じたアクセント色（PlayContextBanner と同じパターン）
+    final Color accentColor;
+    if (isSolved) {
+      accentColor = Colors.green.shade600;
+    } else if (moveBlocked) {
+      accentColor = Colors.red.shade400;
+    } else {
+      accentColor = Colors.orange.shade600;
+    }
+
     return Container(
       key: key,
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 14),
-      color: bgColor,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(summaryIcon, size: 14, color: textColor),
-              const SizedBox(width: 5),
-              Text(
-                text,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: textColor,
-                  letterSpacing: 0.2,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: bgColor,
+        // カード上端の角丸に合わせる
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(14),
+          topRight: Radius.circular(14),
+        ),
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            // 左アクセントバー
+            Container(
+              width: 4,
+              decoration: BoxDecoration(
+                color: accentColor,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(14),
                 ),
               ),
-            ],
-          ),
-        ],
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 6,
+                  horizontal: 12,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(summaryIcon, size: 14, color: textColor),
+                    const SizedBox(width: 5),
+                    Text(
+                      text,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: textColor,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
