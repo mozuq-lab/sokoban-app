@@ -183,6 +183,136 @@ class _HomeScreenState extends State<HomeScreen> {
     _focusNode.requestFocus();
   }
 
+  /// 画面幅に応じて密度を調整した AppBar を構築する。
+  ///
+  /// 360px 未満の幅ではタイトルやアクションボタンを小さくし、
+  /// 余白を詰めることで overflow を防ぐ。
+  static const double _compactAppBarThreshold = 360;
+
+  AppBar _buildAppBar(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isCompact = screenWidth < _compactAppBarThreshold;
+
+    final double logoSize = isCompact ? 16 : 20;
+    final double titleFontSize = isCompact ? 15 : 18;
+    final double titleSpacing = isCompact ? 8 : 16;
+    final double actionBoxSize = isCompact ? 28 : 34;
+    final double actionIconSize = isCompact ? 14 : 18;
+    final double actionRadius = isCompact ? 7 : 9;
+
+    return AppBar(
+      titleSpacing: titleSpacing,
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(1),
+        child: Container(
+          height: 1,
+          color: const Color(0xFFD7CCC8).withValues(alpha: 0.4),
+        ),
+      ),
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: logoSize,
+            height: logoSize,
+            child: CustomPaint(
+              painter: SokobanLogoPainter(
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ),
+          SizedBox(width: isCompact ? 6 : 8),
+          Text(
+            'Sokoban',
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+              fontSize: titleFontSize,
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        IconButton(
+          key: const ValueKey('appbar-undo'),
+          icon: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: actionBoxSize,
+            height: actionBoxSize,
+            decoration: BoxDecoration(
+              color: _history.isNotEmpty
+                  ? const Color(0xFFF5E6CC)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(actionRadius),
+              border: _history.isNotEmpty
+                  ? Border.all(
+                      color: const Color(0xFFD7CCC8),
+                      width: 0.5,
+                    )
+                  : null,
+            ),
+            child: Center(
+              child: SizedBox(
+                width: actionIconSize,
+                height: actionIconSize,
+                child: CustomPaint(
+                  painter: UndoIconPainter(
+                    color: _history.isNotEmpty
+                        ? const Color(0xFF5D4037)
+                        : Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: 0.30),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          tooltip: '元に戻す',
+          onPressed: _history.isNotEmpty ? _undo : null,
+        ),
+        IconButton(
+          key: const ValueKey('appbar-restart'),
+          icon: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: actionBoxSize,
+            height: actionBoxSize,
+            decoration: BoxDecoration(
+              color: _history.isNotEmpty
+                  ? const Color(0xFFF5E6CC)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(actionRadius),
+              border: _history.isNotEmpty
+                  ? Border.all(
+                      color: const Color(0xFFD7CCC8),
+                      width: 0.5,
+                    )
+                  : null,
+            ),
+            child: Center(
+              child: SizedBox(
+                width: actionIconSize,
+                height: actionIconSize,
+                child: CustomPaint(
+                  painter: RestartIconPainter(
+                    color: _history.isNotEmpty
+                        ? const Color(0xFF5D4037)
+                        : Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: 0.30),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          tooltip: 'リスタート',
+          onPressed: _history.isNotEmpty ? _restart : null,
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final gameState = _gameState;
@@ -203,117 +333,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Colors.brown.shade50,
           0.3,
         ),
-        appBar: AppBar(
-          titleSpacing: 16,
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(1),
-            child: Container(
-              height: 1,
-              color: const Color(0xFFD7CCC8).withValues(alpha: 0.4),
-            ),
-          ),
-          title: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                width: 20,
-                height: 20,
-                child: CustomPaint(
-                  painter: SokobanLogoPainter(
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Text(
-                'Sokoban',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.5,
-                  fontSize: 18,
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            IconButton(
-              key: const ValueKey('appbar-undo'),
-              icon: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: _history.isNotEmpty
-                      ? const Color(0xFFF5E6CC)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(9),
-                  border: _history.isNotEmpty
-                      ? Border.all(
-                          color: const Color(0xFFD7CCC8),
-                          width: 0.5,
-                        )
-                      : null,
-                ),
-                child: Center(
-                  child: SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CustomPaint(
-                      painter: UndoIconPainter(
-                        color: _history.isNotEmpty
-                            ? const Color(0xFF5D4037)
-                            : Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withValues(alpha: 0.30),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              tooltip: '元に戻す',
-              onPressed: _history.isNotEmpty ? _undo : null,
-            ),
-            IconButton(
-              key: const ValueKey('appbar-restart'),
-              icon: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: _history.isNotEmpty
-                      ? const Color(0xFFF5E6CC)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(9),
-                  border: _history.isNotEmpty
-                      ? Border.all(
-                          color: const Color(0xFFD7CCC8),
-                          width: 0.5,
-                        )
-                      : null,
-                ),
-                child: Center(
-                  child: SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CustomPaint(
-                      painter: RestartIconPainter(
-                        color: _history.isNotEmpty
-                            ? const Color(0xFF5D4037)
-                            : Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withValues(alpha: 0.30),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              tooltip: 'リスタート',
-              onPressed: _history.isNotEmpty ? _restart : null,
-            ),
-          ],
-        ),
+        appBar: _buildAppBar(context),
         body: SafeArea(
           child: LayoutBuilder(
             builder: (context, outerConstraints) {
