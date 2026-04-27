@@ -1990,6 +1990,26 @@ void main() {
     expect(undoSize.width, equals(28));
   });
 
+  // --- 盤面フッターのテスト ---
+
+  testWidgets('盤面カードにグリッドサイズのフッターが表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    expect(find.byKey(const Key('board_footer')), findsOneWidget);
+    expect(find.byKey(const Key('board_footer_dimensions')), findsOneWidget);
+    expect(find.text('6 × 6'), findsOneWidget);
+  });
+
+  testWidgets('盤面フッターがヘッダーより下に配置される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    final headerPos = tester.getTopLeft(
+      find.byKey(const Key('board_header_stage')),
+    );
+    final footerPos = tester.getTopLeft(
+      find.byKey(const Key('board_footer')),
+    );
+    expect(footerPos.dy, greaterThan(headerPos.dy));
+  });
+
   testWidgets('通常幅で AppBar のアクションボタンが通常サイズになる', (tester) async {
     await tester.pumpWidget(buildApp());
 
