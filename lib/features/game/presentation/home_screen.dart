@@ -764,107 +764,140 @@ class _ControlSection extends StatelessWidget {
   final bool hasFocus;
   final VoidCallback? onRequestFocus;
 
+  /// 方向パッドと補助ボタンの密度を切り替える幅しきい値。
+  ///
+  /// 320px 幅の端末では親パディング (12×2) を引くと約 296px になるため、
+  /// 340 を境にコンパクトモードへ切り替える。
+  static const double _compactThreshold = 340;
+
   @override
   Widget build(BuildContext context) {
     final hasHistory = history.isNotEmpty;
-    return Container(
-      padding: const EdgeInsets.only(top: 8, left: 12, right: 12, bottom: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFAF3E8),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFD7CCC8)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCompact = constraints.maxWidth < _compactThreshold;
+        final double hPad = isCompact ? 8 : 12;
+        final double vPad = isCompact ? 6 : 8;
+        final double dpadInsetH = isCompact ? 6 : 10;
+        final double dpadInsetV = isCompact ? 4 : 6;
+        final double sectionGap = isCompact ? 6 : 8;
+        final double dividerGap = isCompact ? 4 : 6;
+        final double assistGap = isCompact ? 8 : 12;
+        final double bottomGap = isCompact ? 6 : 8;
+
+        return Container(
+          padding: EdgeInsets.only(
+            top: vPad,
+            left: hPad,
+            right: hPad,
+            bottom: vPad + 4,
           ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _ControlSubLabel(
-            key: const Key('control_sub_label_move'),
-            icon: Icons.control_camera,
-            text: '移動',
-          ),
-          const SizedBox(height: 4),
-          // 方向パッドを囲むインセット背景
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5EDE0),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: const Color(0xFFE8DDD0),
-                width: 0.5,
-              ),
-            ),
-            child: _DirectionPad(
-              onMove: onMove,
-              enabled: !gameState.isSolved,
-              isSolved: gameState.isSolved,
-              moveBlocked: moveBlocked,
-              remainingBoxes: remainingBoxes,
-              totalBoxes: totalBoxes,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 1),
-            child: Row(
-              children: [
-                const Expanded(child: Divider(color: Color(0xFFE0D6CC))),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: _ControlSubLabel(
-                    key: const Key('control_sub_label_assist'),
-                    icon: Icons.history,
-                    text: 'やり直し',
-                  ),
-                ),
-                const Expanded(child: Divider(color: Color(0xFFE0D6CC))),
-              ],
-            ),
-          ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              Expanded(
-                child: _AssistButton(
-                  key: const ValueKey('bottom-undo'),
-                  onPressed: hasHistory ? onUndo : null,
-                  iconPainter: UndoIconPainter(
-                    color: hasHistory
-                        ? const Color(0xFF5D4037)
-                        : Colors.grey.shade400,
-                  ),
-                  label: '元に戻す',
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _AssistButton(
-                  key: const ValueKey('bottom-restart'),
-                  onPressed: hasHistory ? onRestart : null,
-                  iconPainter: RestartIconPainter(
-                    color: hasHistory
-                        ? const Color(0xFF5D4037)
-                        : Colors.grey.shade400,
-                  ),
-                  label: 'リスタート',
-                ),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFAF3E8),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFD7CCC8)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          _KeyboardFocusIndicator(
-            hasFocus: hasFocus,
-            onRequestFocus: onRequestFocus,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _ControlSubLabel(
+                key: const Key('control_sub_label_move'),
+                icon: Icons.control_camera,
+                text: '移動',
+              ),
+              SizedBox(height: isCompact ? 2 : 4),
+              // 方向パッドを囲むインセット背景
+              Container(
+                padding: EdgeInsets.symmetric(
+                  vertical: dpadInsetV,
+                  horizontal: dpadInsetH,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5EDE0),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: const Color(0xFFE8DDD0),
+                    width: 0.5,
+                  ),
+                ),
+                child: _DirectionPad(
+                  onMove: onMove,
+                  enabled: !gameState.isSolved,
+                  isSolved: gameState.isSolved,
+                  moveBlocked: moveBlocked,
+                  remainingBoxes: remainingBoxes,
+                  totalBoxes: totalBoxes,
+                  compact: isCompact,
+                ),
+              ),
+              SizedBox(height: sectionGap),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 1),
+                child: Row(
+                  children: [
+                    const Expanded(child: Divider(color: Color(0xFFE0D6CC))),
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isCompact ? 6 : 10,
+                      ),
+                      child: _ControlSubLabel(
+                        key: const Key('control_sub_label_assist'),
+                        icon: Icons.history,
+                        text: 'やり直し',
+                      ),
+                    ),
+                    const Expanded(child: Divider(color: Color(0xFFE0D6CC))),
+                  ],
+                ),
+              ),
+              SizedBox(height: dividerGap),
+              Row(
+                children: [
+                  Expanded(
+                    child: _AssistButton(
+                      key: const ValueKey('bottom-undo'),
+                      onPressed: hasHistory ? onUndo : null,
+                      iconPainter: UndoIconPainter(
+                        color: hasHistory
+                            ? const Color(0xFF5D4037)
+                            : Colors.grey.shade400,
+                      ),
+                      label: '元に戻す',
+                      compact: isCompact,
+                    ),
+                  ),
+                  SizedBox(width: assistGap),
+                  Expanded(
+                    child: _AssistButton(
+                      key: const ValueKey('bottom-restart'),
+                      onPressed: hasHistory ? onRestart : null,
+                      iconPainter: RestartIconPainter(
+                        color: hasHistory
+                            ? const Color(0xFF5D4037)
+                            : Colors.grey.shade400,
+                      ),
+                      label: 'リスタート',
+                      compact: isCompact,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: bottomGap),
+              _KeyboardFocusIndicator(
+                hasFocus: hasFocus,
+                onRequestFocus: onRequestFocus,
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -1054,34 +1087,42 @@ class _AssistButton extends StatelessWidget {
     required this.onPressed,
     required this.iconPainter,
     required this.label,
+    this.compact = false,
   });
 
   final VoidCallback? onPressed;
   final CustomPainter iconPainter;
   final String label;
+  final bool compact;
 
   bool get enabled => onPressed != null;
 
   @override
   Widget build(BuildContext context) {
+    final double height = compact ? 42 : 48;
+    final double iconSize = compact ? 16 : 20;
+    final double fontSize = compact ? 12 : 14;
+    final double radius = compact ? 12 : 14;
+    final double iconGap = compact ? 6 : 8;
+
     return _PressableControl(
       enabled: enabled,
       child: Opacity(
         opacity: enabled ? 1.0 : 0.45,
         child: Material(
           color: enabled ? const Color(0xFFF5E6CC) : const Color(0xFFEDE7E0),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(radius),
           elevation: enabled ? 2 : 0,
           shadowColor: const Color(0x40000000),
           child: InkWell(
             onTap: onPressed,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(radius),
             splashColor: const Color(0x308D6E63),
             highlightColor: const Color(0x188D6E63),
             child: Container(
-              height: 48,
+              height: height,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(radius),
                 border: Border.all(
                   color:
                       enabled ? const Color(0xFF8D6E63) : const Color(0xFFCCC3BA),
@@ -1099,15 +1140,15 @@ class _AssistButton extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SizedBox(
-                    width: 20,
-                    height: 20,
+                    width: iconSize,
+                    height: iconSize,
                     child: CustomPaint(painter: iconPainter),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: iconGap),
                   Text(
                     label,
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: fontSize,
                       fontWeight: FontWeight.w600,
                       color: enabled
                           ? const Color(0xFF5D4037)
@@ -2658,6 +2699,7 @@ class _DirectionPad extends StatelessWidget {
     this.moveBlocked = false,
     this.remainingBoxes = 0,
     this.totalBoxes = 0,
+    this.compact = false,
   });
 
   final void Function(Direction) onMove;
@@ -2666,10 +2708,11 @@ class _DirectionPad extends StatelessWidget {
   final bool moveBlocked;
   final int remainingBoxes;
   final int totalBoxes;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
-    const btnSize = 60.0;
+    final double btnSize = compact ? 50.0 : 60.0;
 
     const activeColor = Color(0xFF5D4037);
     final disabledColor = Colors.grey.shade400;
@@ -2687,6 +2730,9 @@ class _DirectionPad extends StatelessWidget {
           return 'D';
       }
     }
+
+    final double btnRadius = compact ? 11 : 14;
+    final double hintFontSize = compact ? 8 : 9;
 
     Widget dirButton(Direction dir, String label) {
       final arrowColor = enabled ? activeColor : disabledColor;
@@ -2706,17 +2752,17 @@ class _DirectionPad extends StatelessWidget {
                 color: enabled
                     ? const Color(0xFFF5E6CC)
                     : const Color(0xFFEDE7E0),
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(btnRadius),
                 elevation: enabled ? 3 : 0,
                 shadowColor: const Color(0x40000000),
                 child: InkWell(
                   onTap: enabled ? () => onMove(dir) : null,
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(btnRadius),
                   splashColor: const Color(0x308D6E63),
                   highlightColor: const Color(0x188D6E63),
                   child: Container(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(btnRadius),
                       border: Border.all(
                         color: enabled
                             ? const Color(0xFF8D6E63)
@@ -2739,12 +2785,12 @@ class _DirectionPad extends StatelessWidget {
                               ArrowPainter(direction: dir, color: arrowColor),
                         ),
                         Positioned(
-                          right: 5,
-                          bottom: 3,
+                          right: compact ? 4 : 5,
+                          bottom: compact ? 2 : 3,
                           child: Text(
                             keyHint(dir),
                             style: TextStyle(
-                              fontSize: 9,
+                              fontSize: hintFontSize,
                               fontWeight: FontWeight.w600,
                               color: hintColor,
                               letterSpacing: 0.2,
@@ -2764,6 +2810,11 @@ class _DirectionPad extends StatelessWidget {
     }
 
     // --- 中央ステータスチップ ---
+    final double chipPadH = compact ? 7 : 10;
+    final double chipPadV = compact ? 3 : 5;
+    final double chipFontSize = compact ? 10 : 12;
+    final double chipRadius = compact ? 8 : 10;
+
     Widget centerChip() {
       final String chipText;
       final Color chipBg;
@@ -2795,10 +2846,13 @@ class _DirectionPad extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         child: Container(
           key: Key('dpad_center_status_$chipText'),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          padding: EdgeInsets.symmetric(
+            horizontal: chipPadH,
+            vertical: chipPadV,
+          ),
           decoration: BoxDecoration(
             color: chipBg,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(chipRadius),
             border: Border.all(color: chipFg.withValues(alpha: 0.25), width: 1),
             boxShadow: [
               BoxShadow(
@@ -2811,7 +2865,7 @@ class _DirectionPad extends StatelessWidget {
           child: Text(
             chipText,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: chipFontSize,
               fontWeight: FontWeight.w700,
               color: chipFg,
               letterSpacing: 0.3,
@@ -2821,24 +2875,27 @@ class _DirectionPad extends StatelessWidget {
       );
     }
 
+    final double btnGap = compact ? 4 : 6;
+    final double centerWidth = btnSize + (compact ? 8 : 12);
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         dirButton(Direction.up, '上'),
-        const SizedBox(height: 6),
+        SizedBox(height: btnGap),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             dirButton(Direction.left, '左'),
             SizedBox(
-              width: btnSize + 12,
+              width: centerWidth,
               height: btnSize,
               child: Center(child: centerChip()),
             ),
             dirButton(Direction.right, '右'),
           ],
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: btnGap),
         dirButton(Direction.down, '下'),
       ],
     );

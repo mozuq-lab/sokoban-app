@@ -548,7 +548,7 @@ void main() {
     expect(expandedRestart, findsAtLeastNWidgets(1));
   });
 
-  testWidgets('下部ボタンの最小高さが 48 以上である', (tester) async {
+  testWidgets('下部ボタンの最小高さが 42 以上である', (tester) async {
     await tester.pumpWidget(buildApp());
     final undoButton = tester.getSize(
       find.byKey(const ValueKey('bottom-undo')),
@@ -556,8 +556,9 @@ void main() {
     final restartButton = tester.getSize(
       find.byKey(const ValueKey('bottom-restart')),
     );
-    expect(undoButton.height, greaterThanOrEqualTo(48));
-    expect(restartButton.height, greaterThanOrEqualTo(48));
+    // コンパクトモードでは 42、通常では 48
+    expect(undoButton.height, greaterThanOrEqualTo(42));
+    expect(restartButton.height, greaterThanOrEqualTo(42));
   });
 
   // --- 操作ボタンの disabled 状態の視覚表示テスト ---
