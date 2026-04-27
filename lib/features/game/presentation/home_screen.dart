@@ -678,34 +678,34 @@ class _BoardSection extends StatelessWidget {
                           ),
                         ],
                       ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(6.5),
-                      child: AspectRatio(
-                        aspectRatio:
-                            gameState.board.width / gameState.board.height,
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            final cellSize =
-                                constraints.maxWidth / gameState.board.width;
-                            return Stack(
-                              children: [
-                                _BoardView(
-                                  gameState: gameState,
-                                  cellSize: cellSize,
-                                ),
-                                if (gameState.isSolved)
-                                  _ClearOverlay(
-                                    moveCount: moveCount,
-                                    totalBoxes: gameState.boxes.length,
-                                    onRestart: onRestart,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(6.5),
+                        child: AspectRatio(
+                          aspectRatio:
+                              gameState.board.width / gameState.board.height,
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              final cellSize =
+                                  constraints.maxWidth / gameState.board.width;
+                              return Stack(
+                                children: [
+                                  _BoardView(
+                                    gameState: gameState,
+                                    cellSize: cellSize,
                                   ),
-                              ],
-                            );
-                          },
+                                  if (gameState.isSolved)
+                                    _ClearOverlay(
+                                      moveCount: moveCount,
+                                      totalBoxes: gameState.boxes.length,
+                                      onRestart: onRestart,
+                                    ),
+                                ],
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ),
-                  ),
                   ),
                 ),
               ),
