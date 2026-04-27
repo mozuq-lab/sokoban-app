@@ -1776,6 +1776,25 @@ void main() {
     expect(innerRadius, lessThan(outerRadius));
   });
 
+  testWidgets('盤面タイルフレームがインセット溝で囲まれている', (tester) async {
+    await tester.pumpWidget(buildApp());
+    final grooveFinder = find.byKey(const Key('board_inset_groove'));
+    expect(grooveFinder, findsOneWidget);
+
+    // インセット溝コンテナが背景色と角丸を持つ
+    final groove = tester.widget<Container>(grooveFinder);
+    final deco = groove.decoration! as BoxDecoration;
+    expect(deco.color, isNotNull);
+    expect(deco.borderRadius, isNotNull);
+
+    // タイルフレームがインセット溝の子孫にある
+    final frameFinder = find.descendant(
+      of: grooveFinder,
+      matching: find.byKey(const Key('board_tile_frame')),
+    );
+    expect(frameFinder, findsOneWidget);
+  });
+
   // --- クリアオーバーレイのレスポンシブテスト ---
 
   /// キーボード操作でステージをクリアする（狭い画面テスト用）。

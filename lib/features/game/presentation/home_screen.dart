@@ -647,23 +647,37 @@ class _BoardSection extends StatelessWidget {
               Flexible(
                 child: Padding(
                   padding: const EdgeInsets.all(6),
+                  // 盤面を一段沈み込ませるインセット溝
                   child: Container(
-                    key: const Key('board_tile_frame'),
+                    key: const Key('board_inset_groove'),
+                    padding: const EdgeInsets.all(3),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: Colors.brown.withValues(alpha: 0.22),
-                        width: 1.5,
-                      ),
-                      boxShadow: [
-                        // 内側に沈み込んだ印象を作る上辺の薄い影
-                        BoxShadow(
-                          color: Colors.brown.withValues(alpha: 0.10),
-                          blurRadius: 2,
-                          offset: const Offset(0, 1),
-                        ),
-                      ],
+                      color: const Color(0xFFE8DDD0),
+                      borderRadius: BorderRadius.circular(10),
                     ),
+                    child: Container(
+                      key: const Key('board_tile_frame'),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: Colors.brown.withValues(alpha: 0.25),
+                          width: 1.5,
+                        ),
+                        boxShadow: [
+                          // 上辺の内側影で沈み込み感を強調
+                          BoxShadow(
+                            color: Colors.brown.withValues(alpha: 0.13),
+                            blurRadius: 3,
+                            offset: const Offset(0, 1.5),
+                          ),
+                          // 下辺のハイライトで立体感を追加
+                          BoxShadow(
+                            color: Colors.white.withValues(alpha: 0.5),
+                            blurRadius: 1,
+                            offset: const Offset(0, -0.5),
+                          ),
+                        ],
+                      ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(6.5),
                       child: AspectRatio(
@@ -691,6 +705,7 @@ class _BoardSection extends StatelessWidget {
                         ),
                       ),
                     ),
+                  ),
                   ),
                 ),
               ),
