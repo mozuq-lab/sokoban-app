@@ -1555,6 +1555,11 @@ class _NarrowLayout extends StatelessWidget {
                   (available * _boardRatio).clamp(_minBoardHeight, available);
               final sectionGap = isCompact ? 4.0 : 6.0;
 
+              final headingColor = Theme.of(context)
+                  .colorScheme
+                  .onSurfaceVariant
+                  .withValues(alpha: 0.6);
+
               return SingleChildScrollView(
                 child: ConstrainedBox(
                   // 画面全体を使い切れるよう最低高さを設定。
@@ -1565,10 +1570,31 @@ class _NarrowLayout extends StatelessWidget {
                       SizedBox(height: isCompact ? 2 : 4),
                       playContextBanner,
                       SizedBox(height: sectionGap),
+                      _SectionHeading(
+                        iconWidget: CustomPaint(
+                          painter: PuzzleSectionIconPainter(color: headingColor),
+                        ),
+                        label: 'パズル',
+                      ),
+                      SizedBox(height: isCompact ? 2 : 4),
                       SizedBox(height: boardHeight, child: boardSection),
                       SizedBox(height: sectionGap),
+                      _SectionHeading(
+                        iconWidget: CustomPaint(
+                          painter: StatusSectionIconPainter(color: headingColor),
+                        ),
+                        label: '状況',
+                      ),
+                      SizedBox(height: isCompact ? 2 : 4),
                       statusCard,
                       SizedBox(height: sectionGap),
+                      _SectionHeading(
+                        iconWidget: CustomPaint(
+                          painter: ControlSectionIconPainter(color: headingColor),
+                        ),
+                        label: '操作',
+                      ),
+                      SizedBox(height: isCompact ? 2 : 4),
                       controlSection,
                       SizedBox(height: isCompact ? 4 : 8),
                     ],

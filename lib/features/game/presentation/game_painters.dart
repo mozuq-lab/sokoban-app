@@ -1014,3 +1014,37 @@ class ControlSectionIconPainter extends CustomPainter {
   bool shouldRepaint(covariant ControlSectionIconPainter oldDelegate) =>
       color != oldDelegate.color;
 }
+
+/// 状況セクション見出しアイコン（横棒グラフ風）を描画する。
+class StatusSectionIconPainter extends CustomPainter {
+  const StatusSectionIconPainter({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+    final inset = math.min(w, h) * 0.12;
+    final barH = (h - inset * 2 - 4) / 3; // 3 本のバー
+    final r = Radius.circular(barH * 0.25);
+    final widths = [0.55, 0.85, 0.40]; // 各バーの幅比率
+    final alphas = [0.45, 0.75, 0.35];
+
+    for (var i = 0; i < 3; i++) {
+      final top = inset + i * (barH + 2);
+      final barW = (w - inset * 2) * widths[i];
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(inset, top, barW, barH),
+          r,
+        ),
+        Paint()..color = color.withValues(alpha: alphas[i]),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant StatusSectionIconPainter oldDelegate) =>
+      color != oldDelegate.color;
+}

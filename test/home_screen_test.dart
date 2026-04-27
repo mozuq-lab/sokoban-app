@@ -1368,6 +1368,33 @@ void main() {
 
       expect(find.text('1'), findsOneWidget);
     });
+
+    testWidgets('狭い画面でセクション見出し（パズル・状況・操作）が表示される',
+        (tester) async {
+      tester.view.physicalSize = const Size(600, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(buildAppWithSize(const Size(600, 800)));
+
+      for (final label in ['パズル', '状況', '操作']) {
+        expect(find.text(label), findsAtLeastNWidgets(1));
+      }
+    });
+
+    testWidgets('広い画面ではセクション見出し「状況」が表示されない',
+        (tester) async {
+      tester.view.physicalSize = const Size(900, 700);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(buildAppWithSize(const Size(900, 700)));
+
+      // 「状況」見出しは narrow 専用
+      expect(find.text('状況'), findsNothing);
+    });
   });
 
   testWidgets('ヒーローバナーと盤面ヘッダーにステージ見出しが表示される', (tester) async {
