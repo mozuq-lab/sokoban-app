@@ -2080,6 +2080,23 @@ void main() {
     expect(find.text('ゴール'), findsOneWidget);
   });
 
+  testWidgets('凡例が背景付きコンテナでグループ化されている', (tester) async {
+    await tester.pumpWidget(buildApp());
+    final legendFinder = find.byKey(const Key('board_legend'));
+    expect(legendFinder, findsOneWidget);
+    // 凡例ウィジェットの外側が Container（背景付き）で囲まれている
+    final legendWidget = tester.widget<Container>(
+      find.ancestor(
+        of: find.text('プレイヤー'),
+        matching: find.byType(Container),
+      ).first,
+    );
+    final decoration = legendWidget.decoration as BoxDecoration?;
+    expect(decoration, isNotNull);
+    expect(decoration!.color, isNotNull);
+    expect(decoration.borderRadius, isNotNull);
+  });
+
   testWidgets('盤面フッターがヘッダーより下に配置される', (tester) async {
     await tester.pumpWidget(buildApp());
     final headerPos = tester.getTopLeft(
