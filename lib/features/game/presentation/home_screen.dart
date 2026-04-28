@@ -707,7 +707,7 @@ class _BoardSection extends StatelessWidget {
                   ),
                 ),
               ),
-              // --- フッター行: グリッドサイズ ---
+              // --- フッター行: グリッドサイズ + 凡例 ---
               Padding(
                 padding: const EdgeInsets.only(
                   left: 12,
@@ -715,35 +715,60 @@ class _BoardSection extends StatelessWidget {
                   bottom: 6,
                   top: 2,
                 ),
-                child: Row(
-                  key: const Key('board_footer'),
-                  children: [
-                    SizedBox(
-                      width: 10,
-                      height: 10,
-                      child: CustomPaint(
-                        painter: PuzzleSectionIconPainter(
-                          color: const Color(0xFF8D6E63).withValues(alpha: 0.4),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final dimensionsRow = Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          width: 10,
+                          height: 10,
+                          child: CustomPaint(
+                            painter: PuzzleSectionIconPainter(
+                              color: const Color(0xFF8D6E63)
+                                  .withValues(alpha: 0.4),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      '${gameState.board.width} × ${gameState.board.height}',
-                      key: const Key('board_footer_dimensions'),
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w500,
-                        color: const Color(0xFF8D6E63).withValues(alpha: 0.5),
-                        letterSpacing: 0.3,
-                      ),
-                    ),
-                    const Spacer(),
-                    // --- 凡例 ---
-                    const _BoardLegend(
+                        const SizedBox(width: 5),
+                        Text(
+                          '${gameState.board.width} × ${gameState.board.height}',
+                          key: const Key('board_footer_dimensions'),
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF8D6E63)
+                                .withValues(alpha: 0.5),
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                      ],
+                    );
+                    const legend = _BoardLegend(
                       key: Key('board_legend'),
-                    ),
-                  ],
+                    );
+
+                    // 狭い画面では 2 段構成にして窮屈さを回避
+                    if (constraints.maxWidth < 260) {
+                      return Column(
+                        key: const Key('board_footer'),
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          dimensionsRow,
+                          const SizedBox(height: 4),
+                          legend,
+                        ],
+                      );
+                    }
+                    return Row(
+                      key: const Key('board_footer'),
+                      children: [
+                        dimensionsRow,
+                        const Spacer(),
+                        legend,
+                      ],
+                    );
+                  },
                 ),
               ),
             ],
