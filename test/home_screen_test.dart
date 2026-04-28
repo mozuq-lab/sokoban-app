@@ -962,8 +962,7 @@ void main() {
       find.byKey(const ValueKey('segment_1')),
     );
     final deco1 = seg1.decoration! as BoxDecoration;
-    expect(deco1.color!.a, lessThan(0.5),
-        reason: 'segment 1 should be empty');
+    expect(deco1.color!.a, lessThan(0.5), reason: 'segment 1 should be empty');
   });
 
   testWidgets('初期状態で配置が分数形式で表示される', (tester) async {
@@ -1225,8 +1224,7 @@ void main() {
     expect(find.text('もう一度'), findsNothing);
   });
 
-  testWidgets('クリアオーバーレイにアクセントラインとピル型手数表示がある',
-      (tester) async {
+  testWidgets('クリアオーバーレイにアクセントラインとピル型手数表示がある', (tester) async {
     await tester.pumpWidget(buildApp());
     await solveStage(tester);
     await tester.pumpAndSettle();
@@ -1260,8 +1258,7 @@ void main() {
     expect(pillFinder, findsWidgets);
   });
 
-  testWidgets('クリアオーバーレイにステージ完了サブタイトルが表示される',
-      (tester) async {
+  testWidgets('クリアオーバーレイにステージ完了サブタイトルが表示される', (tester) async {
     await tester.pumpWidget(buildApp());
     await solveStage(tester);
     await tester.pumpAndSettle();
@@ -1279,8 +1276,7 @@ void main() {
     expect(find.text('2/2 配置'), findsOneWidget);
   });
 
-  testWidgets('Undo でクリア解除するとオーバーレイのサブタイトルとチップが消える',
-      (tester) async {
+  testWidgets('Undo でクリア解除するとオーバーレイのサブタイトルとチップが消える', (tester) async {
     await tester.pumpWidget(buildApp());
     await solveStage(tester);
     await tester.pumpAndSettle();
@@ -1369,8 +1365,7 @@ void main() {
       expect(find.text('1'), findsOneWidget);
     });
 
-    testWidgets('狭い画面でセクション見出し（パズル・状況・操作）が表示される',
-        (tester) async {
+    testWidgets('狭い画面でセクション見出し（パズル・状況・操作）が表示される', (tester) async {
       tester.view.physicalSize = const Size(600, 800);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -1383,8 +1378,7 @@ void main() {
       }
     });
 
-    testWidgets('広い画面ではセクション見出し「状況」が表示されない',
-        (tester) async {
+    testWidgets('広い画面ではセクション見出し「状況」が表示されない', (tester) async {
       tester.view.physicalSize = const Size(900, 700);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -1463,8 +1457,7 @@ void main() {
     );
   });
 
-  testWidgets('クリア後に盤面ヘッダーのステータスバッジがクリア表示になる',
-      (tester) async {
+  testWidgets('クリア後に盤面ヘッダーのステータスバッジがクリア表示になる', (tester) async {
     await tester.pumpWidget(buildApp());
     await solveStage(tester);
 
@@ -1739,7 +1732,8 @@ void main() {
     // フォーカスを外す（別の FocusNode を作ってフォーカスを奪う）
     final otherFocus = FocusNode();
     addTearDown(otherFocus.dispose);
-    FocusScope.of(tester.element(find.byType(HomeScreen))).requestFocus(otherFocus);
+    FocusScope.of(tester.element(find.byType(HomeScreen)))
+        .requestFocus(otherFocus);
     await tester.pump();
 
     expect(find.text('タップしてキーボードを有効化'), findsOneWidget);
@@ -1753,12 +1747,14 @@ void main() {
     // フォーカスを外す
     final otherFocus = FocusNode();
     addTearDown(otherFocus.dispose);
-    FocusScope.of(tester.element(find.byType(HomeScreen))).requestFocus(otherFocus);
+    FocusScope.of(tester.element(find.byType(HomeScreen)))
+        .requestFocus(otherFocus);
     await tester.pump();
     expect(find.text('タップしてキーボードを有効化'), findsOneWidget);
 
     // インジケーターをスクロールして表示し、タップしてフォーカスを復帰
-    await tester.ensureVisible(find.byKey(const Key('keyboard_focus_indicator')));
+    await tester
+        .ensureVisible(find.byKey(const Key('keyboard_focus_indicator')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('keyboard_focus_indicator')));
     await tester.pump();
@@ -1780,8 +1776,7 @@ void main() {
     expect(deco.borderRadius, isNotNull);
   });
 
-  testWidgets('盤面タイルフレームの内側 ClipRRect がフレーム内に収まる角丸を持つ',
-      (tester) async {
+  testWidgets('盤面タイルフレームの内側 ClipRRect がフレーム内に収まる角丸を持つ', (tester) async {
     await tester.pumpWidget(buildApp());
     final frameFinder = find.byKey(const Key('board_tile_frame'));
     expect(frameFinder, findsOneWidget);
@@ -1796,8 +1791,7 @@ void main() {
     final clip = tester.widget<ClipRRect>(clipFinder);
     final outerDeco =
         tester.widget<Container>(frameFinder).decoration! as BoxDecoration;
-    final outerRadius =
-        (outerDeco.borderRadius! as BorderRadius).topLeft.x;
+    final outerRadius = (outerDeco.borderRadius! as BorderRadius).topLeft.x;
     final innerRadius = (clip.borderRadius as BorderRadius).topLeft.x;
     // 内側の角丸は外側よりボーダー幅ぶん小さい
     expect(innerRadius, lessThan(outerRadius));
@@ -2044,6 +2038,14 @@ void main() {
     expect(find.byKey(const Key('board_footer')), findsOneWidget);
     expect(find.byKey(const Key('board_footer_dimensions')), findsOneWidget);
     expect(find.text('6 × 6'), findsOneWidget);
+  });
+
+  testWidgets('盤面フッターにプレイヤー・箱・ゴールの凡例が表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    expect(find.byKey(const Key('board_legend')), findsOneWidget);
+    expect(find.text('プレイヤー'), findsOneWidget);
+    expect(find.text('箱'), findsOneWidget);
+    expect(find.text('ゴール'), findsOneWidget);
   });
 
   testWidgets('盤面フッターがヘッダーより下に配置される', (tester) async {
