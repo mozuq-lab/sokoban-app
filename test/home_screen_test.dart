@@ -911,10 +911,42 @@ void main() {
     final dividerFinder = find.byKey(const Key('stat_divider'));
     expect(dividerFinder, findsOneWidget);
 
-    // 区切り線が幅 1 の Container であることを確認
+    // 横並びレイアウトでは区切り線が幅 1 の Container
     final container = tester.widget<Container>(dividerFinder);
     final constraints = container.constraints;
     expect(constraints?.maxWidth, equals(1));
+  });
+
+  testWidgets('通常幅ではステータスカードが横並びレイアウトを使う', (tester) async {
+    await tester.pumpWidget(buildApp());
+    expect(
+      find.byKey(const Key('stat_area_horizontal')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('stat_area_vertical')), findsNothing);
+  });
+
+  testWidgets('狭い画面ではステータスカードが縦積みレイアウトに切り替わる',
+      (tester) async {
+    // 幅 280px の狭い画面をシミュレート
+    tester.view.physicalSize = const Size(280, 700);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(buildApp());
+    expect(
+      find.byKey(const Key('stat_area_vertical')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('stat_area_horizontal')), findsNothing);
+
+    // 縦積みでは区切り線が高さ 1 の横線になる
+    final divider = tester.widget<Container>(
+      find.byKey(const Key('stat_divider')),
+    );
+    final constraints = divider.constraints;
+    expect(constraints?.maxHeight, equals(1));
   });
 
   // --- 配置セグメントバーのテスト ---
