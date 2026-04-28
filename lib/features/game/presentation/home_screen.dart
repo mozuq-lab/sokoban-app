@@ -1965,84 +1965,17 @@ class _StatusCard extends StatelessWidget {
           // --- 進捗情報（手数・配置状況） ---
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: const Color(0xFFE0D6CC).withValues(alpha: 0.6),
-                  width: 0.5,
-                ),
-              ),
-              child: IntrinsicHeight(
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 6,
-                          horizontal: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color:
-                              const Color(0xFF1565C0).withValues(alpha: 0.05),
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(9.5),
-                            bottomLeft: Radius.circular(9.5),
-                          ),
-                        ),
-                        child: _StatItem(
-                          iconWidget: CustomPaint(
-                            painter: MoveCountIconPainter(
-                              color: const Color(0xFF1565C0),
-                            ),
-                          ),
-                          iconColor: const Color(0xFF1565C0),
-                          label: '手数',
-                          value: '$moveCount',
-                        ),
-                      ),
-                    ),
-                    Container(
-                      key: const Key('stat_divider'),
-                      width: 1,
-                      color: const Color(0xFFE0D6CC).withValues(alpha: 0.6),
-                    ),
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 6,
-                          horizontal: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: (allPlaced
-                                  ? Colors.green
-                                  : Colors.orange.shade800)
-                              .withValues(alpha: 0.05),
-                          borderRadius: const BorderRadius.only(
-                            topRight: Radius.circular(9.5),
-                            bottomRight: Radius.circular(9.5),
-                          ),
-                        ),
-                        child: _StatItem(
-                          iconWidget: CustomPaint(
-                            painter: PlacementIconPainter(
-                              color: allPlaced
-                                  ? Colors.green
-                                  : Colors.orange.shade800,
-                            ),
-                          ),
-                          iconColor:
-                              allPlaced ? Colors.green : Colors.orange.shade800,
-                          label: '配置',
-                          value: allPlaced
-                              ? '全配置！'
-                              : '${totalBoxes - remainingBoxes} / $totalBoxes',
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final useVertical = constraints.maxWidth < 260;
+                return _StatArea(
+                  moveCount: moveCount,
+                  remainingBoxes: remainingBoxes,
+                  totalBoxes: totalBoxes,
+                  allPlaced: allPlaced,
+                  useVertical: useVertical,
+                );
+              },
             ),
           ),
           // --- 配置セグメントバー ---
@@ -2231,6 +2164,151 @@ class _StatusCard extends StatelessWidget {
                     ),
                   ],
                 ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 手数・配置状況の 2 項目を横並び or 縦積みで表示するエリア。
+///
+/// 狭い画面（幅 260px 未満）では自動的に縦積みレイアウトに切り替わる。
+class _StatArea extends StatelessWidget {
+  const _StatArea({
+    required this.moveCount,
+    required this.remainingBoxes,
+    required this.totalBoxes,
+    required this.allPlaced,
+    required this.useVertical,
+  });
+
+  final int moveCount;
+  final int remainingBoxes;
+  final int totalBoxes;
+  final bool allPlaced;
+  final bool useVertical;
+
+  @override
+  Widget build(BuildContext context) {
+    final placementColor = allPlaced ? Colors.green : Colors.orange.shade800;
+
+    final moveItem = _StatItem(
+      iconWidget: CustomPaint(
+        painter: MoveCountIconPainter(
+          color: const Color(0xFF1565C0),
+        ),
+      ),
+      iconColor: const Color(0xFF1565C0),
+      label: '手数',
+      value: '$moveCount',
+    );
+
+    final placementItem = _StatItem(
+      iconWidget: CustomPaint(
+        painter: PlacementIconPainter(
+          color: placementColor,
+        ),
+      ),
+      iconColor: placementColor,
+      label: '配置',
+      value: allPlaced
+          ? '全配置！'
+          : '${totalBoxes - remainingBoxes} / $totalBoxes',
+    );
+
+    final borderColor = const Color(0xFFE0D6CC).withValues(alpha: 0.6);
+
+    if (useVertical) {
+      return Container(
+        key: const Key('stat_area_vertical'),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: borderColor, width: 0.5),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1565C0).withValues(alpha: 0.05),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(9.5),
+                  topRight: Radius.circular(9.5),
+                ),
+              ),
+              child: moveItem,
+            ),
+            Container(
+              key: const Key('stat_divider'),
+              height: 1,
+              color: borderColor,
+            ),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+              decoration: BoxDecoration(
+                color: placementColor.withValues(alpha: 0.05),
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(9.5),
+                  bottomRight: Radius.circular(9.5),
+                ),
+              ),
+              child: placementItem,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      key: const Key('stat_area_horizontal'),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: borderColor, width: 0.5),
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 6,
+                  horizontal: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1565C0).withValues(alpha: 0.05),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(9.5),
+                    bottomLeft: Radius.circular(9.5),
+                  ),
+                ),
+                child: moveItem,
+              ),
+            ),
+            Container(
+              key: const Key('stat_divider'),
+              width: 1,
+              color: borderColor,
+            ),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 6,
+                  horizontal: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: placementColor.withValues(alpha: 0.05),
+                  borderRadius: const BorderRadius.only(
+                    topRight: Radius.circular(9.5),
+                    bottomRight: Radius.circular(9.5),
+                  ),
+                ),
+                child: placementItem,
               ),
             ),
           ],
