@@ -2059,6 +2059,31 @@ void main() {
     expect(footerPos.dy, greaterThan(headerPos.dy));
   });
 
+  testWidgets('狭い画面で盤面フッターが 2 段構成になる', (tester) async {
+    // 幅 250px: board card maxWidth(400) より狭く、
+    // padding(12+12) を引くとフッター LayoutBuilder に 260 未満が渡る
+    tester.view.physicalSize = const Size(250, 1200);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(size: Size(250, 1200)),
+          child: const HomeScreen(initialLevel: testLevel),
+        ),
+      ),
+    );
+    // フッターが Column（2 段）でレンダリングされることを確認
+    final footer = find.byKey(const Key('board_footer'));
+    expect(footer, findsOneWidget);
+    final footerWidget = tester.widget(footer);
+    expect(footerWidget, isA<Column>());
+    // 凡例とグリッドサイズも引き続き表示される
+    expect(find.byKey(const Key('board_footer_dimensions')), findsOneWidget);
+    expect(find.byKey(const Key('board_legend')), findsOneWidget);
+  });
+
   testWidgets('通常幅で AppBar のアクションボタンが通常サイズになる', (tester) async {
     await tester.pumpWidget(buildApp());
 
