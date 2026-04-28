@@ -742,6 +742,11 @@ class _BoardSection extends StatelessWidget {
                         letterSpacing: 0.3,
                       ),
                     ),
+                    const Spacer(),
+                    // --- 凡例 ---
+                    const _BoardLegend(
+                      key: Key('board_legend'),
+                    ),
                   ],
                 ),
               ),
@@ -749,6 +754,74 @@ class _BoardSection extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// 盤面フッターの凡例（プレイヤー・箱・ゴール）。
+///
+/// ゲーム用ウィジェット (PlayerWidget 等) を直接使うとテストの
+/// `findsOneWidget` と衝突するため、簡易な図形で表現する。
+class _BoardLegend extends StatelessWidget {
+  const _BoardLegend({super.key});
+
+  static const _labelStyle = TextStyle(
+    fontSize: 9,
+    fontWeight: FontWeight.w500,
+    color: Color(0xFF8D6E63),
+    letterSpacing: 0.2,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // プレイヤー: 青い丸
+        Container(
+          width: 8,
+          height: 8,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: Color(0xFF3B82B8),
+          ),
+        ),
+        const SizedBox(width: 3),
+        Text('プレイヤー',
+            style: _labelStyle.copyWith(
+                color: const Color(0xFF8D6E63).withValues(alpha: 0.5))),
+        const SizedBox(width: 8),
+        // 箱: 琥珀色の角丸四角
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(1.5),
+            color: const Color(0xFFC08830),
+          ),
+        ),
+        const SizedBox(width: 3),
+        Text('箱',
+            style: _labelStyle.copyWith(
+                color: const Color(0xFF8D6E63).withValues(alpha: 0.5))),
+        const SizedBox(width: 8),
+        // ゴール: 緑のリング
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: const Color(0xFF43A047),
+              width: 1.5,
+            ),
+          ),
+        ),
+        const SizedBox(width: 3),
+        Text('ゴール',
+            style: _labelStyle.copyWith(
+                color: const Color(0xFF8D6E63).withValues(alpha: 0.5))),
+      ],
     );
   }
 }
