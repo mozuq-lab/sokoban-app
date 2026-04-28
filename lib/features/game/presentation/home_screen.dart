@@ -84,8 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     final key = event.logicalKey;
-    final isCtrlOrMeta =
-        HardwareKeyboard.instance.isControlPressed ||
+    final isCtrlOrMeta = HardwareKeyboard.instance.isControlPressed ||
         HardwareKeyboard.instance.isMetaPressed;
 
     // Undo: Ctrl+Z / Cmd+Z
@@ -452,8 +451,8 @@ class _BoardSection extends StatelessWidget {
                         height: 16,
                         child: CustomPaint(
                           painter: PuzzleSectionIconPainter(
-                            color: const Color(0xFF8D6E63)
-                                .withValues(alpha: 0.8),
+                            color:
+                                const Color(0xFF8D6E63).withValues(alpha: 0.8),
                           ),
                         ),
                       ),
@@ -482,8 +481,7 @@ class _BoardSection extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: gameState.isSolved
                               ? const Color(0xFFE8F5E9)
-                              : const Color(0xFF8D6E63)
-                                  .withValues(alpha: 0.08),
+                              : const Color(0xFF8D6E63).withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -725,8 +723,7 @@ class _BoardSection extends StatelessWidget {
                       height: 10,
                       child: CustomPaint(
                         painter: PuzzleSectionIconPainter(
-                          color: const Color(0xFF8D6E63)
-                              .withValues(alpha: 0.4),
+                          color: const Color(0xFF8D6E63).withValues(alpha: 0.4),
                         ),
                       ),
                     ),
@@ -737,10 +734,14 @@ class _BoardSection extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w500,
-                        color: const Color(0xFF8D6E63)
-                            .withValues(alpha: 0.5),
+                        color: const Color(0xFF8D6E63).withValues(alpha: 0.5),
                         letterSpacing: 0.3,
                       ),
+                    ),
+                    const Spacer(),
+                    // --- 凡例 ---
+                    const _BoardLegend(
+                      key: Key('board_legend'),
                     ),
                   ],
                 ),
@@ -749,6 +750,74 @@ class _BoardSection extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// 盤面フッターの凡例（プレイヤー・箱・ゴール）。
+///
+/// ゲーム用ウィジェット (PlayerWidget 等) を直接使うとテストの
+/// `findsOneWidget` と衝突するため、簡易な図形で表現する。
+class _BoardLegend extends StatelessWidget {
+  const _BoardLegend({super.key});
+
+  static const _labelStyle = TextStyle(
+    fontSize: 9,
+    fontWeight: FontWeight.w500,
+    color: Color(0xFF8D6E63),
+    letterSpacing: 0.2,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // プレイヤー: 青い丸
+        Container(
+          width: 8,
+          height: 8,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: Color(0xFF3B82B8),
+          ),
+        ),
+        const SizedBox(width: 3),
+        Text('プレイヤー',
+            style: _labelStyle.copyWith(
+                color: const Color(0xFF8D6E63).withValues(alpha: 0.5))),
+        const SizedBox(width: 8),
+        // 箱: 琥珀色の角丸四角
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(1.5),
+            color: const Color(0xFFC08830),
+          ),
+        ),
+        const SizedBox(width: 3),
+        Text('箱',
+            style: _labelStyle.copyWith(
+                color: const Color(0xFF8D6E63).withValues(alpha: 0.5))),
+        const SizedBox(width: 8),
+        // ゴール: 緑のリング
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: const Color(0xFF43A047),
+              width: 1.5,
+            ),
+          ),
+        ),
+        const SizedBox(width: 3),
+        Text('ゴール',
+            style: _labelStyle.copyWith(
+                color: const Color(0xFF8D6E63).withValues(alpha: 0.5))),
+      ],
     );
   }
 }
@@ -1139,8 +1208,9 @@ class _AssistButton extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(radius),
                 border: Border.all(
-                  color:
-                      enabled ? const Color(0xFF8D6E63) : const Color(0xFFCCC3BA),
+                  color: enabled
+                      ? const Color(0xFF8D6E63)
+                      : const Color(0xFFCCC3BA),
                   width: enabled ? 1.5 : 1.0,
                 ),
                 gradient: enabled
@@ -1296,7 +1366,8 @@ class _PlayContextBanner extends StatelessWidget {
                               color: accentColor.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(9),
                             ),
-                            child: Icon(icon, size: iconInner, color: accentColor),
+                            child:
+                                Icon(icon, size: iconInner, color: accentColor),
                           ),
                           SizedBox(width: gap),
                           // テキスト 2 行 + 進捗バー (+ compact 時はチップも)
@@ -1474,9 +1545,7 @@ class _BannerProgressBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final double progress = total > 0 ? placed / total : 0;
     final trackColor = accentColor.withValues(alpha: 0.12);
-    final fillColor = isSolved
-        ? const Color(0xFF388E3C)
-        : accentColor;
+    final fillColor = isSolved ? const Color(0xFF388E3C) : accentColor;
 
     return ClipRRect(
       key: Key('banner_bar_${placed}_$total'),
@@ -1572,7 +1641,8 @@ class _NarrowLayout extends StatelessWidget {
                       SizedBox(height: sectionGap),
                       _SectionHeading(
                         iconWidget: CustomPaint(
-                          painter: PuzzleSectionIconPainter(color: headingColor),
+                          painter:
+                              PuzzleSectionIconPainter(color: headingColor),
                         ),
                         label: 'パズル',
                       ),
@@ -1581,7 +1651,8 @@ class _NarrowLayout extends StatelessWidget {
                       SizedBox(height: sectionGap),
                       _SectionHeading(
                         iconWidget: CustomPaint(
-                          painter: StatusSectionIconPainter(color: headingColor),
+                          painter:
+                              StatusSectionIconPainter(color: headingColor),
                         ),
                         label: '状況',
                       ),
@@ -1590,7 +1661,8 @@ class _NarrowLayout extends StatelessWidget {
                       SizedBox(height: sectionGap),
                       _SectionHeading(
                         iconWidget: CustomPaint(
-                          painter: ControlSectionIconPainter(color: headingColor),
+                          painter:
+                              ControlSectionIconPainter(color: headingColor),
                         ),
                         label: '操作',
                       ),
@@ -1886,8 +1958,8 @@ class _StatusCard extends StatelessWidget {
                           horizontal: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1565C0)
-                              .withValues(alpha: 0.05),
+                          color:
+                              const Color(0xFF1565C0).withValues(alpha: 0.05),
                           borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(9.5),
                             bottomLeft: Radius.circular(9.5),
@@ -1934,9 +2006,8 @@ class _StatusCard extends StatelessWidget {
                                   : Colors.orange.shade800,
                             ),
                           ),
-                          iconColor: allPlaced
-                              ? Colors.green
-                              : Colors.orange.shade800,
+                          iconColor:
+                              allPlaced ? Colors.green : Colors.orange.shade800,
                           label: '配置',
                           value: allPlaced
                               ? '全配置！'
@@ -2234,8 +2305,7 @@ class _SegmentedProgressBar extends StatelessWidget {
 
     final Color filledColor =
         isSolved ? Colors.green.shade400 : Colors.orange.shade400;
-    final Color emptyColor =
-        const Color(0xFFD7CCC8).withValues(alpha: 0.35);
+    final Color emptyColor = const Color(0xFFD7CCC8).withValues(alpha: 0.35);
 
     return Row(
       children: List.generate(totalCount, (i) {
@@ -2411,8 +2481,7 @@ class _ClearOverlayState extends State<_ClearOverlay>
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final availableWidth = constraints.maxWidth;
-                  final isCompact =
-                      availableWidth < _compactOverlayThreshold;
+                  final isCompact = availableWidth < _compactOverlayThreshold;
                   final double hPad = isCompact ? 16 : 32;
                   final double vPadTop = isCompact ? 14 : 22;
                   final double trophyOuter = isCompact ? 8 : 12;
@@ -2498,7 +2567,10 @@ class _ClearOverlayState extends State<_ClearOverlay>
                           ),
                           Padding(
                             padding: EdgeInsets.fromLTRB(
-                              hPad, vPadTop, hPad, 10,
+                              hPad,
+                              vPadTop,
+                              hPad,
+                              10,
                             ),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
@@ -2585,8 +2657,10 @@ class _ClearOverlayState extends State<_ClearOverlay>
                           // ボタンエリア
                           Padding(
                             padding: EdgeInsets.fromLTRB(
-                              btnHPad, isCompact ? 10 : 14,
-                              btnHPad, isCompact ? 12 : 18,
+                              btnHPad,
+                              isCompact ? 10 : 14,
+                              btnHPad,
+                              isCompact ? 12 : 18,
                             ),
                             child: FilledButton.icon(
                               key: const ValueKey('overlay-restart'),
@@ -2790,9 +2864,8 @@ class _DirectionPad extends StatelessWidget {
             child: Opacity(
               opacity: enabled ? 1.0 : 0.45,
               child: Material(
-                color: enabled
-                    ? const Color(0xFFF5E6CC)
-                    : const Color(0xFFEDE7E0),
+                color:
+                    enabled ? const Color(0xFFF5E6CC) : const Color(0xFFEDE7E0),
                 borderRadius: BorderRadius.circular(btnRadius),
                 elevation: enabled ? 3 : 0,
                 shadowColor: const Color(0x40000000),
