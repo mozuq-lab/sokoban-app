@@ -787,65 +787,88 @@ class _BoardLegend extends StatelessWidget {
   const _BoardLegend({super.key});
 
   static const _labelStyle = TextStyle(
-    fontSize: 9,
+    fontSize: 9.5,
     fontWeight: FontWeight.w500,
     color: Color(0xFF8D6E63),
     letterSpacing: 0.2,
   );
 
+  static const _separatorColor = Color(0xFF8D6E63);
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: const Color(0xFF8D6E63).withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(6),
+    final items = <Widget>[
+      // プレイヤー: 青い丸
+      _legendItem(
+        icon: Container(
+          width: 11,
+          height: 11,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: Color(0xFF3B82B8),
+          ),
+        ),
+        label: 'プレイヤー',
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // プレイヤー: 青い丸
-          _legendItem(
-            icon: Container(
-              width: 10,
-              height: 10,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Color(0xFF3B82B8),
-              ),
-            ),
-            label: 'プレイヤー',
+      // 箱: 琥珀色の角丸四角
+      _legendItem(
+        icon: Container(
+          width: 11,
+          height: 11,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(2),
+            color: const Color(0xFFC08830),
           ),
-          const SizedBox(width: 10),
-          // 箱: 琥珀色の角丸四角
-          _legendItem(
-            icon: Container(
-              width: 10,
-              height: 10,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(2),
-                color: const Color(0xFFC08830),
-              ),
+        ),
+        label: '箱',
+      ),
+      // ゴール: 緑のリング
+      _legendItem(
+        icon: Container(
+          width: 11,
+          height: 11,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: const Color(0xFF43A047),
+              width: 1.5,
             ),
-            label: '箱',
           ),
-          const SizedBox(width: 10),
-          // ゴール: 緑のリング
-          _legendItem(
-            icon: Container(
-              width: 10,
-              height: 10,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: const Color(0xFF43A047),
-                  width: 1.5,
-                ),
-              ),
-            ),
-            label: 'ゴール',
+        ),
+        label: 'ゴール',
+      ),
+    ];
+
+    // アイテム間にセパレータを挟む
+    final separated = <Widget>[];
+    for (var i = 0; i < items.length; i++) {
+      if (i > 0) {
+        separated.add(Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Container(
+            width: 1,
+            height: 10,
+            color: _separatorColor.withValues(alpha: 0.15),
           ),
-        ],
+        ));
+      }
+      separated.add(items[i]);
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: const Color(0xFF8D6E63).withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: const Color(0xFF8D6E63).withValues(alpha: 0.08),
+        ),
+      ),
+      child: Wrap(
+        spacing: 0,
+        runSpacing: 4,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: separated,
       ),
     );
   }
@@ -855,11 +878,11 @@ class _BoardLegend extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         icon,
-        const SizedBox(width: 4),
+        const SizedBox(width: 5),
         Text(
           label,
           style: _labelStyle.copyWith(
-            color: const Color(0xFF8D6E63).withValues(alpha: 0.7),
+            color: const Color(0xFF8D6E63).withValues(alpha: 0.75),
           ),
         ),
       ],
