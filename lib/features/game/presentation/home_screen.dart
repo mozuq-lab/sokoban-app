@@ -1875,6 +1875,9 @@ class _SectionHeading extends StatelessWidget {
     final subtitleColor = Theme.of(
       context,
     ).colorScheme.onSurfaceVariant.withValues(alpha: 0.4);
+    final lineColor = Theme.of(
+      context,
+    ).colorScheme.onSurfaceVariant.withValues(alpha: 0.12);
     return Padding(
       padding: const EdgeInsets.only(left: 2),
       child: Row(
@@ -1897,6 +1900,13 @@ class _SectionHeading extends StatelessWidget {
               style: TextStyle(fontSize: 10, color: subtitleColor),
             ),
           ],
+          const SizedBox(width: 8),
+          Expanded(
+            child: Container(
+              height: 1,
+              color: lineColor,
+            ),
+          ),
         ],
       ),
     );
