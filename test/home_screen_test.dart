@@ -1410,7 +1410,7 @@ void main() {
       }
     });
 
-    testWidgets('広い画面ではセクション見出し「状況」が表示されない', (tester) async {
+    testWidgets('広い画面でもセクション見出し「状況」が表示される', (tester) async {
       tester.view.physicalSize = const Size(900, 700);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -1418,8 +1418,8 @@ void main() {
 
       await tester.pumpWidget(buildAppWithSize(const Size(900, 700)));
 
-      // 「状況」見出しは narrow 専用
-      expect(find.text('状況'), findsNothing);
+      // wide layout でも「状況」見出しが表示される
+      expect(find.text('状況'), findsOneWidget);
     });
   });
 

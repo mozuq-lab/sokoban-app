@@ -1788,6 +1788,19 @@ class _WideLayout extends StatelessWidget {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                            _SectionHeading(
+                              iconWidget: CustomPaint(
+                                painter: StatusSectionIconPainter(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant
+                                      .withValues(alpha: 0.6),
+                                ),
+                              ),
+                              label: '状況',
+                              subtitle: '— 手数と配置の進み具合',
+                            ),
+                            const SizedBox(height: 4),
                             statusCard,
                             const SizedBox(height: 12),
                             _SectionHeading(
