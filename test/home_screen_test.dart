@@ -2145,4 +2145,40 @@ void main() {
     );
     expect(undoSize.width, equals(34));
   });
+
+  // --- AppBar ステージチップのテスト ---
+
+  testWidgets('AppBar にステージチップが表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    expect(find.text('Stage 1'), findsOneWidget);
+  });
+
+  testWidgets('クリア後に AppBar ステージチップがクリア表示になる', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+    await tester.pumpAndSettle();
+
+    // チップのラベルが「クリア」に変わる
+    expect(
+      find.byKey(const ValueKey('appbar-stage-chip-true')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('Undo でクリア解除すると AppBar ステージチップが Stage 1 に戻る',
+      (tester) async {
+    await tester.pumpWidget(buildApp());
+    await solveStage(tester);
+    await tester.pumpAndSettle();
+
+    // Undo
+    await tester.tap(find.byKey(const ValueKey('appbar-undo')).first);
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey('appbar-stage-chip-false')),
+      findsOneWidget,
+    );
+    expect(find.text('Stage 1'), findsOneWidget);
+  });
 }
