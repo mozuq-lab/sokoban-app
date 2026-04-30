@@ -1124,6 +1124,8 @@ class _ControlSection extends StatelessWidget {
 }
 
 /// 操作セクション内のサブラベル（「移動」「やり直し」など）。
+///
+/// 小さなピル背景を持ち、カード内のサブセクション境界を視覚的に示す。
 class _ControlSubLabel extends StatelessWidget {
   const _ControlSubLabel({super.key, required this.icon, required this.text});
 
@@ -1132,21 +1134,32 @@ class _ControlSubLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 13, color: const Color(0xFF8D6E63)),
-        const SizedBox(width: 4),
-        Text(
-          text,
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF8D6E63),
-            letterSpacing: 0.5,
-          ),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: const Color(0xFF8D6E63).withValues(alpha: 0.07),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: const Color(0xFF8D6E63).withValues(alpha: 0.10),
+          width: 0.5,
         ),
-      ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: const Color(0xFF8D6E63)),
+          const SizedBox(width: 4),
+          Text(
+            text,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF8D6E63),
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
