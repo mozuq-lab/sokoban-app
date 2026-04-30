@@ -1529,6 +1529,25 @@ void main() {
     );
   });
 
+  testWidgets('操作サブラベルがピル背景装飾を持つ', (tester) async {
+    await tester.pumpWidget(buildApp());
+
+    final moveLabel = find.byKey(const Key('control_sub_label_move'));
+    expect(moveLabel, findsOneWidget);
+
+    // _ControlSubLabel のルート Container がピル背景の BoxDecoration を持つ
+    final container = tester.widget<Container>(
+      find.descendant(
+        of: moveLabel,
+        matching: find.byType(Container),
+      ).first,
+    );
+    final decoration = container.decoration as BoxDecoration?;
+    expect(decoration, isNotNull);
+    expect(decoration!.borderRadius, isNotNull);
+    expect(decoration.color, isNotNull);
+  });
+
   // --- 操作パッド中央ステータスチップのテスト ---
 
   /// ステータスチップを Key で探すヘルパー。
