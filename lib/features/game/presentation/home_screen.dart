@@ -199,6 +199,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final double actionIconSize = isCompact ? 14 : 18;
     final double actionRadius = isCompact ? 7 : 9;
 
+    final gameState = _gameState;
+    final bool solved = gameState?.isSolved ?? false;
+
     return AppBar(
       titleSpacing: titleSpacing,
       bottom: PreferredSize(
@@ -229,6 +232,13 @@ class _HomeScreenState extends State<HomeScreen> {
               fontSize: titleFontSize,
             ),
           ),
+          if (gameState != null && !isCompact) ...[
+            const SizedBox(width: 10),
+            _AppBarStageChip(
+              key: ValueKey('appbar-stage-chip-$solved'),
+              isSolved: solved,
+            ),
+          ],
         ],
       ),
       actions: [
@@ -388,6 +398,65 @@ class _HomeScreenState extends State<HomeScreen> {
                 controlSection: controlSection,
               );
             },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// AppBar に表示するステージ状態チップ。
+///
+/// プレイ中 / クリア済みを小さなピルで示し、
+/// ヘッダーの情報密度を盤面下のステータスと揃える。
+class _AppBarStageChip extends StatelessWidget {
+  const _AppBarStageChip({
+    super.key,
+    required this.isSolved,
+  });
+
+  final bool isSolved;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color bgColor;
+    final Color fgColor;
+    final String label;
+
+    if (isSolved) {
+      bgColor = const Color(0xFFE8F5E9);
+      fgColor = const Color(0xFF388E3C);
+      label = 'クリア';
+    } else {
+      bgColor = const Color(0xFFF5E6CC);
+      fgColor = const Color(0xFF8D6E63);
+      label = 'Stage 1';
+    }
+
+    const double fontSize = 10;
+    const EdgeInsets padding =
+        EdgeInsets.symmetric(horizontal: 7, vertical: 2.5);
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 250),
+      child: Container(
+        key: ValueKey(label),
+        padding: padding,
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: fgColor.withValues(alpha: 0.3),
+            width: 0.5,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: fontSize,
+            fontWeight: FontWeight.w600,
+            color: fgColor,
+            height: 1.2,
           ),
         ),
       ),
