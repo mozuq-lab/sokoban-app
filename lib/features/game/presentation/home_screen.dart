@@ -212,7 +212,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       title: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(
             width: logoSize,
@@ -224,19 +223,23 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           SizedBox(width: isCompact ? 6 : 8),
-          Text(
-            'Sokoban',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.5,
-              fontSize: titleFontSize,
+          Flexible(
+            child: Text(
+              'Sokoban',
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+                fontSize: titleFontSize,
+              ),
             ),
           ),
-          if (gameState != null && !isCompact) ...[
-            const SizedBox(width: 10),
+          if (gameState != null) ...[
+            SizedBox(width: isCompact ? 6 : 10),
             _AppBarStageChip(
               key: ValueKey('appbar-stage-chip-$solved'),
               isSolved: solved,
+              compact: isCompact,
             ),
           ],
         ],
@@ -413,9 +416,11 @@ class _AppBarStageChip extends StatelessWidget {
   const _AppBarStageChip({
     super.key,
     required this.isSolved,
+    this.compact = false,
   });
 
   final bool isSolved;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -433,9 +438,10 @@ class _AppBarStageChip extends StatelessWidget {
       label = 'Stage 1';
     }
 
-    const double fontSize = 10;
-    const EdgeInsets padding =
-        EdgeInsets.symmetric(horizontal: 7, vertical: 2.5);
+    final double fontSize = compact ? 9 : 10;
+    final EdgeInsets padding = compact
+        ? const EdgeInsets.symmetric(horizontal: 5, vertical: 2)
+        : const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5);
 
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 250),
