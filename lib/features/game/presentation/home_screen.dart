@@ -1255,11 +1255,13 @@ class _KeyboardFocusIndicator extends StatelessWidget {
 class _PressableControl extends StatefulWidget {
   const _PressableControl({
     required this.enabled,
-    required this.child,
+    required this.builder,
   });
 
   final bool enabled;
-  final Widget child;
+
+  /// Builder that receives press progress (0.0 = idle, 1.0 = fully pressed).
+  final Widget Function(double pressProgress) builder;
 
   @override
   State<_PressableControl> createState() => _PressableControlState();
@@ -1268,7 +1270,6 @@ class _PressableControl extends StatefulWidget {
 class _PressableControlState extends State<_PressableControl>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
-  late final Animation<double> _scaleAnimation;
 
   @override
   void initState() {
@@ -1277,9 +1278,6 @@ class _PressableControlState extends State<_PressableControl>
       vsync: this,
       duration: const Duration(milliseconds: 80),
       reverseDuration: const Duration(milliseconds: 100),
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.93).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
   }
 
@@ -1309,12 +1307,15 @@ class _PressableControlState extends State<_PressableControl>
       onPointerCancel: _onPointerCancel,
       behavior: HitTestBehavior.translucent,
       child: AnimatedBuilder(
-        animation: _scaleAnimation,
-        builder: (context, child) => Transform.scale(
-          scale: _scaleAnimation.value,
-          child: child,
-        ),
-        child: widget.child,
+        animation: _controller,
+        builder: (context, _) {
+          final progress = _controller.value;
+          final scale = 1.0 - (progress * 0.07); // 1.0 → 0.93
+          return Transform.scale(
+            scale: scale,
+            child: widget.builder(progress),
+          );
+        },
       ),
     );
   }
@@ -1347,61 +1348,75 @@ class _AssistButton extends StatelessWidget {
 
     return _PressableControl(
       enabled: enabled,
-      child: Opacity(
-        opacity: enabled ? 1.0 : 0.45,
-        child: Material(
-          color: enabled ? const Color(0xFFF5E6CC) : const Color(0xFFEDE7E0),
-          borderRadius: BorderRadius.circular(radius),
-          elevation: enabled ? 2 : 0,
-          shadowColor: const Color(0x40000000),
-          child: InkWell(
-            onTap: onPressed,
+      builder: (pressProgress) {
+        final elevation = enabled ? 2.0 - (pressProgress * 2.0) : 0.0;
+        return Opacity(
+          opacity: enabled ? 1.0 : 0.45,
+          child: Material(
+            color: enabled ? const Color(0xFFF5E6CC) : const Color(0xFFEDE7E0),
             borderRadius: BorderRadius.circular(radius),
-            splashColor: const Color(0x308D6E63),
-            highlightColor: const Color(0x188D6E63),
-            child: Container(
-              height: height,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(radius),
-                border: Border.all(
-                  color: enabled
-                      ? const Color(0xFF8D6E63)
-                      : const Color(0xFFCCC3BA),
-                  width: enabled ? 1.5 : 1.0,
+            elevation: elevation,
+            shadowColor: const Color(0x40000000),
+            child: InkWell(
+              onTap: onPressed,
+              borderRadius: BorderRadius.circular(radius),
+              splashColor: const Color(0x308D6E63),
+              highlightColor: const Color(0x188D6E63),
+              child: Container(
+                height: height,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(radius),
+                  border: Border.all(
+                    color: enabled
+                        ? const Color(0xFF8D6E63)
+                        : const Color(0xFFCCC3BA),
+                    width: enabled ? 1.5 : 1.0,
+                  ),
+                  gradient: enabled
+                      ? LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Color.lerp(
+                              const Color(0xFFF9EDDA),
+                              const Color(0xFFF0DDBF),
+                              pressProgress * 0.5,
+                            )!,
+                            Color.lerp(
+                              const Color(0xFFF0DDBF),
+                              const Color(0xFFE8D5B0),
+                              pressProgress * 0.5,
+                            )!,
+                          ],
+                        )
+                      : null,
                 ),
-                gradient: enabled
-                    ? const LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Color(0xFFF9EDDA), Color(0xFFF0DDBF)],
-                      )
-                    : null,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: iconSize,
-                    height: iconSize,
-                    child: CustomPaint(painter: iconPainter),
-                  ),
-                  SizedBox(width: iconGap),
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: fontSize,
-                      fontWeight: FontWeight.w600,
-                      color: enabled
-                          ? const Color(0xFF5D4037)
-                          : const Color(0xFF9E9E9E),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: iconSize,
+                      height: iconSize,
+                      child: CustomPaint(painter: iconPainter),
                     ),
-                  ),
-                ],
+                    SizedBox(width: iconGap),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: fontSize,
+                        fontWeight: FontWeight.w600,
+                        color: enabled
+                            ? const Color(0xFF5D4037)
+                            : const Color(0xFF9E9E9E),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -3118,63 +3133,79 @@ class _DirectionPad extends StatelessWidget {
           message: label,
           child: _PressableControl(
             enabled: enabled,
-            child: Opacity(
-              opacity: enabled ? 1.0 : 0.45,
-              child: Material(
-                color:
-                    enabled ? const Color(0xFFF5E6CC) : const Color(0xFFEDE7E0),
-                borderRadius: BorderRadius.circular(btnRadius),
-                elevation: enabled ? 3 : 0,
-                shadowColor: const Color(0x40000000),
-                child: InkWell(
-                  onTap: enabled ? () => onMove(dir) : null,
+            builder: (pressProgress) {
+              // elevation 3→1 on press for a "pushed in" feel
+              final elevation = enabled ? 3.0 - (pressProgress * 2.0) : 0.0;
+              return Opacity(
+                opacity: enabled ? 1.0 : 0.45,
+                child: Material(
+                  color: enabled
+                      ? const Color(0xFFF5E6CC)
+                      : const Color(0xFFEDE7E0),
                   borderRadius: BorderRadius.circular(btnRadius),
-                  splashColor: const Color(0x308D6E63),
-                  highlightColor: const Color(0x188D6E63),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(btnRadius),
-                      border: Border.all(
-                        color: enabled
-                            ? const Color(0xFF8D6E63)
-                            : const Color(0xFFCCC3BA),
-                        width: enabled ? 1.5 : 1.0,
-                      ),
-                      gradient: enabled
-                          ? const LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [Color(0xFFF9EDDA), Color(0xFFF0DDBF)],
-                            )
-                          : null,
-                    ),
-                    child: Stack(
-                      children: [
-                        CustomPaint(
-                          size: Size.infinite,
-                          painter:
-                              ArrowPainter(direction: dir, color: arrowColor),
+                  elevation: elevation,
+                  shadowColor: const Color(0x40000000),
+                  child: InkWell(
+                    onTap: enabled ? () => onMove(dir) : null,
+                    borderRadius: BorderRadius.circular(btnRadius),
+                    splashColor: const Color(0x308D6E63),
+                    highlightColor: const Color(0x188D6E63),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(btnRadius),
+                        border: Border.all(
+                          color: enabled
+                              ? const Color(0xFF8D6E63)
+                              : const Color(0xFFCCC3BA),
+                          width: enabled ? 1.5 : 1.0,
                         ),
-                        Positioned(
-                          right: compact ? 4 : 5,
-                          bottom: compact ? 2 : 3,
-                          child: Text(
-                            keyHint(dir),
-                            style: TextStyle(
-                              fontSize: hintFontSize,
-                              fontWeight: FontWeight.w600,
-                              color: hintColor,
-                              letterSpacing: 0.2,
-                              height: 1,
+                        gradient: enabled
+                            ? LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Color.lerp(
+                                    const Color(0xFFF9EDDA),
+                                    const Color(0xFFF0DDBF),
+                                    pressProgress * 0.5,
+                                  )!,
+                                  Color.lerp(
+                                    const Color(0xFFF0DDBF),
+                                    const Color(0xFFE8D5B0),
+                                    pressProgress * 0.5,
+                                  )!,
+                                ],
+                              )
+                            : null,
+                      ),
+                      child: Stack(
+                        children: [
+                          CustomPaint(
+                            size: Size.infinite,
+                            painter:
+                                ArrowPainter(direction: dir, color: arrowColor),
+                          ),
+                          Positioned(
+                            right: compact ? 4 : 5,
+                            bottom: compact ? 2 : 3,
+                            child: Text(
+                              keyHint(dir),
+                              style: TextStyle(
+                                fontSize: hintFontSize,
+                                fontWeight: FontWeight.w600,
+                                color: hintColor,
+                                letterSpacing: 0.2,
+                                height: 1,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
         ),
       );
