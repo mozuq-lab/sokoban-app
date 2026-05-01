@@ -1013,12 +1013,7 @@ class _ControlSection extends StatelessWidget {
         final double bottomGap = isCompact ? 6 : 8;
 
         return Container(
-          padding: EdgeInsets.only(
-            top: vPad,
-            left: hPad,
-            right: hPad,
-            bottom: vPad + 4,
-          ),
+          clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: const Color(0xFFFAF3E8),
             borderRadius: BorderRadius.circular(14),
@@ -1034,6 +1029,22 @@ class _ControlSection extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // 上端アクセントバー（PlayContextBanner / StatusCard と視覚的に統一）
+              Container(
+                height: 4,
+                width: double.infinity,
+                color: const Color(0xFF8D6E63),
+              ),
+              Padding(
+                padding: EdgeInsets.only(
+                  top: vPad,
+                  left: hPad,
+                  right: hPad,
+                  bottom: vPad + 4,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
               _ControlSubLabel(
                 key: const Key('control_sub_label_move'),
                 icon: Icons.control_camera,
@@ -1120,6 +1131,9 @@ class _ControlSection extends StatelessWidget {
               _KeyboardFocusIndicator(
                 hasFocus: hasFocus,
                 onRequestFocus: onRequestFocus,
+              ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -2056,6 +2070,17 @@ class _StatusCard extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // 上端アクセントバー（PlayContextBanner / ControlSection と視覚的に統一）
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            height: 4,
+            width: double.infinity,
+            color: isSolved
+                ? Colors.green.shade600
+                : moveBlocked
+                    ? Colors.red.shade400
+                    : Colors.orange.shade600,
+          ),
           // --- 状態サマリー帯 ---
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 250),
@@ -2290,11 +2315,6 @@ class _StatusCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: bgColor,
-        // カード上端の角丸に合わせる
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(14),
-          topRight: Radius.circular(14),
-        ),
       ),
       child: IntrinsicHeight(
         child: Row(
@@ -2302,12 +2322,7 @@ class _StatusCard extends StatelessWidget {
             // 左アクセントバー
             Container(
               width: 4,
-              decoration: BoxDecoration(
-                color: accentColor,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(14),
-                ),
-              ),
+              color: accentColor,
             ),
             Expanded(
               child: Padding(
