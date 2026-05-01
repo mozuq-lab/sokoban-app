@@ -2050,6 +2050,28 @@ void main() {
     // RenderFlex overflow が発生していないことを確認（テスト自体がエラーなく完了すればOK）
   });
 
+  testWidgets('狭い画面でも AppBar にステージチップが表示される', (tester) async {
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(size: Size(320, 700)),
+          child: const HomeScreen(initialLevel: testLevel),
+        ),
+      ),
+    );
+
+    expect(
+      find.byKey(const ValueKey('appbar-stage-chip-false')),
+      findsOneWidget,
+    );
+    expect(find.text('Stage 1'), findsOneWidget);
+  });
+
   testWidgets('狭い画面で AppBar のアクションボタンが小さくなる', (tester) async {
     tester.view.physicalSize = const Size(320, 700);
     tester.view.devicePixelRatio = 1.0;
