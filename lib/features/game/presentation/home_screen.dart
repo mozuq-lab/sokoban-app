@@ -1045,93 +1045,97 @@ class _ControlSection extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-              _ControlSubLabel(
-                key: const Key('control_sub_label_move'),
-                icon: Icons.control_camera,
-                text: '移動',
-              ),
-              SizedBox(height: isCompact ? 2 : 4),
-              // 方向パッドを囲むインセット背景
-              Container(
-                padding: EdgeInsets.symmetric(
-                  vertical: dpadInsetV,
-                  horizontal: dpadInsetH,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF5EDE0),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: const Color(0xFFE8DDD0),
-                    width: 0.5,
-                  ),
-                ),
-                child: _DirectionPad(
-                  onMove: onMove,
-                  enabled: !gameState.isSolved,
-                  isSolved: gameState.isSolved,
-                  moveBlocked: moveBlocked,
-                  remainingBoxes: remainingBoxes,
-                  totalBoxes: totalBoxes,
-                  compact: isCompact,
-                ),
-              ),
-              SizedBox(height: sectionGap),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 1),
-                child: Row(
-                  children: [
-                    const Expanded(child: Divider(color: Color(0xFFE0D6CC))),
-                    Padding(
+                    _ControlSubLabel(
+                      key: const Key('control_sub_label_move'),
+                      icon: Icons.control_camera,
+                      text: '移動',
+                    ),
+                    SizedBox(height: isCompact ? 2 : 4),
+                    // 方向パッドを囲むインセット背景
+                    Container(
                       padding: EdgeInsets.symmetric(
-                        horizontal: isCompact ? 6 : 10,
+                        vertical: dpadInsetV,
+                        horizontal: dpadInsetH,
                       ),
-                      child: _ControlSubLabel(
-                        key: const Key('control_sub_label_assist'),
-                        icon: Icons.history,
-                        text: 'やり直し',
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF5EDE0),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: const Color(0xFFE8DDD0),
+                          width: 0.5,
+                        ),
+                      ),
+                      child: _DirectionPad(
+                        onMove: onMove,
+                        enabled: !gameState.isSolved,
+                        isSolved: gameState.isSolved,
+                        moveBlocked: moveBlocked,
+                        remainingBoxes: remainingBoxes,
+                        totalBoxes: totalBoxes,
+                        compact: isCompact,
                       ),
                     ),
-                    const Expanded(child: Divider(color: Color(0xFFE0D6CC))),
-                  ],
-                ),
-              ),
-              SizedBox(height: dividerGap),
-              Row(
-                children: [
-                  Expanded(
-                    child: _AssistButton(
-                      key: const ValueKey('bottom-undo'),
-                      onPressed: hasHistory ? onUndo : null,
-                      iconPainter: UndoIconPainter(
-                        color: hasHistory
-                            ? const Color(0xFF5D4037)
-                            : Colors.grey.shade400,
+                    SizedBox(height: sectionGap),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 1),
+                      child: Row(
+                        children: [
+                          const Expanded(
+                            child: Divider(color: Color(0xFFE0D6CC)),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: isCompact ? 6 : 10,
+                            ),
+                            child: _ControlSubLabel(
+                              key: const Key('control_sub_label_assist'),
+                              icon: Icons.history,
+                              text: 'やり直し',
+                            ),
+                          ),
+                          const Expanded(
+                            child: Divider(color: Color(0xFFE0D6CC)),
+                          ),
+                        ],
                       ),
-                      label: '元に戻す',
-                      compact: isCompact,
                     ),
-                  ),
-                  SizedBox(width: assistGap),
-                  Expanded(
-                    child: _AssistButton(
-                      key: const ValueKey('bottom-restart'),
-                      onPressed: hasHistory ? onRestart : null,
-                      iconPainter: RestartIconPainter(
-                        color: hasHistory
-                            ? const Color(0xFF5D4037)
-                            : Colors.grey.shade400,
-                      ),
-                      label: 'リスタート',
-                      compact: isCompact,
+                    SizedBox(height: dividerGap),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _AssistButton(
+                            key: const ValueKey('bottom-undo'),
+                            onPressed: hasHistory ? onUndo : null,
+                            iconPainter: UndoIconPainter(
+                              color: hasHistory
+                                  ? const Color(0xFF5D4037)
+                                  : Colors.grey.shade400,
+                            ),
+                            label: '元に戻す',
+                            compact: isCompact,
+                          ),
+                        ),
+                        SizedBox(width: assistGap),
+                        Expanded(
+                          child: _AssistButton(
+                            key: const ValueKey('bottom-restart'),
+                            onPressed: hasHistory ? onRestart : null,
+                            iconPainter: RestartIconPainter(
+                              color: hasHistory
+                                  ? const Color(0xFF5D4037)
+                                  : Colors.grey.shade400,
+                            ),
+                            label: 'リスタート',
+                            compact: isCompact,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
-              SizedBox(height: bottomGap),
-              _KeyboardFocusIndicator(
-                hasFocus: hasFocus,
-                onRequestFocus: onRequestFocus,
-              ),
+                    SizedBox(height: bottomGap),
+                    _KeyboardFocusIndicator(
+                      hasFocus: hasFocus,
+                      onRequestFocus: onRequestFocus,
+                    ),
                   ],
                 ),
               ),
