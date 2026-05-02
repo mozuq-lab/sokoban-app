@@ -1836,33 +1836,38 @@ class _NarrowLayout extends StatelessWidget {
                       SizedBox(height: isCompact ? 2 : 4),
                       playContextBanner,
                       SizedBox(height: sectionGap),
-                      _SectionHeading(
-                        iconWidget: CustomPaint(
-                          painter:
-                              PuzzleSectionIconPainter(color: headingColor),
+                      // compact 時はセクション見出しを省略し垂直スペースを確保する。
+                      // 各カードのアクセントバーと装飾で十分区別できる。
+                      if (!isCompact)
+                        _SectionHeading(
+                          iconWidget: CustomPaint(
+                            painter:
+                                PuzzleSectionIconPainter(color: headingColor),
+                          ),
+                          label: 'パズル',
                         ),
-                        label: 'パズル',
-                      ),
                       SizedBox(height: isCompact ? 2 : 4),
                       SizedBox(height: boardHeight, child: boardSection),
                       SizedBox(height: sectionGap),
-                      _SectionHeading(
-                        iconWidget: CustomPaint(
-                          painter:
-                              StatusSectionIconPainter(color: headingColor),
+                      if (!isCompact)
+                        _SectionHeading(
+                          iconWidget: CustomPaint(
+                            painter:
+                                StatusSectionIconPainter(color: headingColor),
+                          ),
+                          label: '状況',
                         ),
-                        label: '状況',
-                      ),
                       SizedBox(height: isCompact ? 2 : 4),
                       statusCard,
                       SizedBox(height: sectionGap),
-                      _SectionHeading(
-                        iconWidget: CustomPaint(
-                          painter:
-                              ControlSectionIconPainter(color: headingColor),
+                      if (!isCompact)
+                        _SectionHeading(
+                          iconWidget: CustomPaint(
+                            painter:
+                                ControlSectionIconPainter(color: headingColor),
+                          ),
+                          label: '操作',
                         ),
-                        label: '操作',
-                      ),
                       SizedBox(height: isCompact ? 2 : 4),
                       controlSection,
                       SizedBox(height: isCompact ? 4 : 8),
