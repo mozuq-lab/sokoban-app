@@ -491,6 +491,7 @@ class _BoardSection extends StatelessWidget {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 400),
         child: Container(
+          clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: Colors.brown.shade50,
             borderRadius: BorderRadius.circular(14),
@@ -511,6 +512,13 @@ class _BoardSection extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // 上端アクセントバー（StatusCard / ControlSection と視覚的に統一）
+              Container(
+                key: const Key('board_accent_bar'),
+                height: 4,
+                width: double.infinity,
+                color: const Color(0xFF8D6E63),
+              ),
               // --- ヘッダー行 ---
               LayoutBuilder(
                 builder: (context, constraints) {
