@@ -355,6 +355,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 gameState: gameState,
                 moveCount: _moveCount,
                 onRestart: _restart,
+                hasFocus: _hasFocus,
+                onRequestFocus: () => _focusNode.requestFocus(),
               );
 
               final totalBoxes = gameState.boxes.length;
@@ -476,39 +478,53 @@ class _BoardSection extends StatelessWidget {
     required this.gameState,
     required this.moveCount,
     required this.onRestart,
+    this.hasFocus = false,
+    this.onRequestFocus,
   });
 
   final GameState gameState;
   final int moveCount;
   final VoidCallback onRestart;
+  final bool hasFocus;
+  final VoidCallback? onRequestFocus;
 
   @override
   Widget build(BuildContext context) {
     final placed = gameState.boxes.length - gameState.remainingBoxes;
     final total = gameState.boxes.length;
 
+    final borderColor = hasFocus
+        ? const Color(0xFF8D6E63)
+        : const Color(0xFFD7CCC8);
+    final shadowOpacity = hasFocus ? 0.13 : 0.10;
+
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 400),
-        child: Container(
-          clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(
-            color: Colors.brown.shade50,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: const Color(0xFFD7CCC8)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.10),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
-              ),
-              BoxShadow(
-                color: Colors.brown.withValues(alpha: 0.04),
-                blurRadius: 2,
-                offset: const Offset(0, 1),
-              ),
-            ],
-          ),
+        child: GestureDetector(
+          onTap: hasFocus ? null : onRequestFocus,
+          behavior: HitTestBehavior.opaque,
+          child: AnimatedContainer(
+            key: const Key('board_section_card'),
+            duration: const Duration(milliseconds: 200),
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              color: Colors.brown.shade50,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: borderColor),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: shadowOpacity),
+                  blurRadius: hasFocus ? 10 : 8,
+                  offset: const Offset(0, 3),
+                ),
+                BoxShadow(
+                  color: Colors.brown.withValues(alpha: 0.04),
+                  blurRadius: 2,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -855,6 +871,7 @@ class _BoardSection extends StatelessWidget {
                 ),
               ),
             ],
+          ),
           ),
         ),
       ),
