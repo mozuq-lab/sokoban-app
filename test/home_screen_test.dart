@@ -1431,6 +1431,14 @@ void main() {
 
   // --- 盤面ヘッダーのテスト ---
 
+  testWidgets('盤面カードに上端アクセントバーが表示される', (tester) async {
+    await tester.pumpWidget(buildApp());
+    final bar = find.byKey(const Key('board_accent_bar'));
+    expect(bar, findsOneWidget);
+    final container = tester.widget<Container>(bar);
+    expect(container.constraints?.maxHeight, 4);
+  });
+
   testWidgets('盤面カードにステージラベルと箱カウントが表示される', (tester) async {
     await tester.pumpWidget(buildApp());
     expect(find.byKey(const Key('board_header_stage')), findsOneWidget);
