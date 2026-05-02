@@ -2187,6 +2187,18 @@ void main() {
     expect(find.text('6 × 6'), findsOneWidget);
   });
 
+  testWidgets('グリッドサイズ表示がチップ風の背景付きコンテナになっている',
+      (tester) async {
+    await tester.pumpWidget(buildApp());
+    final dimWidget = tester.widget<Container>(
+      find.byKey(const Key('board_footer_dimensions')),
+    );
+    final decoration = dimWidget.decoration as BoxDecoration?;
+    expect(decoration, isNotNull);
+    expect(decoration!.color, isNotNull);
+    expect(decoration.borderRadius, isNotNull);
+  });
+
   testWidgets('盤面フッターにプレイヤー・箱・ゴールの凡例が表示される', (tester) async {
     await tester.pumpWidget(buildApp());
     expect(find.byKey(const Key('board_legend')), findsOneWidget);
@@ -2195,21 +2207,24 @@ void main() {
     expect(find.text('ゴール'), findsOneWidget);
   });
 
-  testWidgets('凡例が背景付きコンテナでグループ化されている', (tester) async {
+  testWidgets('凡例の各項目がチップ風の背景付きコンテナで表示される',
+      (tester) async {
     await tester.pumpWidget(buildApp());
-    final legendFinder = find.byKey(const Key('board_legend'));
-    expect(legendFinder, findsOneWidget);
-    // 凡例ウィジェットの外側が Container（背景付き）で囲まれている
-    final legendWidget = tester.widget<Container>(
-      find.ancestor(
-        of: find.text('プレイヤー'),
-        matching: find.byType(Container),
-      ).first,
-    );
-    final decoration = legendWidget.decoration as BoxDecoration?;
-    expect(decoration, isNotNull);
-    expect(decoration!.color, isNotNull);
-    expect(decoration.borderRadius, isNotNull);
+    // 各凡例テキストの直近 Container がチップ風の背景を持つ
+    for (final label in ['プレイヤー', '箱', 'ゴール']) {
+      final chipWidget = tester.widget<Container>(
+        find.ancestor(
+          of: find.text(label),
+          matching: find.byType(Container),
+        ).first,
+      );
+      final decoration = chipWidget.decoration as BoxDecoration?;
+      expect(decoration, isNotNull, reason: '$label のチップに decoration がない');
+      expect(decoration!.color, isNotNull,
+          reason: '$label のチップに背景色がない');
+      expect(decoration.borderRadius, isNotNull,
+          reason: '$label のチップに角丸がない');
+    }
   });
 
   testWidgets('盤面フッターがヘッダーより下に配置される', (tester) async {

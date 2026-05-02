@@ -816,32 +816,43 @@ class _BoardSection extends StatelessWidget {
                   ),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      final dimensionsRow = Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SizedBox(
-                            width: 10,
-                            height: 10,
-                            child: CustomPaint(
-                              painter: PuzzleSectionIconPainter(
-                                color: const Color(0xFF8D6E63)
-                                    .withValues(alpha: 0.4),
+                      final dimensionsRow = Container(
+                        key: const Key('board_footer_dimensions'),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF8D6E63)
+                              .withValues(alpha: 0.06),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              width: 10,
+                              height: 10,
+                              child: CustomPaint(
+                                painter: PuzzleSectionIconPainter(
+                                  color: const Color(0xFF8D6E63)
+                                      .withValues(alpha: 0.4),
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            '${gameState.board.width} × ${gameState.board.height}',
-                            key: const Key('board_footer_dimensions'),
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w500,
-                              color: const Color(0xFF8D6E63)
-                                  .withValues(alpha: 0.5),
-                              letterSpacing: 0.3,
+                            const SizedBox(width: 5),
+                            Text(
+                              '${gameState.board.width} × ${gameState.board.height}',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                                color: const Color(0xFF8D6E63)
+                                    .withValues(alpha: 0.55),
+                                letterSpacing: 0.3,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       );
                       const legend = _BoardLegend(
                         key: Key('board_legend'),
@@ -893,99 +904,83 @@ class _BoardLegend extends StatelessWidget {
     letterSpacing: 0.2,
   );
 
-  static const _separatorColor = Color(0xFF8D6E63);
-
   @override
   Widget build(BuildContext context) {
-    final items = <Widget>[
-      // プレイヤー: 青い丸
-      _legendItem(
-        icon: Container(
-          width: 11,
-          height: 11,
-          decoration: const BoxDecoration(
-            shape: BoxShape.circle,
-            color: Color(0xFF3B82B8),
-          ),
-        ),
-        label: 'プレイヤー',
-      ),
-      // 箱: 琥珀色の角丸四角
-      _legendItem(
-        icon: Container(
-          width: 11,
-          height: 11,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(2),
-            color: const Color(0xFFC08830),
-          ),
-        ),
-        label: '箱',
-      ),
-      // ゴール: 緑のリング
-      _legendItem(
-        icon: Container(
-          width: 11,
-          height: 11,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: const Color(0xFF43A047),
-              width: 1.5,
+    return Wrap(
+      spacing: 6,
+      runSpacing: 4,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        // プレイヤー: 青い丸
+        _legendChip(
+          icon: Container(
+            width: 10,
+            height: 10,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Color(0xFF3B82B8),
             ),
           ),
+          label: 'プレイヤー',
+          tint: const Color(0xFF3B82B8),
         ),
-        label: 'ゴール',
-      ),
-    ];
-
-    // アイテム間にセパレータを挟む
-    final separated = <Widget>[];
-    for (var i = 0; i < items.length; i++) {
-      if (i > 0) {
-        separated.add(Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Container(
-            width: 1,
+        // 箱: 琥珀色の角丸四角
+        _legendChip(
+          icon: Container(
+            width: 10,
             height: 10,
-            color: _separatorColor.withValues(alpha: 0.15),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(2),
+              color: const Color(0xFFC08830),
+            ),
           ),
-        ));
-      }
-      separated.add(items[i]);
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: const Color(0xFF8D6E63).withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: const Color(0xFF8D6E63).withValues(alpha: 0.08),
+          label: '箱',
+          tint: const Color(0xFFC08830),
         ),
-      ),
-      child: Wrap(
-        spacing: 0,
-        runSpacing: 4,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: separated,
-      ),
+        // ゴール: 緑のリング
+        _legendChip(
+          icon: Container(
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: const Color(0xFF43A047),
+                width: 1.5,
+              ),
+            ),
+          ),
+          label: 'ゴール',
+          tint: const Color(0xFF43A047),
+        ),
+      ],
     );
   }
 
-  Widget _legendItem({required Widget icon, required String label}) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        icon,
-        const SizedBox(width: 5),
-        Text(
-          label,
-          style: _labelStyle.copyWith(
-            color: const Color(0xFF8D6E63).withValues(alpha: 0.75),
+  Widget _legendChip({
+    required Widget icon,
+    required String label,
+    required Color tint,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      decoration: BoxDecoration(
+        color: tint.withValues(alpha: 0.07),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          icon,
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: _labelStyle.copyWith(
+              color: const Color(0xFF8D6E63).withValues(alpha: 0.7),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
