@@ -355,6 +355,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 gameState: gameState,
                 moveCount: _moveCount,
                 onRestart: _restart,
+                hasFocus: _hasFocus,
+                onRequestFocus: () => _focusNode.requestFocus(),
               );
 
               final totalBoxes = gameState.boxes.length;
@@ -476,385 +478,400 @@ class _BoardSection extends StatelessWidget {
     required this.gameState,
     required this.moveCount,
     required this.onRestart,
+    this.hasFocus = false,
+    this.onRequestFocus,
   });
 
   final GameState gameState;
   final int moveCount;
   final VoidCallback onRestart;
+  final bool hasFocus;
+  final VoidCallback? onRequestFocus;
 
   @override
   Widget build(BuildContext context) {
     final placed = gameState.boxes.length - gameState.remainingBoxes;
     final total = gameState.boxes.length;
 
+    final borderColor =
+        hasFocus ? const Color(0xFF8D6E63) : const Color(0xFFD7CCC8);
+    final shadowOpacity = hasFocus ? 0.13 : 0.10;
+
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 400),
-        child: Container(
-          clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(
-            color: Colors.brown.shade50,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: const Color(0xFFD7CCC8)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.10),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
-              ),
-              BoxShadow(
-                color: Colors.brown.withValues(alpha: 0.04),
-                blurRadius: 2,
-                offset: const Offset(0, 1),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // 上端アクセントバー（StatusCard / ControlSection と視覚的に統一）
-              Container(
-                key: const Key('board_accent_bar'),
-                height: 4,
-                width: double.infinity,
-                color: const Color(0xFF8D6E63),
-              ),
-              // --- ヘッダー行 ---
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  // 幅 300px 未満では 2 行に分割して窮屈さを緩和する。
-                  final isCompactHeader = constraints.maxWidth < 300;
+        child: GestureDetector(
+          onTap: hasFocus ? null : onRequestFocus,
+          behavior: HitTestBehavior.opaque,
+          child: AnimatedContainer(
+            key: const Key('board_section_card'),
+            duration: const Duration(milliseconds: 200),
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              color: Colors.brown.shade50,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: borderColor),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: shadowOpacity),
+                  blurRadius: hasFocus ? 10 : 8,
+                  offset: const Offset(0, 3),
+                ),
+                BoxShadow(
+                  color: Colors.brown.withValues(alpha: 0.04),
+                  blurRadius: 2,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 上端アクセントバー（StatusCard / ControlSection と視覚的に統一）
+                Container(
+                  key: const Key('board_accent_bar'),
+                  height: 4,
+                  width: double.infinity,
+                  color: const Color(0xFF8D6E63),
+                ),
+                // --- ヘッダー行 ---
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    // 幅 300px 未満では 2 行に分割して窮屈さを緩和する。
+                    final isCompactHeader = constraints.maxWidth < 300;
 
-                  // --- 左: ステージ名 + ステータス ---
-                  final stageRow = Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CustomPaint(
-                          painter: PuzzleSectionIconPainter(
-                            color:
-                                const Color(0xFF8D6E63).withValues(alpha: 0.8),
+                    // --- 左: ステージ名 + ステータス ---
+                    final stageRow = Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CustomPaint(
+                            painter: PuzzleSectionIconPainter(
+                              color: const Color(0xFF8D6E63)
+                                  .withValues(alpha: 0.8),
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 7),
-                      Flexible(
-                        child: Text(
-                          'ステージ 1',
-                          key: const Key('board_header_stage'),
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF5D4037),
-                            letterSpacing: 0.3,
+                        const SizedBox(width: 7),
+                        Flexible(
+                          child: Text(
+                            'ステージ 1',
+                            key: const Key('board_header_stage'),
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF5D4037),
+                              letterSpacing: 0.3,
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 6),
-                      // ステータスバッジ
-                      Container(
-                        key: const Key('board_header_status'),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: gameState.isSolved
-                              ? const Color(0xFFE8F5E9)
-                              : const Color(0xFF8D6E63).withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          gameState.isSolved ? 'クリア' : 'プレイ中',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
+                        const SizedBox(width: 6),
+                        // ステータスバッジ
+                        Container(
+                          key: const Key('board_header_status'),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
                             color: gameState.isSolved
-                                ? const Color(0xFF388E3C)
-                                : const Color(0xFF8D6E63),
-                            letterSpacing: 0.2,
+                                ? const Color(0xFFE8F5E9)
+                                : const Color(0xFF8D6E63)
+                                    .withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            gameState.isSolved ? 'クリア' : 'プレイ中',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: gameState.isSolved
+                                  ? const Color(0xFF388E3C)
+                                  : const Color(0xFF8D6E63),
+                              letterSpacing: 0.2,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  );
+                      ],
+                    );
 
-                  // --- 右: 統計チップ ---
-                  final statChips = Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // 手数チップ
-                      Container(
-                        key: const Key('board_header_move_count'),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFEFEBE9),
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(
-                            color: const Color(0xFFD7CCC8),
-                            width: 0.5,
+                    // --- 右: 統計チップ ---
+                    final statChips = Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // 手数チップ
+                        Container(
+                          key: const Key('board_header_move_count'),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
                           ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SizedBox(
-                              width: 10,
-                              height: 10,
-                              child: CustomPaint(
-                                painter: MoveCountIconPainter(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEFEBE9),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: const Color(0xFFD7CCC8),
+                              width: 0.5,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(
+                                width: 10,
+                                height: 10,
+                                child: CustomPaint(
+                                  painter: MoveCountIconPainter(
+                                    color: const Color(0xFF8D6E63),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 3),
+                              Text(
+                                '$moveCount 手',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
                                   color: const Color(0xFF8D6E63),
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 3),
-                            Text(
-                              '$moveCount 手',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF8D6E63),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      // 箱カウントチップ
-                      Container(
-                        key: const Key('board_header_box_count'),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: gameState.isSolved
-                              ? Colors.green.shade50
-                              : const Color(0xFFEFEBE9),
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(
-                            color: gameState.isSolved
-                                ? Colors.green.shade200
-                                : const Color(0xFFD7CCC8),
-                            width: 0.5,
+                            ],
                           ),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SizedBox(
-                              width: 10,
-                              height: 10,
-                              child: CustomPaint(
-                                painter: PlacementIconPainter(
+                        const SizedBox(width: 6),
+                        // 箱カウントチップ
+                        Container(
+                          key: const Key('board_header_box_count'),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: gameState.isSolved
+                                ? Colors.green.shade50
+                                : const Color(0xFFEFEBE9),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: gameState.isSolved
+                                  ? Colors.green.shade200
+                                  : const Color(0xFFD7CCC8),
+                              width: 0.5,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(
+                                width: 10,
+                                height: 10,
+                                child: CustomPaint(
+                                  painter: PlacementIconPainter(
+                                    color: gameState.isSolved
+                                        ? Colors.green.shade700
+                                        : const Color(0xFF8D6E63),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 3),
+                              Text(
+                                '$placed/$total',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
                                   color: gameState.isSolved
                                       ? Colors.green.shade700
                                       : const Color(0xFF8D6E63),
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 3),
-                            Text(
-                              '$placed/$total',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                                color: gameState.isSolved
-                                    ? Colors.green.shade700
-                                    : const Color(0xFF8D6E63),
-                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+
+                    if (isCompactHeader) {
+                      // 狭い幅: 2 行に分けて表示する
+                      return Padding(
+                        key: const Key('board_header_compact'),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            stageRow,
+                            const SizedBox(height: 4),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: statChips,
                             ),
                           ],
                         ),
-                      ),
-                    ],
-                  );
+                      );
+                    }
 
-                  if (isCompactHeader) {
-                    // 狭い幅: 2 行に分けて表示する
+                    // 広い幅: 1 行に横並び（従来と同等）
                     return Padding(
-                      key: const Key('board_header_compact'),
+                      key: const Key('board_header_wide'),
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 5,
+                        horizontal: 12,
+                        vertical: 6,
                       ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
+                      child: Row(
                         children: [
-                          stageRow,
-                          const SizedBox(height: 4),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: statChips,
-                          ),
+                          Flexible(child: stageRow),
+                          const Spacer(),
+                          statChips,
                         ],
                       ),
                     );
-                  }
-
-                  // 広い幅: 1 行に横並び（従来と同等）
-                  return Padding(
-                    key: const Key('board_header_wide'),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    child: Row(
-                      children: [
-                        Flexible(child: stageRow),
-                        const Spacer(),
-                        statChips,
-                      ],
-                    ),
-                  );
-                },
-              ),
-              // --- 区切り線 ---
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: const Color(0xFFD7CCC8).withValues(alpha: 0.5),
+                  },
                 ),
-              ),
-              // --- 盤面 ---
-              Flexible(
-                child: Padding(
-                  padding: const EdgeInsets.all(6),
-                  // 盤面を一段沈み込ませるインセット溝
-                  child: Container(
-                    key: const Key('board_inset_groove'),
-                    padding: const EdgeInsets.all(3),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE8DDD0),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                // --- 区切り線 ---
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Divider(
+                    height: 1,
+                    thickness: 1,
+                    color: const Color(0xFFD7CCC8).withValues(alpha: 0.5),
+                  ),
+                ),
+                // --- 盤面 ---
+                Flexible(
+                  child: Padding(
+                    padding: const EdgeInsets.all(6),
+                    // 盤面を一段沈み込ませるインセット溝
                     child: Container(
-                      key: const Key('board_tile_frame'),
+                      key: const Key('board_inset_groove'),
+                      padding: const EdgeInsets.all(3),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: Colors.brown.withValues(alpha: 0.25),
-                          width: 1.5,
-                        ),
-                        boxShadow: [
-                          // 上辺の内側影で沈み込み感を強調
-                          BoxShadow(
-                            color: Colors.brown.withValues(alpha: 0.13),
-                            blurRadius: 3,
-                            offset: const Offset(0, 1.5),
-                          ),
-                          // 下辺のハイライトで立体感を追加
-                          BoxShadow(
-                            color: Colors.white.withValues(alpha: 0.5),
-                            blurRadius: 1,
-                            offset: const Offset(0, -0.5),
-                          ),
-                        ],
+                        color: const Color(0xFFE8DDD0),
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(6.5),
-                        child: AspectRatio(
-                          aspectRatio:
-                              gameState.board.width / gameState.board.height,
-                          child: LayoutBuilder(
-                            builder: (context, constraints) {
-                              final cellSize =
-                                  constraints.maxWidth / gameState.board.width;
-                              return Stack(
-                                children: [
-                                  _BoardView(
-                                    gameState: gameState,
-                                    cellSize: cellSize,
-                                  ),
-                                  if (gameState.isSolved)
-                                    _ClearOverlay(
-                                      moveCount: moveCount,
-                                      totalBoxes: gameState.boxes.length,
-                                      onRestart: onRestart,
+                      child: Container(
+                        key: const Key('board_tile_frame'),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Colors.brown.withValues(alpha: 0.25),
+                            width: 1.5,
+                          ),
+                          boxShadow: [
+                            // 上辺の内側影で沈み込み感を強調
+                            BoxShadow(
+                              color: Colors.brown.withValues(alpha: 0.13),
+                              blurRadius: 3,
+                              offset: const Offset(0, 1.5),
+                            ),
+                            // 下辺のハイライトで立体感を追加
+                            BoxShadow(
+                              color: Colors.white.withValues(alpha: 0.5),
+                              blurRadius: 1,
+                              offset: const Offset(0, -0.5),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(6.5),
+                          child: AspectRatio(
+                            aspectRatio:
+                                gameState.board.width / gameState.board.height,
+                            child: LayoutBuilder(
+                              builder: (context, constraints) {
+                                final cellSize = constraints.maxWidth /
+                                    gameState.board.width;
+                                return Stack(
+                                  children: [
+                                    _BoardView(
+                                      gameState: gameState,
+                                      cellSize: cellSize,
                                     ),
-                                ],
-                              );
-                            },
+                                    if (gameState.isSolved)
+                                      _ClearOverlay(
+                                        moveCount: moveCount,
+                                        totalBoxes: gameState.boxes.length,
+                                        onRestart: onRestart,
+                                      ),
+                                  ],
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              // --- フッター行: グリッドサイズ + 凡例 ---
-              Padding(
-                padding: const EdgeInsets.only(
-                  left: 12,
-                  right: 12,
-                  bottom: 6,
-                  top: 2,
-                ),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final dimensionsRow = Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SizedBox(
-                          width: 10,
-                          height: 10,
-                          child: CustomPaint(
-                            painter: PuzzleSectionIconPainter(
-                              color: const Color(0xFF8D6E63)
-                                  .withValues(alpha: 0.4),
+                // --- フッター行: グリッドサイズ + 凡例 ---
+                Padding(
+                  padding: const EdgeInsets.only(
+                    left: 12,
+                    right: 12,
+                    bottom: 6,
+                    top: 2,
+                  ),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final dimensionsRow = Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            width: 10,
+                            height: 10,
+                            child: CustomPaint(
+                              painter: PuzzleSectionIconPainter(
+                                color: const Color(0xFF8D6E63)
+                                    .withValues(alpha: 0.4),
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 5),
-                        Text(
-                          '${gameState.board.width} × ${gameState.board.height}',
-                          key: const Key('board_footer_dimensions'),
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w500,
-                            color: const Color(0xFF8D6E63)
-                                .withValues(alpha: 0.5),
-                            letterSpacing: 0.3,
+                          const SizedBox(width: 5),
+                          Text(
+                            '${gameState.board.width} × ${gameState.board.height}',
+                            key: const Key('board_footer_dimensions'),
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                              color: const Color(0xFF8D6E63)
+                                  .withValues(alpha: 0.5),
+                              letterSpacing: 0.3,
+                            ),
                           ),
-                        ),
-                      ],
-                    );
-                    const legend = _BoardLegend(
-                      key: Key('board_legend'),
-                    );
+                        ],
+                      );
+                      const legend = _BoardLegend(
+                        key: Key('board_legend'),
+                      );
 
-                    // 狭い画面では 2 段構成にして窮屈さを回避
-                    if (constraints.maxWidth < 260) {
-                      return Column(
+                      // 狭い画面では 2 段構成にして窮屈さを回避
+                      if (constraints.maxWidth < 260) {
+                        return Column(
+                          key: const Key('board_footer'),
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            dimensionsRow,
+                            const SizedBox(height: 4),
+                            legend,
+                          ],
+                        );
+                      }
+                      return Row(
                         key: const Key('board_footer'),
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           dimensionsRow,
-                          const SizedBox(height: 4),
+                          const Spacer(),
                           legend,
                         ],
                       );
-                    }
-                    return Row(
-                      key: const Key('board_footer'),
-                      children: [
-                        dimensionsRow,
-                        const Spacer(),
-                        legend,
-                      ],
-                    );
-                  },
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -2415,9 +2432,8 @@ class _StatArea extends StatelessWidget {
       ),
       iconColor: placementColor,
       label: '配置',
-      value: allPlaced
-          ? '全配置！'
-          : '${totalBoxes - remainingBoxes} / $totalBoxes',
+      value:
+          allPlaced ? '全配置！' : '${totalBoxes - remainingBoxes} / $totalBoxes',
     );
 
     final borderColor = const Color(0xFFE0D6CC).withValues(alpha: 0.6);

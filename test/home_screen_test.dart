@@ -1780,6 +1780,57 @@ void main() {
     );
   });
 
+  // --- 盤面カードのフォーカス視覚フィードバックのテスト ---
+
+  testWidgets('フォーカス時に盤面カードのボーダーがアクセント色になる', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await tester.pump(); // autofocus
+
+    final container = tester.widget<AnimatedContainer>(
+      find.byKey(const Key('board_section_card')),
+    );
+    final deco = container.decoration! as BoxDecoration;
+    final border = deco.border! as Border;
+    expect(border.top.color, equals(const Color(0xFF8D6E63)));
+  });
+
+  testWidgets('フォーカス喪失時に盤面カードのボーダーがデフォルト色になる', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+
+    // フォーカスを外す
+    final otherFocus = FocusNode();
+    addTearDown(otherFocus.dispose);
+    FocusScope.of(tester.element(find.byType(HomeScreen)))
+        .requestFocus(otherFocus);
+    await tester.pump();
+
+    final container = tester.widget<AnimatedContainer>(
+      find.byKey(const Key('board_section_card')),
+    );
+    final deco = container.decoration! as BoxDecoration;
+    final border = deco.border! as Border;
+    expect(border.top.color, equals(const Color(0xFFD7CCC8)));
+  });
+
+  testWidgets('盤面カードをタップするとフォーカスが復帰する', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+
+    // フォーカスを外す
+    final otherFocus = FocusNode();
+    addTearDown(otherFocus.dispose);
+    FocusScope.of(tester.element(find.byType(HomeScreen)))
+        .requestFocus(otherFocus);
+    await tester.pump();
+    expect(find.text('タップしてキーボードを有効化'), findsOneWidget);
+
+    // 盤面カードをタップしてフォーカス復帰
+    await tester.tap(find.byKey(const Key('board_section_card')));
+    await tester.pump();
+    expect(find.text('キーボード有効'), findsOneWidget);
+  });
+
   // --- キーボードフォーカスインジケーターのテスト ---
 
   testWidgets('操作セクションにキーボードフォーカスインジケーターが表示される', (tester) async {
