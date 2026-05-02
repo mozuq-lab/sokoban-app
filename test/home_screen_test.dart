@@ -1410,6 +1410,21 @@ void main() {
       }
     });
 
+    testWidgets('狭くて低い画面ではセクション見出しが省略される', (tester) async {
+      // 高さ 500 → AppBar/SafeArea 後の available は 600 未満 → compact
+      tester.view.physicalSize = const Size(400, 500);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(buildAppWithSize(const Size(400, 500)));
+
+      // compact narrow layout ではセクション見出しが非表示になる
+      for (final label in ['パズル', '状況', '操作']) {
+        expect(find.text(label), findsNothing);
+      }
+    });
+
     testWidgets('広い画面でもセクション見出し「状況」が表示される', (tester) async {
       tester.view.physicalSize = const Size(900, 700);
       tester.view.devicePixelRatio = 1.0;
